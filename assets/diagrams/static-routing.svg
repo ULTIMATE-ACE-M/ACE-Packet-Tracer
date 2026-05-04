@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" role="img" aria-label="Two routers connected with static routing">
+  <style>
+    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
+    .small { fill: var(--diagram-muted, #4a5568); font: 12px ui-monospace, Consolas, monospace; }
+    .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
+    .router { fill: var(--diagram-router, #c6f6d5); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .lan { fill: var(--diagram-pc, #fff5f5); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .link { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; fill: none; }
+    .arrowtxt { fill: var(--diagram-accent, #c05621); font: 13px ui-monospace, Consolas, monospace; }
+  </style>
+  <defs>
+    <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--diagram-accent,#c05621)"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="380" y="28" text-anchor="middle">Static Route — R1 reaching the LAN behind R2</text>
+
+  <rect class="lan" x="40" y="115" width="120" height="60" rx="8"/>
+  <text class="label" x="100" y="140" text-anchor="middle">LAN A</text>
+  <text class="small" x="100" y="160" text-anchor="middle">10.1.1.0/24</text>
+
+  <rect class="router" x="200" y="115" width="120" height="60" rx="8"/>
+  <text class="label" x="260" y="140" text-anchor="middle">R1</text>
+  <text class="small" x="260" y="160" text-anchor="middle">10.0.0.1</text>
+
+  <rect class="router" x="440" y="115" width="120" height="60" rx="8"/>
+  <text class="label" x="500" y="140" text-anchor="middle">R2</text>
+  <text class="small" x="500" y="160" text-anchor="middle">10.0.0.2</text>
+
+  <rect class="lan" x="600" y="115" width="120" height="60" rx="8"/>
+  <text class="label" x="660" y="140" text-anchor="middle">LAN B</text>
+  <text class="small" x="660" y="160" text-anchor="middle">10.2.2.0/24</text>
+
+  <line class="link" x1="160" y1="145" x2="200" y2="145"/>
+  <line class="link" x1="320" y1="145" x2="440" y2="145"/>
+  <line class="link" x1="560" y1="145" x2="600" y2="145"/>
+
+  <text class="small" x="380" y="135" text-anchor="middle">10.0.0.0/30</text>
+
+  <path d="M100 115 Q380 60 660 115" stroke="var(--diagram-accent,#c05621)" stroke-width="2" fill="none" marker-end="url(#arrow2)" stroke-dasharray="6,4"/>
+  <text class="arrowtxt" x="380" y="80" text-anchor="middle">packet to 10.2.2.5</text>
+
+  <rect x="200" y="220" width="360" height="70" rx="6" fill="var(--diagram-fill,#f4f6fb)" stroke="var(--diagram-stroke,#2c5282)"/>
+  <text class="small" x="380" y="242" text-anchor="middle">R1(config)# ip route 10.2.2.0 255.255.255.0 10.0.0.2</text>
+  <text class="small" x="380" y="262" text-anchor="middle">— "to reach 10.2.2.0/24, send to next hop 10.0.0.2 (R2)"</text>
+  <text class="small" x="380" y="282" text-anchor="middle">R2 needs the reverse route back to 10.1.1.0/24 via 10.0.0.1</text>
+</svg>
