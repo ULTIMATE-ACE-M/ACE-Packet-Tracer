@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" role="img" aria-label="OSPF multi-area design">
+  <style>
+    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
+    .small { fill: var(--diagram-muted, #4a5568); font: 12px ui-monospace, Consolas, monospace; }
+    .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
+    .area { fill: var(--diagram-area, #ebf8ff); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; stroke-dasharray: 6,4; }
+    .area0 { fill: var(--diagram-area0, #fff5cc); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; stroke-dasharray: 6,4; }
+    .router { fill: var(--diagram-router, #c6f6d5); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .abr { fill: var(--diagram-abr, #fed7d7); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .link { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; }
+  </style>
+
+  <text class="title" x="380" y="28" text-anchor="middle">OSPF Multi-Area Design</text>
+
+  <rect class="area0" x="240" y="60" width="280" height="120" rx="14"/>
+  <text class="label" x="380" y="80" text-anchor="middle">Area 0 (Backbone)</text>
+
+  <rect class="area" x="40" y="200" width="240" height="130" rx="14"/>
+  <text class="label" x="160" y="220" text-anchor="middle">Area 1</text>
+
+  <rect class="area" x="480" y="200" width="240" height="130" rx="14"/>
+  <text class="label" x="600" y="220" text-anchor="middle">Area 2 (Stub)</text>
+
+  <rect class="router" x="280" y="100" width="80" height="44" rx="6"/>
+  <text class="label" x="320" y="127" text-anchor="middle">R-Core1</text>
+  <rect class="router" x="400" y="100" width="80" height="44" rx="6"/>
+  <text class="label" x="440" y="127" text-anchor="middle">R-Core2</text>
+  <line class="link" x1="360" y1="122" x2="400" y2="122"/>
+
+  <rect class="abr" x="190" y="170" width="80" height="44" rx="6"/>
+  <text class="label" x="230" y="197" text-anchor="middle">ABR-A</text>
+  <rect class="abr" x="490" y="170" width="80" height="44" rx="6"/>
+  <text class="label" x="530" y="197" text-anchor="middle">ABR-B</text>
+
+  <line class="link" x1="270" y1="180" x2="290" y2="144"/>
+  <line class="link" x1="490" y1="180" x2="470" y2="144"/>
+
+  <rect class="router" x="80"  y="245" width="80" height="44" rx="6"/>
+  <text class="label" x="120" y="272" text-anchor="middle">R1</text>
+  <rect class="router" x="170" y="245" width="80" height="44" rx="6"/>
+  <text class="label" x="210" y="272" text-anchor="middle">R2</text>
+  <line class="link" x1="160" y1="267" x2="170" y2="267"/>
+  <line class="link" x1="210" y1="245" x2="230" y2="214"/>
+
+  <rect class="router" x="510" y="245" width="80" height="44" rx="6"/>
+  <text class="label" x="550" y="272" text-anchor="middle">R3</text>
+  <rect class="router" x="600" y="245" width="80" height="44" rx="6"/>
+  <text class="label" x="640" y="272" text-anchor="middle">R4</text>
+  <line class="link" x1="590" y1="267" x2="600" y2="267"/>
+  <line class="link" x1="540" y1="245" x2="520" y2="214"/>
+
+  <text class="small" x="380" y="350" text-anchor="middle">All non-backbone areas connect to Area 0 through Area Border Routers (ABRs).</text>
+</svg>
