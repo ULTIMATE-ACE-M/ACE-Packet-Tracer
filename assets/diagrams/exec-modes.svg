@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" role="img" aria-label="Cisco IOS EXEC mode hierarchy">
+  <style>
+    .box { fill: var(--diagram-fill, #f4f6fb); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; rx: 8; }
+    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
+    .prompt { fill: var(--diagram-muted, #4a5568); font: 13px ui-monospace, Consolas, monospace; }
+    .arrow { fill: none; stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; marker-end: url(#arrow); }
+    .cmd { fill: var(--diagram-accent, #c05621); font: 12px ui-monospace, Consolas, monospace; }
+    .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--diagram-arrow, #3182ce)"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="380" y="28" text-anchor="middle">EXEC Mode Hierarchy</text>
+
+  <rect class="box" x="40" y="60" width="180" height="64"/>
+  <text class="label" x="130" y="84" text-anchor="middle">User EXEC</text>
+  <text class="prompt" x="130" y="105" text-anchor="middle">Router&gt;</text>
+
+  <rect class="box" x="290" y="60" width="180" height="64"/>
+  <text class="label" x="380" y="84" text-anchor="middle">Privileged EXEC</text>
+  <text class="prompt" x="380" y="105" text-anchor="middle">Router#</text>
+
+  <rect class="box" x="540" y="60" width="180" height="64"/>
+  <text class="label" x="630" y="84" text-anchor="middle">Global Config</text>
+  <text class="prompt" x="630" y="105" text-anchor="middle">Router(config)#</text>
+
+  <rect class="box" x="40" y="220" width="200" height="64"/>
+  <text class="label" x="140" y="244" text-anchor="middle">Interface Config</text>
+  <text class="prompt" x="140" y="265" text-anchor="middle">Router(config-if)#</text>
+
+  <rect class="box" x="280" y="220" width="200" height="64"/>
+  <text class="label" x="380" y="244" text-anchor="middle">Router Config</text>
+  <text class="prompt" x="380" y="265" text-anchor="middle">Router(config-router)#</text>
+
+  <rect class="box" x="520" y="220" width="200" height="64"/>
+  <text class="label" x="620" y="244" text-anchor="middle">Line Config</text>
+  <text class="prompt" x="620" y="265" text-anchor="middle">Router(config-line)#</text>
+
+  <path class="arrow" d="M220 86 L290 86"/>
+  <text class="cmd" x="255" y="78" text-anchor="middle">enable</text>
+  <path class="arrow" d="M290 102 L220 102"/>
+  <text class="cmd" x="255" y="118" text-anchor="middle">disable</text>
+
+  <path class="arrow" d="M470 86 L540 86"/>
+  <text class="cmd" x="505" y="78" text-anchor="middle">configure</text>
+  <text class="cmd" x="505" y="92" text-anchor="middle">terminal</text>
+  <path class="arrow" d="M540 102 L470 102"/>
+  <text class="cmd" x="505" y="118" text-anchor="middle">exit / end</text>
+
+  <path class="arrow" d="M600 124 Q500 180 200 220"/>
+  <text class="cmd" x="380" y="170" text-anchor="middle">interface g0/0</text>
+
+  <path class="arrow" d="M630 124 L380 220"/>
+  <text class="cmd" x="540" y="170" text-anchor="middle">router ospf 1</text>
+
+  <path class="arrow" d="M660 124 Q700 170 620 220"/>
+  <text class="cmd" x="700" y="170" text-anchor="middle">line vty 0 4</text>
+
+  <text class="prompt" x="380" y="330" text-anchor="middle">Use exit to step up one level, end (or Ctrl+Z) to jump back to Privileged EXEC.</text>
+</svg>
