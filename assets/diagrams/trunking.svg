@@ -1,46 +1,130 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" role="img" aria-label="802.1Q trunk between switches">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" role="img" aria-label="802.1Q trunk between switches with Cisco icons">
   <style>
-    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
-    .small { fill: var(--diagram-muted, #4a5568); font: 12px ui-monospace, Consolas, monospace; }
+    .label { fill: var(--diagram-text, #1a202c); font: 600 13px system-ui, sans-serif; }
+    .small { fill: var(--diagram-muted, #4a5568); font: 11px ui-monospace, Consolas, monospace; }
     .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
-    .switch { fill: var(--diagram-switch, #fefcbf); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
-    .access { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; }
-    .trunk { stroke: var(--diagram-accent, #c05621); stroke-width: 4; }
-    .frame { fill: var(--diagram-fill, #f4f6fb); stroke: var(--diagram-stroke, #2c5282); stroke-width: 1.5; }
+    .link { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; fill: none; }
+    .trunk { stroke: var(--diagram-accent, #c05621); stroke-width: 4; fill: none; }
+    .blocked { stroke: var(--diagram-accent, #e53e3e); stroke-width: 3; stroke-dasharray: 8,5; fill: none; }
   </style>
 
-  <text class="title" x="380" y="28" text-anchor="middle">802.1Q Trunk Between Two Switches</text>
+  <defs>
+    <!-- Router: cylinder seen at angle with 4 arrows curving inward (Cisco-style) -->
+    <symbol id="cisco-router" viewBox="0 0 80 60" overflow="visible">
+      <ellipse cx="40" cy="42" rx="32" ry="9" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <path d="M8 42 V22 A32,9 0 0 0 72,22 V42" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <ellipse cx="40" cy="22" rx="32" ry="9" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <!-- 4 inward-pointing arrows on top -->
+      <g stroke="var(--diagram-stroke,#2c5282)" stroke-width="2" fill="none" stroke-linecap="round">
+        <path d="M40 22 L25 14 M30 13 L25 14 L26 19"/>
+        <path d="M40 22 L55 14 M50 13 L55 14 L54 19"/>
+        <path d="M40 22 L25 30 M30 31 L25 30 L26 25"/>
+        <path d="M40 22 L55 30 M50 31 L55 30 L54 25"/>
+      </g>
+    </symbol>
 
-  <rect class="switch" x="60"  y="120" width="180" height="60" rx="8"/>
-  <text class="label" x="150" y="150" text-anchor="middle">SW1</text>
-  <text class="small" x="150" y="170" text-anchor="middle">Gi0/1 trunk</text>
+    <!-- Switch: short cylinder/rectangle with 4 horizontal arrows (Cisco-style) -->
+    <symbol id="cisco-switch" viewBox="0 0 80 50" overflow="visible">
+      <rect x="6" y="14" width="68" height="22" rx="3" fill="var(--diagram-switch,#fefcbf)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <!-- 4 arrows: 2 left/right going right, 2 left/right going left -->
+      <g stroke="var(--diagram-stroke,#2c5282)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <path d="M14 20 H40 M36 17 L40 20 L36 23"/>
+        <path d="M14 30 H40 M36 27 L40 30 L36 33"/>
+        <path d="M40 20 L66 20 M44 17 L40 20 L44 23" transform="translate(0,0)"/>
+        <path d="M66 30 H40 M44 27 L40 30 L44 33"/>
+      </g>
+    </symbol>
 
-  <rect class="switch" x="520" y="120" width="180" height="60" rx="8"/>
-  <text class="label" x="610" y="150" text-anchor="middle">SW2</text>
-  <text class="small" x="610" y="170" text-anchor="middle">Gi0/1 trunk</text>
+    <!-- L3 multilayer switch: switch + diamond overlay -->
+    <symbol id="cisco-l3switch" viewBox="0 0 80 50" overflow="visible">
+      <rect x="6" y="14" width="68" height="22" rx="3" fill="var(--diagram-switch,#fefcbf)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <g stroke="var(--diagram-stroke,#2c5282)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <path d="M14 20 H30 M26 17 L30 20 L26 23"/>
+        <path d="M50 30 H66 M62 27 L66 30 L62 33"/>
+      </g>
+      <polygon points="40,8 56,25 40,42 24,25" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <line class="trunk" x1="240" y1="150" x2="520" y2="150"/>
-  <text class="small" x="380" y="140" text-anchor="middle">802.1Q trunk — VLANs 10, 20, 99</text>
+    <!-- PC: monitor + base -->
+    <symbol id="cisco-pc" viewBox="0 0 80 60" overflow="visible">
+      <rect x="10" y="6" width="60" height="38" rx="3" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <rect x="14" y="10" width="52" height="28" rx="1" fill="var(--diagram-cloud,#ebf8ff)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <rect x="32" y="44" width="16" height="6" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <rect x="22" y="50" width="36" height="4" rx="1" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <rect class="frame" x="280" y="210" width="200" height="50" rx="6"/>
-  <text class="small" x="298" y="240">Dst MAC</text>
-  <line x1="350" y1="210" x2="350" y2="260" stroke="var(--diagram-stroke,#2c5282)"/>
-  <text class="small" x="362" y="240">Src MAC</text>
-  <line x1="412" y1="210" x2="412" y2="260" stroke="var(--diagram-stroke,#2c5282)"/>
-  <text class="small" x="446" y="232" text-anchor="middle">Tag</text>
-  <text class="small" x="446" y="250" text-anchor="middle">VLAN 10</text>
+    <!-- Server: tower with stripes -->
+    <symbol id="cisco-server" viewBox="0 0 60 80" overflow="visible">
+      <rect x="8" y="4" width="44" height="72" rx="2" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <line x1="12" y1="16" x2="48" y2="16" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="28" x2="48" y2="28" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="40" x2="48" y2="40" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="52" x2="48" y2="52" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="64" x2="48" y2="64" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <circle cx="44" cy="10" r="2" fill="#16a34a"/>
+    </symbol>
 
-  <text class="small" x="380" y="200" text-anchor="middle">802.1Q tag inserted between MACs and EtherType</text>
+    <!-- Cloud (Internet) -->
+    <symbol id="cisco-cloud" viewBox="0 0 120 70" overflow="visible">
+      <path d="M30 50 a18 18 0 0 1 6 -34 a22 22 0 0 1 38 4 a16 16 0 0 1 22 18 a14 14 0 0 1 -10 24 H32 a14 14 0 0 1 -2 -12 z"
+        fill="var(--diagram-cloud,#ebf8ff)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <line class="access" x1="60"  y1="140" x2="20" y2="100"/>
-  <line class="access" x1="60"  y1="160" x2="20" y2="200"/>
-  <line class="access" x1="700" y1="140" x2="740" y2="100"/>
-  <line class="access" x1="700" y1="160" x2="740" y2="200"/>
+    <!-- Wireless AP -->
+    <symbol id="cisco-ap" viewBox="0 0 80 60" overflow="visible">
+      <rect x="20" y="30" width="40" height="14" rx="2" fill="var(--diagram-switch,#fefcbf)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <line x1="40" y1="30" x2="40" y2="20" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <path d="M28 18 a14 14 0 0 1 24 0" fill="none" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <path d="M22 12 a22 22 0 0 1 36 0" fill="none" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <text class="small" x="20" y="92" text-anchor="middle">VLAN 10</text>
-  <text class="small" x="20" y="216" text-anchor="middle">VLAN 20</text>
-  <text class="small" x="740" y="92" text-anchor="middle">VLAN 10</text>
-  <text class="small" x="740" y="216" text-anchor="middle">VLAN 99</text>
+    <!-- Phone (IP phone) -->
+    <symbol id="cisco-phone" viewBox="0 0 80 60" overflow="visible">
+      <rect x="14" y="8" width="52" height="44" rx="3" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <rect x="20" y="14" width="40" height="14" fill="var(--diagram-cloud,#ebf8ff)"/>
+      <g fill="var(--diagram-stroke,#2c5282)">
+        <circle cx="26" cy="38" r="2"/><circle cx="34" cy="38" r="2"/><circle cx="42" cy="38" r="2"/><circle cx="50" cy="38" r="2"/>
+        <circle cx="26" cy="46" r="2"/><circle cx="34" cy="46" r="2"/><circle cx="42" cy="46" r="2"/><circle cx="50" cy="46" r="2"/>
+      </g>
+    </symbol>
 
-  <text class="small" x="380" y="295" text-anchor="middle">The native VLAN crosses the trunk untagged — must match on both ends.</text>
+    <!-- Marker arrows for the diagram itself -->
+    <marker id="m-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--diagram-arrow,#3182ce)"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="380" y="24" text-anchor="middle">802.1Q Trunk Between Two Switches</text>
+
+  <use href="#cisco-switch" x="80" y="120" width="120" height="50"/>
+  <text class="label" x="140" y="190" text-anchor="middle">SW1</text>
+  <text class="small" x="140" y="205" text-anchor="middle">Gi0/1 trunk</text>
+
+  <use href="#cisco-switch" x="560" y="120" width="120" height="50"/>
+  <text class="label" x="620" y="190" text-anchor="middle">SW2</text>
+  <text class="small" x="620" y="205" text-anchor="middle">Gi0/1 trunk</text>
+
+  <line class="trunk" x1="200" y1="145" x2="560" y2="145"/>
+  <text class="small" x="380" y="135" text-anchor="middle">802.1Q trunk — VLANs 10, 20, 99</text>
+
+  <!-- Access ports -->
+  <use href="#cisco-pc" x="20" y="60" width="40" height="32"/>
+  <use href="#cisco-pc" x="20" y="220" width="40" height="32"/>
+  <use href="#cisco-pc" x="700" y="60" width="40" height="32"/>
+  <use href="#cisco-pc" x="700" y="220" width="40" height="32"/>
+
+  <line class="link" x1="40" y1="92" x2="100" y2="130"/>
+  <line class="link" x1="40" y1="220" x2="100" y2="170"/>
+  <line class="link" x1="660" y1="130" x2="720" y2="92"/>
+  <line class="link" x1="660" y1="170" x2="720" y2="220"/>
+
+  <text class="small" x="40" y="55" text-anchor="middle">VLAN 10</text>
+  <text class="small" x="40" y="265" text-anchor="middle">VLAN 20</text>
+  <text class="small" x="720" y="55" text-anchor="middle">VLAN 10</text>
+  <text class="small" x="720" y="265" text-anchor="middle">VLAN 99</text>
+
+  <!-- Frame breakdown -->
+  <rect x="280" y="240" width="200" height="50" rx="6" fill="var(--diagram-fill,#f4f6fb)" stroke="var(--diagram-stroke,#2c5282)"/>
+  <text class="small" x="380" y="260" text-anchor="middle">Dst MAC | Src MAC | TAG=VLAN | EtherType …</text>
+  <text class="small" x="380" y="278" text-anchor="middle">802.1Q tag inserted between MACs and EtherType</text>
 </svg>

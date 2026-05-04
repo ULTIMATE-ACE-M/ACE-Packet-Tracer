@@ -1,46 +1,133 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" role="img" aria-label="Switch with three VLANs">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" role="img" aria-label="VLANs with Cisco icons">
   <style>
-    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
-    .small { fill: var(--diagram-muted, #4a5568); font: 12px ui-monospace, Consolas, monospace; }
+    .label { fill: var(--diagram-text, #1a202c); font: 600 13px system-ui, sans-serif; }
+    .small { fill: var(--diagram-muted, #4a5568); font: 11px ui-monospace, Consolas, monospace; }
     .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
-    .switch { fill: var(--diagram-switch, #fefcbf); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
-    .pc-sales { fill: #fed7d7; stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
-    .pc-eng   { fill: #c6f6d5; stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
-    .pc-guest { fill: #bee3f8; stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
-    .link { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; }
+    .link { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; fill: none; }
+    .trunk { stroke: var(--diagram-accent, #c05621); stroke-width: 4; fill: none; }
+    .blocked { stroke: var(--diagram-accent, #e53e3e); stroke-width: 3; stroke-dasharray: 8,5; fill: none; }
   </style>
 
-  <text class="title" x="380" y="28" text-anchor="middle">VLANs — One Switch, Three Broadcast Domains</text>
+  <defs>
+    <!-- Router: cylinder seen at angle with 4 arrows curving inward (Cisco-style) -->
+    <symbol id="cisco-router" viewBox="0 0 80 60" overflow="visible">
+      <ellipse cx="40" cy="42" rx="32" ry="9" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <path d="M8 42 V22 A32,9 0 0 0 72,22 V42" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <ellipse cx="40" cy="22" rx="32" ry="9" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <!-- 4 inward-pointing arrows on top -->
+      <g stroke="var(--diagram-stroke,#2c5282)" stroke-width="2" fill="none" stroke-linecap="round">
+        <path d="M40 22 L25 14 M30 13 L25 14 L26 19"/>
+        <path d="M40 22 L55 14 M50 13 L55 14 L54 19"/>
+        <path d="M40 22 L25 30 M30 31 L25 30 L26 25"/>
+        <path d="M40 22 L55 30 M50 31 L55 30 L54 25"/>
+      </g>
+    </symbol>
 
-  <rect class="switch" x="280" y="140" width="200" height="60" rx="8"/>
-  <text class="label" x="380" y="170" text-anchor="middle">SW1</text>
-  <text class="small" x="380" y="188" text-anchor="middle">Catalyst 2960</text>
+    <!-- Switch: short cylinder/rectangle with 4 horizontal arrows (Cisco-style) -->
+    <symbol id="cisco-switch" viewBox="0 0 80 50" overflow="visible">
+      <rect x="6" y="14" width="68" height="22" rx="3" fill="var(--diagram-switch,#fefcbf)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <!-- 4 arrows: 2 left/right going right, 2 left/right going left -->
+      <g stroke="var(--diagram-stroke,#2c5282)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <path d="M14 20 H40 M36 17 L40 20 L36 23"/>
+        <path d="M14 30 H40 M36 27 L40 30 L36 33"/>
+        <path d="M40 20 L66 20 M44 17 L40 20 L44 23" transform="translate(0,0)"/>
+        <path d="M66 30 H40 M44 27 L40 30 L44 33"/>
+      </g>
+    </symbol>
 
-  <rect class="pc-sales" x="40" y="80"  width="80" height="48" rx="6"/>
-  <text class="label" x="80" y="110" text-anchor="middle">Sales-1</text>
-  <rect class="pc-sales" x="140" y="80" width="80" height="48" rx="6"/>
-  <text class="label" x="180" y="110" text-anchor="middle">Sales-2</text>
+    <!-- L3 multilayer switch: switch + diamond overlay -->
+    <symbol id="cisco-l3switch" viewBox="0 0 80 50" overflow="visible">
+      <rect x="6" y="14" width="68" height="22" rx="3" fill="var(--diagram-switch,#fefcbf)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <g stroke="var(--diagram-stroke,#2c5282)" stroke-width="1.8" fill="none" stroke-linecap="round">
+        <path d="M14 20 H30 M26 17 L30 20 L26 23"/>
+        <path d="M50 30 H66 M62 27 L66 30 L62 33"/>
+      </g>
+      <polygon points="40,8 56,25 40,42 24,25" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <rect class="pc-eng" x="540" y="80"  width="80" height="48" rx="6"/>
-  <text class="label" x="580" y="110" text-anchor="middle">Eng-1</text>
-  <rect class="pc-eng" x="640" y="80"  width="80" height="48" rx="6"/>
-  <text class="label" x="680" y="110" text-anchor="middle">Eng-2</text>
+    <!-- PC: monitor + base -->
+    <symbol id="cisco-pc" viewBox="0 0 80 60" overflow="visible">
+      <rect x="10" y="6" width="60" height="38" rx="3" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <rect x="14" y="10" width="52" height="28" rx="1" fill="var(--diagram-cloud,#ebf8ff)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <rect x="32" y="44" width="16" height="6" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <rect x="22" y="50" width="36" height="4" rx="1" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <rect class="pc-guest" x="280" y="240" width="80" height="48" rx="6"/>
-  <text class="label" x="320" y="270" text-anchor="middle">Guest-1</text>
-  <rect class="pc-guest" x="400" y="240" width="80" height="48" rx="6"/>
-  <text class="label" x="440" y="270" text-anchor="middle">Guest-2</text>
+    <!-- Server: tower with stripes -->
+    <symbol id="cisco-server" viewBox="0 0 60 80" overflow="visible">
+      <rect x="8" y="4" width="44" height="72" rx="2" fill="var(--diagram-router,#c6f6d5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <line x1="12" y1="16" x2="48" y2="16" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="28" x2="48" y2="28" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="40" x2="48" y2="40" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="52" x2="48" y2="52" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <line x1="12" y1="64" x2="48" y2="64" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1"/>
+      <circle cx="44" cy="10" r="2" fill="#16a34a"/>
+    </symbol>
 
-  <line class="link" x1="80"  y1="128" x2="300" y2="142"/>
-  <line class="link" x1="180" y1="128" x2="320" y2="142"/>
-  <line class="link" x1="580" y1="128" x2="460" y2="142"/>
-  <line class="link" x1="680" y1="128" x2="470" y2="142"/>
-  <line class="link" x1="320" y1="240" x2="360" y2="200"/>
-  <line class="link" x1="440" y1="240" x2="400" y2="200"/>
+    <!-- Cloud (Internet) -->
+    <symbol id="cisco-cloud" viewBox="0 0 120 70" overflow="visible">
+      <path d="M30 50 a18 18 0 0 1 6 -34 a22 22 0 0 1 38 4 a16 16 0 0 1 22 18 a14 14 0 0 1 -10 24 H32 a14 14 0 0 1 -2 -12 z"
+        fill="var(--diagram-cloud,#ebf8ff)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <text class="small" x="130" y="64"  text-anchor="middle">VLAN 10 — Sales</text>
-  <text class="small" x="630" y="64"  text-anchor="middle">VLAN 20 — Engineering</text>
-  <text class="small" x="380" y="312" text-anchor="middle">VLAN 99 — Guest</text>
+    <!-- Wireless AP -->
+    <symbol id="cisco-ap" viewBox="0 0 80 60" overflow="visible">
+      <rect x="20" y="30" width="40" height="14" rx="2" fill="var(--diagram-switch,#fefcbf)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <line x1="40" y1="30" x2="40" y2="20" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <path d="M28 18 a14 14 0 0 1 24 0" fill="none" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <path d="M22 12 a22 22 0 0 1 36 0" fill="none" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+    </symbol>
 
-  <text class="small" x="380" y="332" text-anchor="middle">Hosts in different VLANs cannot talk to each other without a router or L3 switch.</text>
+    <!-- Phone (IP phone) -->
+    <symbol id="cisco-phone" viewBox="0 0 80 60" overflow="visible">
+      <rect x="14" y="8" width="52" height="44" rx="3" fill="var(--diagram-pc,#fff5f5)" stroke="var(--diagram-stroke,#2c5282)" stroke-width="2"/>
+      <rect x="20" y="14" width="40" height="14" fill="var(--diagram-cloud,#ebf8ff)"/>
+      <g fill="var(--diagram-stroke,#2c5282)">
+        <circle cx="26" cy="38" r="2"/><circle cx="34" cy="38" r="2"/><circle cx="42" cy="38" r="2"/><circle cx="50" cy="38" r="2"/>
+        <circle cx="26" cy="46" r="2"/><circle cx="34" cy="46" r="2"/><circle cx="42" cy="46" r="2"/><circle cx="50" cy="46" r="2"/>
+      </g>
+    </symbol>
+
+    <!-- Marker arrows for the diagram itself -->
+    <marker id="m-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--diagram-arrow,#3182ce)"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="380" y="24" text-anchor="middle">VLANs — One Switch, Three Broadcast Domains</text>
+
+  <!-- Switch -->
+  <use href="#cisco-switch" x="320" y="135" width="120" height="50"/>
+  <text class="label" x="380" y="200" text-anchor="middle">SW1</text>
+
+  <!-- VLAN 10 PCs (red border via group) -->
+  <g><use href="#cisco-pc" x="40" y="60" width="60" height="48"/>
+     <text class="small" x="70" y="120" text-anchor="middle">Sales-1</text></g>
+  <g><use href="#cisco-pc" x="130" y="60" width="60" height="48"/>
+     <text class="small" x="160" y="120" text-anchor="middle">Sales-2</text></g>
+
+  <!-- VLAN 20 PCs -->
+  <g><use href="#cisco-pc" x="570" y="60" width="60" height="48"/>
+     <text class="small" x="600" y="120" text-anchor="middle">Eng-1</text></g>
+  <g><use href="#cisco-pc" x="660" y="60" width="60" height="48"/>
+     <text class="small" x="690" y="120" text-anchor="middle">Eng-2</text></g>
+
+  <!-- VLAN 99 PCs -->
+  <g><use href="#cisco-pc" x="290" y="240" width="60" height="48"/>
+     <text class="small" x="320" y="300" text-anchor="middle">Guest-1</text></g>
+  <g><use href="#cisco-pc" x="410" y="240" width="60" height="48"/>
+     <text class="small" x="440" y="300" text-anchor="middle">Guest-2</text></g>
+
+  <line class="link" x1="70" y1="108" x2="340" y2="135" stroke="#e53e3e"/>
+  <line class="link" x1="160" y1="108" x2="350" y2="138" stroke="#e53e3e"/>
+  <line class="link" x1="600" y1="108" x2="420" y2="138" stroke="#16a34a"/>
+  <line class="link" x1="690" y1="108" x2="430" y2="135" stroke="#16a34a"/>
+  <line class="link" x1="320" y1="240" x2="370" y2="185" stroke="#3182ce"/>
+  <line class="link" x1="440" y1="240" x2="395" y2="185" stroke="#3182ce"/>
+
+  <text class="small" x="115" y="48" text-anchor="middle" fill="#e53e3e">VLAN 10 — Sales</text>
+  <text class="small" x="645" y="48" text-anchor="middle" fill="#16a34a">VLAN 20 — Engineering</text>
+  <text class="small" x="380" y="318" text-anchor="middle" fill="#3182ce">VLAN 99 — Guest</text>
+
+  <text class="small" x="380" y="335" text-anchor="middle">Different VLANs need a router or L3 switch to talk.</text>
 </svg>
