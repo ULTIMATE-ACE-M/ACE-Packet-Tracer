@@ -131,9 +131,18 @@
       // ----- Example -----
       if (cmd.example) {
         const snippet = el("pre", { class: "snippet" });
+        // Strip the device prompt from each line and skip lines that are
+        // just an empty prompt — so the Copy button gives you only what
+        // you actually need to type.
+        const promptRe = /^[\w-]+(\([^)]+\))?[#>]\s*/;
+        const copyValue = cmd.example.split("\n")
+          .map(line => line.replace(promptRe, ""))
+          .filter(line => line.trim().length > 0)
+          .join("\n");
         const copyBtn = el("button", {
           class: "copy-btn", type: "button", "aria-label": "Copy to clipboard",
-          onclick: e => copyText(cmd.example, e.target)
+          title: "Copy: " + (copyValue.length > 60 ? copyValue.slice(0, 60) + "…" : copyValue),
+          onclick: e => copyText(copyValue, e.target)
         }, "Copy");
         snippet.appendChild(copyBtn);
         snippet.appendChild(document.createTextNode(cmd.example));
