@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Node (in case you add tooling later)
+node_modules/
+npm-debug.log
+
+# Python (in case you add a build step)
+__pycache__/
+*.pyc
+.venv/
