@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cisco Packet Tracer Command Reference</title>
+  <meta name="description" content="A searchable reference of every Cisco IOS command used in Cisco Packet Tracer, with explanations and diagrams." />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e3a8a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3E%26gt;_%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <button id="menu-toggle" class="icon-btn" aria-label="Toggle navigation">☰</button>
+      <h1>Cisco Packet Tracer Reference</h1>
+    </div>
+    <div class="topbar-search">
+      <input id="search" type="search" placeholder="Search commands, modes, or descriptions…" autocomplete="off" />
+    </div>
+    <div class="topbar-right">
+      <a class="icon-btn" id="github-link" href="#" title="View on GitHub" aria-label="View on GitHub">★</a>
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav id="sidebar" class="sidebar" aria-label="Command categories">
+      <ul id="nav-list"></ul>
+    </nav>
+
+    <main id="content" class="content">
+      <section class="hero">
+        <h2>Every Cisco IOS command you'll touch in Packet Tracer</h2>
+        <p>Browse by category in the sidebar, or use the search bar to jump straight to a command. Each section includes syntax, an example, the mode it belongs to, and a diagram where useful.</p>
+        <p class="hero-meta"><span id="cmd-count">0</span> commands across <span id="cat-count">0</span> categories.</p>
+      </section>
+
+      <div id="categories"></div>
+
+      <footer class="site-footer">
+        <p>Independent learning reference — not affiliated with Cisco Systems, Inc. MIT licensed. Edit <code>assets/data.js</code> to contribute.</p>
+      </footer>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
