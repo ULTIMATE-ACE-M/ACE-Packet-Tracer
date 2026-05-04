@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" role="img" aria-label="DHCP DORA process">
+  <style>
+    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
+    .small { fill: var(--diagram-muted, #4a5568); font: 12px ui-monospace, Consolas, monospace; }
+    .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
+    .pc { fill: var(--diagram-pc, #fff5f5); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .router { fill: var(--diagram-router, #c6f6d5); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .step { fill: var(--diagram-fill, #f4f6fb); stroke: var(--diagram-stroke, #2c5282); stroke-width: 1.5; rx: 6; }
+    .arrow { fill: none; stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; marker-end: url(#dhcparr); }
+  </style>
+  <defs>
+    <marker id="dhcparr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="var(--diagram-arrow,#3182ce)"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="380" y="28" text-anchor="middle">DHCP DORA Process</text>
+
+  <rect class="pc" x="60" y="60" width="120" height="60" rx="8"/>
+  <text class="label" x="120" y="88" text-anchor="middle">Client</text>
+  <text class="small" x="120" y="106" text-anchor="middle">no IP yet</text>
+
+  <rect class="router" x="580" y="60" width="120" height="60" rx="8"/>
+  <text class="label" x="640" y="88" text-anchor="middle">DHCP Server</text>
+  <text class="small" x="640" y="106" text-anchor="middle">192.168.1.1</text>
+
+  <line x1="120" y1="120" x2="120" y2="320" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <line x1="640" y1="120" x2="640" y2="320" stroke="var(--diagram-stroke,#2c5282)" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+  <path class="arrow" d="M120 150 L640 150"/>
+  <rect class="step" x="200" y="135" width="160" height="22"/>
+  <text class="small" x="280" y="151" text-anchor="middle">1. DHCPDISCOVER (broadcast)</text>
+
+  <path class="arrow" d="M640 195 L120 195"/>
+  <rect class="step" x="400" y="180" width="120" height="22"/>
+  <text class="small" x="460" y="196" text-anchor="middle">2. DHCPOFFER</text>
+
+  <path class="arrow" d="M120 240 L640 240"/>
+  <rect class="step" x="200" y="225" width="160" height="22"/>
+  <text class="small" x="280" y="241" text-anchor="middle">3. DHCPREQUEST (broadcast)</text>
+
+  <path class="arrow" d="M640 285 L120 285"/>
+  <rect class="step" x="400" y="270" width="120" height="22"/>
+  <text class="small" x="460" y="286" text-anchor="middle">4. DHCPACK</text>
+
+  <text class="small" x="380" y="325" text-anchor="middle">After ACK the client owns the lease for the configured time.</text>
+</svg>
