@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 320" role="img" aria-label="802.1Q trunk between switches">
+  <style>
+    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
+    .small { fill: var(--diagram-muted, #4a5568); font: 12px ui-monospace, Consolas, monospace; }
+    .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
+    .switch { fill: var(--diagram-switch, #fefcbf); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .access { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; }
+    .trunk { stroke: var(--diagram-accent, #c05621); stroke-width: 4; }
+    .frame { fill: var(--diagram-fill, #f4f6fb); stroke: var(--diagram-stroke, #2c5282); stroke-width: 1.5; }
+  </style>
+
+  <text class="title" x="380" y="28" text-anchor="middle">802.1Q Trunk Between Two Switches</text>
+
+  <rect class="switch" x="60"  y="120" width="180" height="60" rx="8"/>
+  <text class="label" x="150" y="150" text-anchor="middle">SW1</text>
+  <text class="small" x="150" y="170" text-anchor="middle">Gi0/1 trunk</text>
+
+  <rect class="switch" x="520" y="120" width="180" height="60" rx="8"/>
+  <text class="label" x="610" y="150" text-anchor="middle">SW2</text>
+  <text class="small" x="610" y="170" text-anchor="middle">Gi0/1 trunk</text>
+
+  <line class="trunk" x1="240" y1="150" x2="520" y2="150"/>
+  <text class="small" x="380" y="140" text-anchor="middle">802.1Q trunk — VLANs 10, 20, 99</text>
+
+  <rect class="frame" x="280" y="210" width="200" height="50" rx="6"/>
+  <text class="small" x="298" y="240">Dst MAC</text>
+  <line x1="350" y1="210" x2="350" y2="260" stroke="var(--diagram-stroke,#2c5282)"/>
+  <text class="small" x="362" y="240">Src MAC</text>
+  <line x1="412" y1="210" x2="412" y2="260" stroke="var(--diagram-stroke,#2c5282)"/>
+  <text class="small" x="446" y="232" text-anchor="middle">Tag</text>
+  <text class="small" x="446" y="250" text-anchor="middle">VLAN 10</text>
+
+  <text class="small" x="380" y="200" text-anchor="middle">802.1Q tag inserted between MACs and EtherType</text>
+
+  <line class="access" x1="60"  y1="140" x2="20" y2="100"/>
+  <line class="access" x1="60"  y1="160" x2="20" y2="200"/>
+  <line class="access" x1="700" y1="140" x2="740" y2="100"/>
+  <line class="access" x1="700" y1="160" x2="740" y2="200"/>
+
+  <text class="small" x="20" y="92" text-anchor="middle">VLAN 10</text>
+  <text class="small" x="20" y="216" text-anchor="middle">VLAN 20</text>
+  <text class="small" x="740" y="92" text-anchor="middle">VLAN 10</text>
+  <text class="small" x="740" y="216" text-anchor="middle">VLAN 99</text>
+
+  <text class="small" x="380" y="295" text-anchor="middle">The native VLAN crosses the trunk untagged — must match on both ends.</text>
+</svg>
