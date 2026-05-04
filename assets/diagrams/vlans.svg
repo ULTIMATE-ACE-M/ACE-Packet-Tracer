@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" role="img" aria-label="Switch with three VLANs">
+  <style>
+    .label { fill: var(--diagram-text, #1a202c); font: 600 14px system-ui, sans-serif; }
+    .small { fill: var(--diagram-muted, #4a5568); font: 12px ui-monospace, Consolas, monospace; }
+    .title { fill: var(--diagram-text, #1a202c); font: 700 16px system-ui, sans-serif; }
+    .switch { fill: var(--diagram-switch, #fefcbf); stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .pc-sales { fill: #fed7d7; stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .pc-eng   { fill: #c6f6d5; stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .pc-guest { fill: #bee3f8; stroke: var(--diagram-stroke, #2c5282); stroke-width: 2; }
+    .link { stroke: var(--diagram-arrow, #3182ce); stroke-width: 2; }
+  </style>
+
+  <text class="title" x="380" y="28" text-anchor="middle">VLANs — One Switch, Three Broadcast Domains</text>
+
+  <rect class="switch" x="280" y="140" width="200" height="60" rx="8"/>
+  <text class="label" x="380" y="170" text-anchor="middle">SW1</text>
+  <text class="small" x="380" y="188" text-anchor="middle">Catalyst 2960</text>
+
+  <rect class="pc-sales" x="40" y="80"  width="80" height="48" rx="6"/>
+  <text class="label" x="80" y="110" text-anchor="middle">Sales-1</text>
+  <rect class="pc-sales" x="140" y="80" width="80" height="48" rx="6"/>
+  <text class="label" x="180" y="110" text-anchor="middle">Sales-2</text>
+
+  <rect class="pc-eng" x="540" y="80"  width="80" height="48" rx="6"/>
+  <text class="label" x="580" y="110" text-anchor="middle">Eng-1</text>
+  <rect class="pc-eng" x="640" y="80"  width="80" height="48" rx="6"/>
+  <text class="label" x="680" y="110" text-anchor="middle">Eng-2</text>
+
+  <rect class="pc-guest" x="280" y="240" width="80" height="48" rx="6"/>
+  <text class="label" x="320" y="270" text-anchor="middle">Guest-1</text>
+  <rect class="pc-guest" x="400" y="240" width="80" height="48" rx="6"/>
+  <text class="label" x="440" y="270" text-anchor="middle">Guest-2</text>
+
+  <line class="link" x1="80"  y1="128" x2="300" y2="142"/>
+  <line class="link" x1="180" y1="128" x2="320" y2="142"/>
+  <line class="link" x1="580" y1="128" x2="460" y2="142"/>
+  <line class="link" x1="680" y1="128" x2="470" y2="142"/>
+  <line class="link" x1="320" y1="240" x2="360" y2="200"/>
+  <line class="link" x1="440" y1="240" x2="400" y2="200"/>
+
+  <text class="small" x="130" y="64"  text-anchor="middle">VLAN 10 — Sales</text>
+  <text class="small" x="630" y="64"  text-anchor="middle">VLAN 20 — Engineering</text>
+  <text class="small" x="380" y="312" text-anchor="middle">VLAN 99 — Guest</text>
+
+  <text class="small" x="380" y="332" text-anchor="middle">Hosts in different VLANs cannot talk to each other without a router or L3 switch.</text>
+</svg>
