@@ -20,21 +20,23 @@
     }
     .progress-card strong { color: var(--primary); }
     .check-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px 14px;
       margin: 8px 0;
       background: var(--surface);
-      cursor: pointer;
       transition: border-color .15s, background .15s;
     }
     .check-item:hover { border-color: var(--primary); }
     .check-item.checked { background: var(--surface-2); }
     .check-item.checked .check-title,
     .check-item.checked .check-desc { text-decoration: line-through; opacity: 0.65; }
+    .check-row-main {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      cursor: pointer;
+    }
     .check-box {
       flex-shrink: 0;
       width: 22px; height: 22px;
@@ -71,6 +73,80 @@
     }
     .check-title { font-weight: 600; font-size: 15px; color: var(--text); }
     .check-desc { color: var(--text-muted); font-size: 14px; margin: 2px 0 0; }
+
+    .info-btn {
+      margin-top: 10px;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .info-btn:hover { border-color: var(--primary); background: var(--surface); }
+    .info-btn .chev {
+      display: inline-block;
+      transition: transform .2s;
+      font-size: 11px;
+    }
+    .info-btn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+
+    .tools-panel {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+    }
+    .tools-panel.open { display: block; }
+    .tool-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 8px 0;
+      background: var(--surface);
+    }
+    .tool-name {
+      font: 700 14px ui-monospace, Consolas, monospace;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+    .tool-file {
+      display: inline-block;
+      font: 600 11px ui-monospace, Consolas, monospace;
+      color: var(--text-muted);
+      background: var(--surface-2);
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .tool-section {
+      margin-top: 6px;
+      font-size: 13.5px;
+      line-height: 1.55;
+    }
+    .tool-section .lbl {
+      display: inline-block;
+      font-weight: 700;
+      color: var(--text);
+      margin-right: 4px;
+    }
+    .tool-section code {
+      font: 12.5px ui-monospace, Consolas, monospace;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .tool-section ul { margin: 4px 0 0 0; padding-left: 20px; }
+    .tool-section li { margin: 2px 0; }
+
     .reset-btn {
       margin-top: 12px;
       background: transparent;
@@ -126,8 +202,109 @@
   </main>
 
   <script>
+    const TOOLS = [
+      {
+        name: "Nessus",
+        file: "Nessus-10.5.0-x64",
+        use: "Vulnerability scanner — scant hosts/netwerk op bekende kwetsbaarheden (CVE's) en misconfiguraties. Kerntool voor je security-analyse.",
+        howHtml:
+          'Open <code>https://localhost:8834</code> in Chrome. ' +
+          'Klik <strong>New Scan</strong> &rarr; <strong>Basic Network Scan</strong>. ' +
+          'Vul bij <em>Targets</em> het IP-bereik in (bv. <code>192.168.1.0/24</code> of een specifiek IP), Save &rarr; Launch. ' +
+          'Filter resultaten op <strong>Critical</strong> en <strong>High</strong> — die zet je in je advies/verbetervoorstel.'
+      },
+      {
+        name: "Nmap",
+        file: "nmap-7.93-setup",
+        use: "Network/port scanner — ontdekt hosts, open poorten, services en OS. Gebruik het om in kaart te brengen wat er draait voordat je een Nessus-scan doet.",
+        howHtml:
+          'Open een <code>cmd</code> of PowerShell:' +
+          '<ul>' +
+            '<li>Host-discovery: <code>nmap -sn 192.168.1.0/24</code></li>' +
+            '<li>Services + OS detect: <code>nmap -sV -O 192.168.1.10</code></li>' +
+            '<li>Volledige scan met scripts: <code>nmap -sC -sV -p- 192.168.1.10</code></li>' +
+          '</ul>' +
+          'Onverwachte open poorten/services = bevinding voor je rapport.'
+      },
+      {
+        name: "MBSA — Microsoft Baseline Security Analyzer",
+        file: "MBSASetup-x64-EN",
+        use: "Controleert een Windows-host op ontbrekende patches/updates, zwakke wachtwoorden en onveilige Windows/IIS-config.",
+        howHtml:
+          'Start <strong>MBSA 2.3</strong> &rarr; <em>Scan a computer</em> &rarr; vul hostname of IP in &rarr; <em>Start scan</em>. ' +
+          'Bekijk het rapport: <strong>Security Updates</strong> (ontbrekende KB-patches) en <strong>Administrative Vulnerabilities</strong> (zwakke wachtwoorden, anonymous shares, Guest-account). ' +
+          'Tip: vink <em>Configure computers for Microsoft Update</em> aan zodat het de meest recente catalogus pakt.'
+      },
+      {
+        name: "AuditTAP — Audit Test Automation Package",
+        file: "AuditTAP-5.4",
+        use: "PowerShell-tool die Windows/Office config afzet tegen DISA STIG of CIS benchmarks. Genereert een HTML-rapport met pass/fail per hardening-item.",
+        howHtml:
+          'Open <strong>PowerShell als administrator</strong>, ga naar de AuditTAP-map en run:' +
+          '<ul>' +
+            '<li>Module laden: <code>Import-Module .\\AuditTAP.psm1</code></li>' +
+            '<li>Rapport voor Windows 10/11: <code>Invoke-ATAPHtmlReport -RuleSet "Windows10-21H2" -SavePath .\\report.html</code></li>' +
+          '</ul>' +
+          'Open het HTML-bestand in Chrome — alle <strong>Failed</strong> regels zijn kandidaten voor je verbetervoorstel.'
+      },
+      {
+        name: "ManageEngine ADAudit Plus",
+        file: "ManageEngine_ADAudit_Plus_x64",
+        use: "Realtime audit van Active Directory — logins, account lockouts, GPO-changes, wijzigingen in privileged groepen. Gebruik het om security incidenten in AD te analyseren en te documenteren.",
+        howHtml:
+          'Na install opent de webinterface op <code>http://localhost:8081</code>. ' +
+          'Log in (<em>admin / admin</em>), voeg de domain controller toe als <em>data source</em>, ' +
+          'en bekijk <strong>Reports</strong>: failed logons, account lockouts, recent password changes, ' +
+          'changes to admin groups. Exporteer findings naar PDF/CSV voor je logboek.'
+      },
+      {
+        name: "Sysinternals Suite",
+        file: "SysinternalsSuite (zip)",
+        use: "Bundel van Microsoft-tools voor diepe Windows-analyse — onmisbaar bij het onderzoeken van een security incident.",
+        howHtml:
+          'Pak de zip uit en gebruik per situatie de juiste tool:' +
+          '<ul>' +
+            '<li><strong>Process Monitor</strong> (procmon) — filter op proces om bestand-/registry-/netwerkactiviteit te zien (verdacht proces).</li>' +
+            '<li><strong>Autoruns</strong> — toont alles dat automatisch start (services, scheduled tasks, run-keys). Gebruik <em>Hide Microsoft Entries</em> om malware op te sporen.</li>' +
+            '<li><strong>TCPView</strong> — live overzicht van processen met open netwerkverbindingen en luisterende poorten.</li>' +
+            '<li><strong>Process Explorer</strong> — taakbeheer-plus: signature-check, VirusTotal-integratie, parent/child boom.</li>' +
+            '<li><strong>PsExec</strong> — commando's uitvoeren op een remote host: <code>psexec \\\\HOST -s cmd</code></li>' +
+            '<li><strong>Sigcheck</strong> — controleer of een binary digitaal getekend is: <code>sigcheck -a -h C:\\pad\\bestand.exe</code></li>' +
+          '</ul>'
+      },
+      {
+        name: "SQL Server Express + SSMS",
+        file: "SQLEXPRADV / SQL2019-SSEI-Expr / SSMS-Setup-ENU / SQLServerReportingServices",
+        use: "Database-stack die als <em>backend</em> dient voor andere tools (ADAudit Plus, MBSA-history, custom rapportages). SSMS gebruik je om audit-DB's en user permissions te bekijken.",
+        howHtml:
+          'Installeervolgorde: ' +
+          '<strong>SQL2019-SSEI-Expr</strong> (basis-installer) of <strong>SQLEXPRADV_x64_ENU</strong> (advanced edition) ' +
+          '&rarr; <strong>SSMS</strong> voor de management-GUI ' +
+          '&rarr; optioneel <strong>SQL Server Reporting Services</strong> voor BI-rapporten. ' +
+          'In SSMS: connect to <code>(local)\\SQLEXPRESS</code>, query bv. <code>SELECT name FROM sys.database_principals WHERE type = \'S\'</code> om SQL-logins te checken.'
+      },
+      {
+        name: "Google Chrome",
+        file: "ChromeSetup",
+        use: "Browser voor de webinterfaces van Nessus (8834), ADAudit Plus (8081) en HTML-rapporten van AuditTAP/MBSA.",
+        howHtml:
+          'Standaard installeren. Bookmark de tool-URLs: ' +
+          '<code>https://localhost:8834</code> (Nessus), ' +
+          '<code>http://localhost:8081</code> (ADAudit Plus). ' +
+          'Bij <em>Your connection is not private</em> op Nessus: <em>Advanced</em> &rarr; <em>Proceed</em> (self-signed certificaat is normaal in een lab).'
+      },
+      {
+        name: "Visual Studio",
+        file: "VisualStudioSetup",
+        use: "IDE voor het lezen of aanpassen van scripts (PowerShell, C#) als je AuditTAP-modules of een eigen audit-tool moet bewerken. Niet altijd nodig — meestal volstaat Notepad/VS Code.",
+        howHtml:
+          'Bij installatie alleen de <strong>".NET desktop development"</strong> en <strong>".NET Core / Windows PowerShell"</strong> workloads kiezen — scheelt veel ruimte. ' +
+          'Open .ps1 / .psm1 bestanden direct, of gebruik de <em>PowerShell ISE</em> (sneller voor kleine edits).'
+      }
+    ];
+
     const W1 = [
-      { id: "w1-tools",    task: "T1", title: "Tools kiezen",      desc: "De juiste tools zijn gekozen en correct gebruikt." },
+      { id: "w1-tools",    task: "T1", title: "Tools kiezen",      desc: "De juiste tools zijn gekozen en correct gebruikt.", tools: TOOLS },
       { id: "w1-comm",     task: "T1", title: "Communicatie",      desc: "De communicatie is helder en duidelijk." },
       { id: "w1-analyse",  task: "T1", title: "Security analyse",  desc: "De veiligheidsrisico's zijn gevonden en de impact is goed ingeschat." },
       { id: "w1-verbeter", task: "T2", title: "Verbetervoorstel",  desc: "De verbetervoorstellen zijn goed onderbouwd en haalbaar." }
@@ -158,6 +335,15 @@
       });
     }
 
+    function renderTool(t) {
+      return '' +
+        '<div class="tool-card">' +
+          '<div class="tool-name">' + escapeHtml(t.name) + '<span class="tool-file">' + escapeHtml(t.file) + '</span></div>' +
+          '<div class="tool-section"><span class="lbl">Wat:</span>' + t.use + '</div>' +
+          '<div class="tool-section"><span class="lbl">Hoe:</span>' + t.howHtml + '</div>' +
+        '</div>';
+    }
+
     function render(listId, list) {
       const el = document.getElementById(listId);
       el.innerHTML = "";
@@ -165,18 +351,28 @@
         const item = document.createElement("div");
         item.className = "check-item";
         item.dataset.id = c.id;
-        item.setAttribute("role", "checkbox");
-        item.setAttribute("tabindex", "0");
-        item.setAttribute("aria-checked", "false");
-        item.innerHTML =
-          '<span class="check-box" aria-hidden="true"></span>' +
-          '<div class="check-body">' +
-            '<div class="check-row">' +
-              '<span class="task-tag">' + escapeHtml(c.task) + '</span>' +
-              '<span class="check-title">' + escapeHtml(c.title) + '</span>' +
+        const hasTools = Array.isArray(c.tools) && c.tools.length > 0;
+        let html =
+          '<div class="check-row-main" data-toggle="check" role="checkbox" tabindex="0" aria-checked="false">' +
+            '<span class="check-box" aria-hidden="true"></span>' +
+            '<div class="check-body">' +
+              '<div class="check-row">' +
+                '<span class="task-tag">' + escapeHtml(c.task) + '</span>' +
+                '<span class="check-title">' + escapeHtml(c.title) + '</span>' +
+              '</div>' +
+              '<p class="check-desc">' + escapeHtml(c.desc) + '</p>' +
             '</div>' +
-            '<p class="check-desc">' + escapeHtml(c.desc) + '</p>' +
           '</div>';
+        if (hasTools) {
+          html +=
+            '<button type="button" class="info-btn" data-toggle="tools" aria-expanded="false">' +
+              '<span class="chev">&#9656;</span> Tools' +
+            '</button>' +
+            '<div class="tools-panel">' +
+              c.tools.map(renderTool).join("") +
+            '</div>';
+        }
+        item.innerHTML = html;
         el.appendChild(item);
       });
     }
@@ -186,7 +382,8 @@
       document.querySelectorAll(".check-item").forEach(function (item) {
         const on = !!state[item.dataset.id];
         item.classList.toggle("checked", on);
-        item.setAttribute("aria-checked", on ? "true" : "false");
+        const main = item.querySelector('[data-toggle="check"]');
+        if (main) main.setAttribute("aria-checked", on ? "true" : "false");
         if (on) checked++;
       });
       document.getElementById("checked-count").textContent = checked;
@@ -200,8 +397,20 @@
     }
 
     document.addEventListener("click", function (e) {
-      const item = e.target.closest && e.target.closest(".check-item");
-      if (item) { toggleItem(item.dataset.id); return; }
+      const tools = e.target.closest && e.target.closest('[data-toggle="tools"]');
+      if (tools) {
+        e.stopPropagation();
+        const panel = tools.nextElementSibling;
+        const open = panel.classList.toggle("open");
+        tools.setAttribute("aria-expanded", open ? "true" : "false");
+        return;
+      }
+      const main = e.target.closest && e.target.closest('[data-toggle="check"]');
+      if (main) {
+        const item = main.closest(".check-item");
+        toggleItem(item.dataset.id);
+        return;
+      }
       const reset = e.target.closest && e.target.closest(".reset-btn");
       if (reset) {
         const which = reset.dataset.reset;
@@ -214,9 +423,10 @@
 
     document.addEventListener("keydown", function (e) {
       if (e.key !== " " && e.key !== "Enter") return;
-      const item = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains("check-item") ? document.activeElement : null;
-      if (item) {
+      const main = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.toggle === "check" ? document.activeElement : null;
+      if (main) {
         e.preventDefault();
+        const item = main.closest(".check-item");
         toggleItem(item.dataset.id);
       }
     });
