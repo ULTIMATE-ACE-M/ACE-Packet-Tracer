@@ -74,8 +74,8 @@
     .check-title { font-weight: 600; font-size: 15px; color: var(--text); }
     .check-desc { color: var(--text-muted); font-size: 14px; margin: 2px 0 0; }
 
-    .info-btn {
-      margin-top: 10px;
+    .item-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .info-btn, .link-btn {
       background: var(--surface-2);
       color: var(--text);
       border: 1px solid var(--border);
@@ -87,14 +87,16 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      text-decoration: none;
     }
-    .info-btn:hover { border-color: var(--primary); background: var(--surface); }
+    .info-btn:hover, .link-btn:hover { border-color: var(--primary); background: var(--surface); color: var(--text); }
     .info-btn .chev {
       display: inline-block;
       transition: transform .2s;
       font-size: 11px;
     }
     .info-btn[aria-expanded="true"] .chev { transform: rotate(90deg); }
+    .link-btn { color: var(--primary); }
 
     .tools-panel {
       display: none;
@@ -268,14 +270,14 @@
             '<li><strong>Autoruns</strong> — toont alles dat automatisch start (services, scheduled tasks, run-keys). Gebruik <em>Hide Microsoft Entries</em> om malware op te sporen.</li>' +
             '<li><strong>TCPView</strong> — live overzicht van processen met open netwerkverbindingen en luisterende poorten.</li>' +
             '<li><strong>Process Explorer</strong> — taakbeheer-plus: signature-check, VirusTotal-integratie, parent/child boom.</li>' +
-            '<li><strong>PsExec</strong> — commando's uitvoeren op een remote host: <code>psexec \\\\HOST -s cmd</code></li>' +
+            '<li><strong>PsExec</strong> — commando\'s uitvoeren op een remote host: <code>psexec \\\\HOST -s cmd</code></li>' +
             '<li><strong>Sigcheck</strong> — controleer of een binary digitaal getekend is: <code>sigcheck -a -h C:\\pad\\bestand.exe</code></li>' +
           '</ul>'
       },
       {
         name: "SQL Server Express + SSMS",
         file: "SQLEXPRADV / SQL2019-SSEI-Expr / SSMS-Setup-ENU / SQLServerReportingServices",
-        use: "Database-stack die als <em>backend</em> dient voor andere tools (ADAudit Plus, MBSA-history, custom rapportages). SSMS gebruik je om audit-DB's en user permissions te bekijken.",
+        use: "Database-stack die als <em>backend</em> dient voor andere tools (ADAudit Plus, MBSA-history, custom rapportages). SSMS gebruik je om audit-DB\'s en user permissions te bekijken.",
         howHtml:
           'Installeervolgorde: ' +
           '<strong>SQL2019-SSEI-Expr</strong> (basis-installer) of <strong>SQLEXPRADV_x64_ENU</strong> (advanced edition) ' +
@@ -312,7 +314,8 @@
     const W2 = [
       { id: "w2-incident",   task: "T1", title: "Security incidenten",                desc: "De security incidenten zijn correct geanalyseerd en ingedeeld." },
       { id: "w2-techoplos",  task: "T2", title: "Technische oplossingen doorvoeren",  desc: "De technische aanpassingen zijn correct doorgevoerd." },
-      { id: "w2-avg",        task: "T2", title: "AVG",                                desc: "De student handelt conform AVG wetgeving." },
+      { id: "w2-avg",        task: "T2", title: "AVG",                                desc: "De student handelt conform AVG wetgeving.",
+        link: { text: "AVG-regels", href: "avg.html" } },
       { id: "w2-logboek",    task: "T3", title: "Logboek bijhouden",                  desc: "De incidenten zijn correct en volledig gedocumenteerd." },
       { id: "w2-informeren", task: "T4", title: "Informeren",                         desc: "De juiste betrokken personen en, indien van toepassing, instanties zijn op de hoogte gebracht." }
     ];
@@ -352,6 +355,7 @@
         item.className = "check-item";
         item.dataset.id = c.id;
         const hasTools = Array.isArray(c.tools) && c.tools.length > 0;
+        const hasLink = c.link && c.link.href;
         let html =
           '<div class="check-row-main" data-toggle="check" role="checkbox" tabindex="0" aria-checked="false">' +
             '<span class="check-box" aria-hidden="true"></span>' +
@@ -363,14 +367,24 @@
               '<p class="check-desc">' + escapeHtml(c.desc) + '</p>' +
             '</div>' +
           '</div>';
-        if (hasTools) {
-          html +=
-            '<button type="button" class="info-btn" data-toggle="tools" aria-expanded="false">' +
-              '<span class="chev">&#9656;</span> Tools' +
-            '</button>' +
-            '<div class="tools-panel">' +
-              c.tools.map(renderTool).join("") +
-            '</div>';
+        if (hasTools || hasLink) {
+          html += '<div class="item-actions">';
+          if (hasTools) {
+            html +=
+              '<button type="button" class="info-btn" data-toggle="tools" aria-expanded="false">' +
+                '<span class="chev">&#9656;</span> Tools' +
+              '</button>';
+          }
+          if (hasLink) {
+            html +=
+              '<a class="link-btn" href="' + escapeHtml(c.link.href) + '" data-noprop="1">' +
+                '&#128279; ' + escapeHtml(c.link.text) +
+              '</a>';
+          }
+          html += '</div>';
+          if (hasTools) {
+            html += '<div class="tools-panel">' + c.tools.map(renderTool).join("") + '</div>';
+          }
         }
         item.innerHTML = html;
         el.appendChild(item);
@@ -397,12 +411,19 @@
     }
 
     document.addEventListener("click", function (e) {
+      const link = e.target.closest && e.target.closest('[data-noprop="1"]');
+      if (link) {
+        e.stopPropagation();
+        return; // let the link navigate normally
+      }
       const tools = e.target.closest && e.target.closest('[data-toggle="tools"]');
       if (tools) {
         e.stopPropagation();
-        const panel = tools.nextElementSibling;
-        const open = panel.classList.toggle("open");
-        tools.setAttribute("aria-expanded", open ? "true" : "false");
+        const panel = tools.parentElement.nextElementSibling;
+        if (panel && panel.classList.contains("tools-panel")) {
+          const open = panel.classList.toggle("open");
+          tools.setAttribute("aria-expanded", open ? "true" : "false");
+        }
         return;
       }
       const main = e.target.closest && e.target.closest('[data-toggle="check"]');
