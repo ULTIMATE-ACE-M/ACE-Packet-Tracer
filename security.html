@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Security Examen — Checklist</title>
-  <meta name="description" content="Checklist op basis van het beoordelingsformulier P2-K2: Controleert de security." />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e3a8a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3E%26gt;_%3C/text%3E%3C/svg%3E">
   <style>
@@ -51,6 +50,10 @@
     .tool-file { display: inline-block; font: 600 11px ui-monospace, Consolas, monospace; color: var(--text-muted); background: var(--surface-2); padding: 1px 6px; border-radius: 10px; border: 1px solid var(--border); margin-left: 6px; vertical-align: middle; }
     .tool-section { margin-top: 6px; font-size: 13.5px; line-height: 1.55; }
     .tool-section .lbl { display: inline-block; font-weight: 700; color: var(--text); margin-right: 4px; }
+    .tool-section.expect { background: var(--surface-2); border-left: 3px solid #15803d; padding: 6px 10px; border-radius: 0 4px 4px 0; }
+    .tool-section.expect .lbl { color: #15803d; }
+    [data-theme="dark"] .tool-section.expect .lbl { color: #4ade80; }
+    [data-theme="dark"] .tool-section.expect { border-left-color: #4ade80; }
     .tool-section code, .detail-block code { font: 12.5px ui-monospace, Consolas, monospace; background: var(--code-bg); color: var(--code-text); padding: 1px 5px; border-radius: 3px; }
     .tool-section ul { margin: 4px 0 0 0; padding-left: 20px; }
     .tool-section li { margin: 2px 0; }
@@ -76,7 +79,7 @@
   <main class="security-main">
     <section class="hero">
       <h2>Checklist — P2-K2: Controleert de security</h2>
-      <p>Klik op een onderdeel om af te vinken. Klik op <strong>Details</strong> voor de scoring-rubric (Niet/nauwelijks &rarr; Volledig).</p>
+      <p>Klik op een onderdeel om af te vinken. Klik op <strong>Details</strong> voor de scoring-rubric (Niet/nauwelijks &rarr; Volledig). Per tool vind je <em>Wat</em>, <em>Hoe</em> en de <em>Verwachte uitkomst</em>.</p>
       <div class="progress-card">
         Voortgang: <strong><span id="checked-count">0</span> / <span id="total-count">0</span></strong> onderdelen afgevinkt
       </div>
@@ -108,96 +111,121 @@
     };
 
     const TOOLS = [
-      // ---- In de Tools-map (uit screenshot) ----
       { group: "Aanwezig in Tools-map", name: "Nessus", file: "Nessus-10.5.0-x64",
         use: "Vulnerability scanner — scant hosts/netwerk op bekende kwetsbaarheden (CVE's) en misconfiguraties. Kerntool voor de security-analyse op SRV001.",
-        howHtml: 'Open <code>https://localhost:8834</code> in Chrome. <strong>New Scan</strong> &rarr; <strong>Basic Network Scan</strong>. Targets = <code>192.168.1.0/24</code> of specifiek IP. Save &rarr; Launch. Filter op <strong>Critical</strong> en <strong>High</strong> voor je advies/verbetervoorstel.' },
+        howHtml: 'Open <code>https://localhost:8834</code>. <strong>New Scan</strong> &rarr; <strong>Basic Network Scan</strong>. Targets = <code>192.168.1.0/24</code> of specifiek IP. Save &rarr; Launch. Filter op <strong>Critical</strong> en <strong>High</strong>.',
+        expectHtml: 'Lijst met findings per host, gesorteerd op severity. Op SRV001 verwacht je o.a.: ontbrekende KB-patches, SMBv1 enabled, weak SSL/TLS ciphers, anonymous shares, default credentials. Minimaal 6 punten voor je risicomatrix.' },
       { group: "Aanwezig in Tools-map", name: "Nmap", file: "nmap-7.93-setup",
         use: "Network/port scanner — ontdekt hosts, open poorten, services en OS. Inzetten vóór Nessus om in kaart te brengen wat er draait.",
-        howHtml: 'In <code>cmd</code>/PowerShell:<ul><li>Host-discovery: <code>nmap -sn 192.168.1.0/24</code></li><li>Services + OS: <code>nmap -sV -O 192.168.1.10</code></li><li>Volledig + scripts: <code>nmap -sC -sV -p- 192.168.1.10</code></li></ul>Onverwachte open poorten = bevinding voor je rapport.' },
-      { group: "Aanwezig in Tools-map", name: "MBSA — Microsoft Baseline Security Analyzer", file: "MBSASetup-x64-EN",
-        use: "Controleert een Windows-host op ontbrekende patches, zwakke wachtwoorden en onveilige Windows/IIS-config.",
-        howHtml: 'Start MBSA &rarr; <em>Scan a computer</em> &rarr; hostname/IP &rarr; <em>Start scan</em>. Bekijk <strong>Security Updates</strong> en <strong>Administrative Vulnerabilities</strong>.' },
+        howHtml: '<ul><li>Discovery: <code>nmap -sn 192.168.1.0/24</code></li><li>Services + OS: <code>nmap -sV -O 192.168.1.10</code></li><li>Volledig: <code>nmap -sC -sV -p- 192.168.1.10</code></li></ul>',
+        expectHtml: 'Op een Windows-server gebruikelijk: 135/139/445 (SMB), 3389 (RDP), 5985 (WinRM). Bevinding bij onverwacht open poorten zoals 21 (FTP), 23 (Telnet), 1433 (SQL extern bereikbaar), of een webserver op 80 zonder reden.' },
+      { group: "Aanwezig in Tools-map", name: "MBSA", file: "MBSASetup-x64-EN",
+        use: "Controleert Windows-host op ontbrekende patches, zwakke wachtwoorden en onveilige Windows/IIS-config.",
+        howHtml: 'Start MBSA &rarr; <em>Scan a computer</em> &rarr; hostname/IP &rarr; <em>Start scan</em>. Bekijk <strong>Security Updates</strong> en <strong>Administrative Vulnerabilities</strong>.',
+        expectHtml: 'Rapport met rode kruisjes (issue) en groene vinkjes (ok). Verwacht: ontbrekende KB-patches, Guest-account aan, anonymous shares enabled, Windows Update niet geconfigureerd, zwakke wachtwoorden op lokale accounts.' },
       { group: "Aanwezig in Tools-map", name: "AuditTAP", file: "AuditTAP-5.4",
-        use: "PowerShell-tool die Windows/Office config afzet tegen DISA STIG of CIS benchmarks. HTML-rapport met pass/fail per hardening-item.",
-        howHtml: 'PowerShell als admin:<ul><li><code>Import-Module .\\AuditTAP.psm1</code></li><li><code>Invoke-ATAPHtmlReport -RuleSet "Windows10-21H2" -SavePath .\\report.html</code></li></ul>Open in Chrome — <strong>Failed</strong> regels = kandidaten voor je verbetervoorstel.' },
+        use: "PowerShell-tool die Windows-config afzet tegen DISA STIG of CIS benchmarks. Genereert HTML-rapport met pass/fail per hardening-item.",
+        howHtml: 'PowerShell als admin:<ul><li><code>Import-Module .\\AuditTAP.psm1</code></li><li><code>Invoke-ATAPHtmlReport -RuleSet "Windows10-21H2" -SavePath .\\report.html</code></li></ul>',
+        expectHtml: 'HTML-rapport met meerdere <strong>Failed</strong> entries: account-lockout te zwak, audit policy onvolledig, password length &lt; 14, geen complexity vereist, SMBv1 enabled, te veel admin-rechten. Elk Failed = kandidaat voor je verbetervoorstel.' },
       { group: "Aanwezig in Tools-map", name: "ManageEngine ADAudit Plus", file: "ManageEngine_ADAudit_Plus_x64",
-        use: "Realtime Active Directory audit — logins, account lockouts, GPO-changes, privileged-group changes. Voor het analyseren van AD-incidenten.",
-        howHtml: 'Webinterface op <code>http://localhost:8081</code>. Voeg de DC toe als <em>data source</em>. Reports: failed logons, lockouts, password changes, admin-group changes. Exporteer naar PDF/CSV voor je logboek.' },
+        use: "Realtime Active Directory audit — logins, account lockouts, GPO-changes, privileged-group changes.",
+        howHtml: 'Webinterface op <code>http://localhost:8081</code>. Voeg de DC toe als data source. Reports: failed logons, lockouts, password changes, admin-group changes.',
+        expectHtml: 'Pieken in failed logons (mogelijke brute-force), recente account-lockouts, password changes buiten werkuren, onverwachte toevoegingen aan Domain Admins. Verdacht: snelle opeenvolging van pogingen vanaf één IP, of meerdere accounts vanaf één machine.' },
       { group: "Aanwezig in Tools-map", name: "Sysinternals Suite", file: "SysinternalsSuite (zip)",
-        use: "Bundel Microsoft-tools voor diepe Windows-analyse — onmisbaar bij het onderzoeken van een security incident.",
-        howHtml: '<ul><li><strong>Process Monitor</strong> (procmon) — bestand-/registry-/netwerkactiviteit per proces.</li><li><strong>Autoruns</strong> — auto-start items, <em>Hide Microsoft Entries</em> voor malware.</li><li><strong>TCPView</strong> — proces &harr; poort overzicht live.</li><li><strong>Process Explorer</strong> — taakbeheer-plus met VirusTotal-integratie.</li><li><strong>PsExec</strong> — remote command: <code>psexec \\\\HOST -s cmd</code></li><li><strong>Sigcheck</strong> — signature-check: <code>sigcheck -a -h bestand.exe</code></li></ul>' },
-      { group: "Aanwezig in Tools-map", name: "SQL Server Express + SSMS", file: "SQLEXPRADV / SQL2019-SSEI-Expr / SSMS-Setup-ENU / SSRS",
-        use: "Database-stack als backend voor andere tools (ADAudit Plus, MBSA-history, custom rapporten). SSMS om audit-DB en permissions te bekijken.",
-        howHtml: 'Volgorde: <strong>SQL2019-SSEI-Expr</strong> of <strong>SQLEXPRADV</strong> &rarr; <strong>SSMS</strong> &rarr; optioneel <strong>SSRS</strong>. Connect to <code>(local)\\SQLEXPRESS</code>.' },
+        use: "Bundel Microsoft-tools voor diepe Windows-analyse — onmisbaar bij incident-onderzoek.",
+        howHtml: '<ul><li><strong>Procmon</strong> — bestand-/registry-/netwerkactiviteit per proces.</li><li><strong>Autoruns</strong> — alle auto-start items, <em>Hide Microsoft</em>.</li><li><strong>TCPView</strong> — proces &harr; poort live.</li><li><strong>Process Explorer</strong> — VirusTotal-integratie.</li><li><strong>Sigcheck</strong> — <code>sigcheck -a -h bestand.exe</code></li></ul>',
+        expectHtml: 'Procmon: bestandstoegang/registry-keys aangemaakt door verdacht proces. Autoruns: onbekende .exe in Run-keys of Scheduled Tasks (persistence). TCPView: proces met onverwachte uitgaande connectie naar publiek IP. Sigcheck: ongetekende of vervalst-getekende binary.' },
+      { group: "Aanwezig in Tools-map", name: "SQL Server Express + SSMS", file: "SQLEXPRADV / SSMS",
+        use: "Database-stack als backend voor andere tools (ADAudit Plus, MBSA-history). SSMS om audit-DB en permissions te bekijken.",
+        howHtml: 'Volgorde: <strong>SQL2019-SSEI-Expr</strong> of <strong>SQLEXPRADV</strong> &rarr; <strong>SSMS</strong>. Connect <code>(local)\\SQLEXPRESS</code>.',
+        expectHtml: 'In SSMS &rarr; Security &rarr; Logins: lijst met SQL-logins. Verdacht: <em>sa</em> enabled met zwak wachtwoord, ongebruikte sysadmin-accounts, of een service-account met buitensporige rechten.' },
       { group: "Aanwezig in Tools-map", name: "Google Chrome", file: "ChromeSetup",
-        use: "Browser voor de webinterfaces (Nessus 8834, ADAudit Plus 8081) en HTML-rapporten van AuditTAP/MBSA.",
-        howHtml: 'Bookmark de tool-URLs. Bij self-signed cert: <em>Advanced</em> &rarr; <em>Proceed</em>.' },
+        use: "Browser voor de webinterfaces (Nessus 8834, ADAudit Plus 8081) en HTML-rapporten.",
+        howHtml: 'Bookmark de tool-URLs. Bij self-signed cert: <em>Advanced &rarr; Proceed</em>.',
+        expectHtml: 'Webinterfaces openen succesvol. HTML-rapporten van AuditTAP/MBSA leesbaar met formatting intact.' },
       { group: "Aanwezig in Tools-map", name: "Visual Studio", file: "VisualStudioSetup",
-        use: "IDE om PowerShell/C#-scripts te lezen of aanpassen (bv. AuditTAP-modules). Vaak volstaat ook PowerShell ISE / Notepad++.",
-        howHtml: 'Bij installatie alleen ".NET desktop development" + "Windows PowerShell" workloads kiezen.' },
+        use: "IDE om PowerShell/C#-scripts te lezen of aanpassen. Vaak volstaat ook PowerShell ISE.",
+        howHtml: 'Bij installatie alleen ".NET desktop development" + "Windows PowerShell" workloads kiezen.',
+        expectHtml: '.ps1- en .psm1-bestanden openen met syntax highlighting. Niet altijd noodzakelijk voor het examen — alleen als je AuditTAP-modules moet aanpassen.' },
 
-      // ---- Built-in Windows tools ----
       { group: "Windows ingebouwd — analyse", name: "Event Viewer", file: "eventvwr.msc",
-        use: "Centrale Windows logs — onmisbaar bij incident-analyse. Loginpogingen, service crashes, applicatiefouten, Windows Defender alerts.",
-        howHtml: 'Run &rarr; <code>eventvwr.msc</code>. Belangrijke locaties:<ul><li><strong>Security</strong> — events 4624 (logon success), 4625 (logon failure), 4720 (account created), 4732 (added to group)</li><li><strong>System</strong> — service-/driver-events</li><li><strong>Application</strong> — software-crashes</li><li><strong>Applications and Services Logs &rarr; Microsoft &rarr; Windows &rarr; Defender</strong> — antivirus alerts</li></ul>Filter via <em>Filter Current Log...</em> op event ID of timeframe. Exporteer naar .evtx of CSV voor je logboek.' },
-      { group: "Windows ingebouwd — analyse", name: "PowerShell + ISE", file: "powershell.exe / powershell_ise.exe",
-        use: "Scripting voor audits, log-analyse en geautomatiseerde acties. Veel onderzoeken kun je sneller met PowerShell dan met klikken.",
-        howHtml: 'Voorbeelden:<ul><li>Lokale admins: <code>Get-LocalGroupMember -Group "Administrators"</code></li><li>Open poorten: <code>Get-NetTCPConnection -State Listen</code></li><li>Failed logons: <code>Get-WinEvent -FilterHashtable @{LogName="Security";Id=4625} -MaxEvents 50</code></li><li>Auto-start services: <code>Get-CimInstance -ClassName Win32_Service | Where-Object StartMode -eq "Auto"</code></li><li>Patches: <code>Get-HotFix | Sort-Object InstalledOn -Descending</code></li></ul>' },
+        use: "Centrale Windows logs voor incident-analyse. Loginpogingen, service crashes, applicatiefouten, Defender alerts.",
+        howHtml: '<code>eventvwr.msc</code>. <strong>Security</strong>-log: 4624/4625/4720/4732. <strong>Defender</strong>-log: malware alerts. Filter via <em>Filter Current Log</em>.',
+        expectHtml: 'Pieken aan <strong>4625</strong> (failed logon) op een specifiek account. <strong>4720</strong> (account aangemaakt) buiten werkuren. <strong>4732</strong> (toegevoegd aan Administrators) ongepland. Defender events met "Threat detected".' },
+      { group: "Windows ingebouwd — analyse", name: "PowerShell + ISE", file: "powershell.exe / ISE",
+        use: "Scripting voor audits, log-analyse en geautomatiseerde acties.",
+        howHtml: '<ul><li>Lokale admins: <code>Get-LocalGroupMember -Group "Administrators"</code></li><li>Open poorten: <code>Get-NetTCPConnection -State Listen</code></li><li>Failed logons: <code>Get-WinEvent -FilterHashtable @{LogName="Security";Id=4625} -MaxEvents 50</code></li><li>Patches: <code>Get-HotFix | Sort-Object InstalledOn -Descending</code></li></ul>',
+        expectHtml: 'Output zoals: <code>BUILTIN\\Administrators</code> met 5+ leden (te veel), open poorten met PIDs (verdacht: een poort waar geen service voor is), recent geïnstalleerde patch-datum &gt;30 dagen geleden = patches missen.' },
       { group: "Windows ingebouwd — analyse", name: "Task Manager / Resource Monitor", file: "taskmgr / resmon",
-        use: "Snelle blik op draaiende processen, CPU/memory/disk/netwerk per proces. Eerste check bij verdacht traag systeem.",
-        howHtml: '<code>Ctrl+Shift+Esc</code> voor Task Manager. Resource Monitor (<em>resmon</em>) toont per-proces netwerkverbindingen en file-handles. Verdacht proces &rarr; <em>Open file location</em>, dan Sigcheck of VirusTotal.' },
-      { group: "Windows ingebouwd — analyse", name: "Netwerk-CLI (netstat / ipconfig / arp / route / tracert)", file: "ingebouwd",
-        use: "Snelle netwerk-diagnostiek tijdens incidentanalyse — open poorten, gateway, ARP-cache, routing.",
-        howHtml: '<ul><li><code>netstat -ano</code> — open verbindingen + PID</li><li><code>ipconfig /all</code> — interfaces + DNS</li><li><code>arp -a</code> — ARP-cache (vreemde MAC = ARP-spoof?)</li><li><code>route print</code> — routing-table</li><li><code>tracert 8.8.8.8</code> — pad naar buiten</li></ul>' },
+        use: "Snelle blik op draaiende processen, CPU/memory/netwerk per proces.",
+        howHtml: '<code>Ctrl+Shift+Esc</code>. Resource Monitor (<em>resmon</em>) toont per-proces netwerkverbindingen.',
+        expectHtml: 'Verdacht: een proces met hoog CPU-gebruik dat je niet herkent, of een proces (resmon &rarr; Network) met aanhoudende uitgaande connectie naar een onbekend publiek IP.' },
+      { group: "Windows ingebouwd — analyse", name: "Netwerk-CLI", file: "netstat / ipconfig / arp / route",
+        use: "Snelle netwerk-diagnostiek tijdens incidentanalyse.",
+        howHtml: '<ul><li><code>netstat -ano</code> — open verbindingen + PID</li><li><code>ipconfig /all</code> — interfaces</li><li><code>arp -a</code> — ARP-cache</li><li><code>route print</code> — routing</li></ul>',
+        expectHtml: 'netstat toont LISTENING op poorten waar geen service hoort. arp toont vreemde MAC-adressen op de gateway-IP (mogelijk ARP-spoofing). route print toont een onverwachte default route.' },
 
       { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Group Policy Management", file: "gpmc.msc / gpedit.msc",
-        use: "Doorvoeren van security-policies op domain- of lokaal niveau (wachtwoordbeleid, account lockout, audit policy, Windows Defender, BitLocker enforcement).",
-        howHtml: 'Run &rarr; <code>gpmc.msc</code> (domain) of <code>gpedit.msc</code> (lokaal). Belangrijke paden:<ul><li><strong>Computer Config &rarr; Windows Settings &rarr; Security Settings &rarr; Account Policies</strong> &mdash; password &amp; lockout</li><li><strong>... &rarr; Local Policies &rarr; Audit Policy</strong> &mdash; logon, object access, policy change auditing aanzetten</li><li><strong>Administrative Templates &rarr; Windows Components &rarr; Windows Defender Antivirus</strong></li></ul>Na wijziging op client: <code>gpupdate /force</code>.' },
+        use: "Doorvoeren van security-policies (wachtwoordbeleid, lockout, audit policy, Defender, BitLocker enforcement).",
+        howHtml: '<code>gpmc.msc</code> (domain) of <code>gpedit.msc</code> (lokaal). Belangrijke paden:<ul><li>Computer Config &rarr; Windows Settings &rarr; Security Settings &rarr; <strong>Account Policies</strong></li><li>... &rarr; Local Policies &rarr; <strong>Audit Policy</strong></li></ul>Daarna: <code>gpupdate /force</code>.',
+        expectHtml: 'Vóór: password length 7, lockout uitgeschakeld, audit policy "No auditing". Na fix: lengte 14+, lockout 5/30min, audit policy alle "Success and Failure".' },
       { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Windows Firewall", file: "wf.msc",
-        use: "Inkomende/uitgaande regels beheren — vaak gevraagd als technische oplossing om onnodige services te blokkeren.",
-        howHtml: 'Run &rarr; <code>wf.msc</code>. <em>Inbound Rules</em> &rarr; <em>New Rule...</em>. CLI: <code>netsh advfirewall firewall add rule name="Block 3389" dir=in action=block protocol=TCP localport=3389</code>. Tip: blokkeer poorten die Nessus als overbodig open vond.' },
-      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Local Users and Groups / Computer Management", file: "lusrmgr.msc / compmgmt.msc",
-        use: "Lokale accounts beheren — accounts uitschakelen, wachtwoord resetten, groepslidmaatschap aanpassen (least privilege!).",
-        howHtml: 'Run &rarr; <code>lusrmgr.msc</code>. Schakel <strong>Guest</strong> en ongebruikte accounts uit. Verwijder gewone gebruikers uit <em>Administrators</em>. Set <em>User must change password at next logon</em> waar nodig.' },
+        use: "Inkomende/uitgaande regels beheren — onnodige services blokkeren.",
+        howHtml: '<code>wf.msc</code> &rarr; <em>Inbound Rules &rarr; New Rule</em>. CLI: <code>netsh advfirewall firewall add rule name="Block 3389" dir=in action=block protocol=TCP localport=3389</code>.',
+        expectHtml: 'Vóór: te veel open inbound rules op profiel "Any", geen logging. Na fix: alleen vereiste poorten (445 binnen LAN, 3389 alleen vanaf admin-subnet), logging aan in <code>%systemroot%\\System32\\LogFiles\\Firewall</code>.' },
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Local Users and Groups", file: "lusrmgr.msc",
+        use: "Lokale accounts beheren — uitschakelen, wachtwoord resetten, groepslidmaatschap aanpassen.",
+        howHtml: '<code>lusrmgr.msc</code>. Schakel <strong>Guest</strong> uit, verwijder gewone gebruikers uit <em>Administrators</em>.',
+        expectHtml: 'Vóór: Guest enabled, 5+ accounts in Administrators, ongebruikte service-accounts staan aan. Na fix: Guest disabled, alleen 1-2 admins, ongebruikte accounts disabled met "Account is disabled" aangevinkt.' },
       { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Services / Task Scheduler", file: "services.msc / taskschd.msc",
-        use: "Onnodige services uitschakelen (attack surface verkleinen) en geplande taken controleren op verdachte entries.",
-        howHtml: 'Bekijk via <code>services.msc</code> services met StartMode=Automatic die niet nodig zijn (Telnet, SMBv1, oude IIS). Set op <em>Disabled</em>. Check <code>taskschd.msc</code> &rarr; <em>Task Scheduler Library</em> op onbekende taken (kan persistence-mechanisme zijn).' },
+        use: "Onnodige services uitschakelen + scheduled tasks controleren op persistence.",
+        howHtml: 'Bekijk <code>services.msc</code> op StartMode=Automatic services die niet nodig zijn (Telnet, SMBv1, oude IIS). Set Disabled. Check <code>taskschd.msc</code> op onbekende taken.',
+        expectHtml: 'Verdacht: <em>RemoteRegistry</em>, <em>Telnet</em>, of <em>FTP Server</em> draaien zonder reden. In Task Scheduler een taak die elke 5 minuten een script uit %TEMP% draait — typische malware-persistence.' },
       { group: "Windows ingebouwd — oplossingen doorvoeren", name: "BitLocker", file: "manage-bde / Control Panel",
-        use: "Full-disk encryption — vaak een verplicht onderdeel van een verbetervoorstel om data te beschermen bij diefstal.",
-        howHtml: 'GUI: <em>Control Panel &rarr; BitLocker Drive Encryption &rarr; Turn on BitLocker</em>. CLI: <code>manage-bde -on C: -RecoveryPassword</code>. Status: <code>manage-bde -status</code>. Bewaar de recovery-key in AD of een safe.' },
-      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Windows Defender / Defender Firewall", file: "ingebouwd",
-        use: "Standaard antivirus + firewall op Windows. Aanzetten en up-to-date houden is vaak het minimum-verbetervoorstel.",
-        howHtml: 'PowerShell:<ul><li>Status: <code>Get-MpComputerStatus</code></li><li>Update signatures: <code>Update-MpSignature</code></li><li>Quick scan: <code>Start-MpScan -ScanType QuickScan</code></li><li>Full scan: <code>Start-MpScan -ScanType FullScan</code></li></ul>' },
+        use: "Full-disk encryption — vaak verplicht in een verbetervoorstel om data bij diefstal te beschermen.",
+        howHtml: 'GUI: <em>BitLocker Drive Encryption &rarr; Turn on BitLocker</em>. CLI: <code>manage-bde -on C: -RecoveryPassword</code>. Status: <code>manage-bde -status</code>.',
+        expectHtml: 'Vóór: <code>manage-bde -status</code> toont <em>Conversion Status: Fully Decrypted</em> = bevinding. Na fix: <em>Fully Encrypted</em> en recovery-key bewaard in AD of een safe.' },
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Windows Defender", file: "ingebouwd",
+        use: "Standaard antivirus + firewall. Aanzetten + up-to-date houden = minimum-verbetervoorstel.",
+        howHtml: '<ul><li>Status: <code>Get-MpComputerStatus</code></li><li>Update: <code>Update-MpSignature</code></li><li>Quick scan: <code>Start-MpScan -ScanType QuickScan</code></li></ul>',
+        expectHtml: 'Vóór: <code>RealTimeProtectionEnabled : False</code>, signature versie weken oud, geen recente scan. Na fix: True, signature van vandaag, recente Quick/Full scan zonder threats.' },
 
-      // ---- Aanvullende analyse-tools ----
       { group: "Aanvullend", name: "Wireshark", file: "extra installeren",
-        use: "Packet capture &amp; analyse — must-have bij netwerkincidenten. Toont exact welk verkeer over de lijn gaat (welke protocollen, plain-text wachtwoorden, verdachte connecties).",
-        howHtml: 'Selecteer interface &rarr; <em>Start capturing</em>. Filters:<ul><li><code>http</code> &mdash; alleen HTTP</li><li><code>tcp.port == 3389</code> &mdash; RDP</li><li><code>ip.addr == 192.168.1.10</code> &mdash; specifieke host</li><li><code>tcp.flags.syn == 1 and tcp.flags.ack == 0</code> &mdash; SYN-scans</li></ul>Tip: Save als .pcapng en voeg toe aan je logboek als bewijs.' },
+        use: "Packet capture &amp; analyse — toont exact welk verkeer over de lijn gaat.",
+        howHtml: 'Selecteer interface &rarr; <em>Start capturing</em>. Filters: <code>http</code>, <code>tcp.port == 3389</code>, <code>ip.addr == 192.168.1.10</code>.',
+        expectHtml: 'Cleartext credentials in HTTP/FTP/Telnet, ongebruikelijke protocollen, connecties naar publiek IP buiten kantooruren, broadcast-storms, of TCP SYN-scans (veel SYN, geen ACK).' },
       { group: "Aanvullend", name: "Notepad++", file: "extra installeren",
-        use: "Editor voor log-files, scripts en config. Veel sneller dan Notepad bij grote logs (MB+) en heeft regex-search.",
-        howHtml: 'Open een log &rarr; <em>Search &rarr; Find in Files</em> met regex om bv. failed logons of error-codes te vinden. Kleurt syntax voor PowerShell, XML, JSON.' },
-      { group: "Aanvullend", name: "VirusTotal", file: "virustotal.com (web)",
-        use: "Reputation-check voor verdachte bestanden, hashes, IP\'s en URL\'s. Gratis &mdash; geen install nodig.",
-        howHtml: 'Bereken hash met PowerShell: <code>Get-FileHash -Algorithm SHA256 bestand.exe</code>. Plak hash op <code>virustotal.com</code> &rarr; zie hoeveel AV-engines het als malicious markeren. Upload alleen bestanden waarvan je zeker weet dat ze geen privégegevens bevatten (AVG!).' },
+        use: "Editor voor logs en config. Veel sneller dan Notepad bij grote logs (MB+) en heeft regex-search.",
+        howHtml: '<em>Search &rarr; Find in Files</em> met regex om bv. failed logons of error-codes te vinden.',
+        expectHtml: 'Logs (.evtx-export, .csv, .txt) leesbaar. Regex-treffers op patronen als "failed", "error", "denied", "4625".' },
+      { group: "Aanvullend", name: "VirusTotal", file: "virustotal.com",
+        use: "Reputation-check voor verdachte bestanden, hashes, IP\'s en URL\'s.",
+        howHtml: 'Hash via <code>Get-FileHash -Algorithm SHA256 bestand.exe</code>. Plak op virustotal.com. Upload alleen niet-vertrouwelijke bestanden (AVG!).',
+        expectHtml: 'Detection ratio (X/70 engines): 0/70 = waarschijnlijk schoon, &gt;5/70 = verdacht, &gt;30/70 = bevestigde malware. Plus eerdere detecties, gerelateerde URLs en sample-history.' },
       { group: "Aanvullend", name: "OpenVAS / Greenbone", file: "alternatief voor Nessus",
-        use: "Open-source vulnerability scanner. Goed alternatief als Nessus geen license heeft, of voor cross-check van bevindingen.",
-        howHtml: 'Webinterface op <code>https://localhost:9392</code>. <em>Scans &rarr; Tasks &rarr; New Task</em>, kies target en scan-config (bv. <em>Full and fast</em>).' },
-      { group: "Aanvullend", name: "Microsoft Security Compliance Toolkit + LGPO", file: "extra installeren",
-        use: "Officiële Microsoft baseline-templates (CIS-niveau) plus LGPO.exe om die GPO\'s lokaal toe te passen op een machine zonder domain.",
-        howHtml: 'Download de baseline ZIP &rarr; uitpakken &rarr; in PowerShell als admin: <code>.\\Baseline-LocalInstall.ps1</code> of <code>LGPO.exe /g .\\GPOs</code>. Daarna <code>gpupdate /force</code> en <code>secedit /export /cfg before.inf</code> om vóór/ná te vergelijken.' },
+        use: "Open-source vulnerability scanner. Cross-check voor Nessus-bevindingen.",
+        howHtml: 'Webinterface op <code>https://localhost:9392</code>. <em>Scans &rarr; Tasks &rarr; New Task</em>, kies target en scan-config.',
+        expectHtml: 'Vergelijkbare lijst als Nessus, severity in CVSS-score. Goed om te checken of Nessus geen valse positieven geeft, of om missing findings dubbel te verifiëren.' },
+      { group: "Aanvullend", name: "MS Security Compliance Toolkit + LGPO", file: "extra installeren",
+        use: "Microsoft baseline-templates (CIS-niveau) + LGPO.exe om GPO\'s lokaal toe te passen.",
+        howHtml: 'PowerShell als admin in baseline-map: <code>.\\Baseline-LocalInstall.ps1</code> of <code>LGPO.exe /g .\\GPOs</code> &rarr; <code>gpupdate /force</code>.',
+        expectHtml: 'Vóór: <code>secedit /export /cfg before.inf</code> toont jouw config. Na: <em>after.inf</em> heeft veel meer policies actief. Diff laat zien wat je hebt aangescherpt — direct bewijs voor je verbetervoorstel.' },
       { group: "Aanvullend", name: "KeePass / Bitwarden", file: "wachtwoordmanager",
-        use: "Password manager — vaak een vast onderdeel van het verbetervoorstel om zwakke/hergebruikte wachtwoorden uit te bannen.",
-        howHtml: 'KeePass: portable .exe, alle wachtwoorden in één encrypted .kdbx-bestand. Bitwarden: cloud-gebaseerd, free tier. Adviseer in je rapport: minimum lengte 14 chars, MFA waar mogelijk, password manager verplicht.' },
+        use: "Password manager — meestal vast onderdeel van je verbetervoorstel.",
+        howHtml: 'KeePass: portable .exe, alle wachtwoorden in encrypted .kdbx. Bitwarden: cloud, free tier. Adviseer 14+ chars, MFA, manager verplicht.',
+        expectHtml: 'Een werkende password-manager met testaccount, gegenereerde 20-char wachtwoorden, autofill in browser. In je advies: minimale lengte, hergebruik verboden, MFA waar mogelijk.' },
       { group: "Aanvullend", name: "Snort / Suricata", file: "IDS",
-        use: "Intrusion Detection / Prevention System — vaak als preventieve maatregel in het verbetervoorstel om aanvallen op het netwerk te detecteren.",
-        howHtml: 'Suricata draait op een netwerk-tap of op een edge-host. Default rules via <em>Emerging Threats</em>. Alerts in <code>/var/log/suricata/eve.json</code>. Op het examen vooral noemen als <strong>verbetervoorstel</strong>: "implementeer een NIDS zoals Suricata met ET-rules op de DMZ-firewall".' },
-      { group: "Aanvullend", name: "WSUS — Windows Server Update Services", file: "patch-management",
-        use: "Centraal patch-management voor Windows-clients. Onmisbaar bij elk \'patches missen\' verbetervoorstel.",
-        howHtml: 'Op een Windows Server: <em>Server Manager &rarr; Add Roles &rarr; Windows Server Update Services</em>. Configureer client-targeting via GPO (<em>Computer Config &rarr; Administrative Templates &rarr; Windows Components &rarr; Windows Update</em>). Plan een wekelijks maintenance-window voor approvals.' },
-      { group: "Aanvullend", name: "Hash &amp; integrity (CertUtil / Get-FileHash)", file: "ingebouwd",
-        use: "Hashes berekenen om bestand-integriteit te controleren (verdachte downloads, bewijsstuk in onderzoek).",
-        howHtml: '<ul><li>PowerShell: <code>Get-FileHash -Algorithm SHA256 bestand.exe</code></li><li>cmd: <code>certutil -hashfile bestand.exe SHA256</code></li><li>MD5/SHA1 voor oude tools, SHA256 voor alles nieuw.</li></ul>' }
+        use: "Intrusion Detection / Prevention System — preventieve maatregel in het verbetervoorstel.",
+        howHtml: 'Suricata met <em>Emerging Threats</em> rules. Alerts in <code>/var/log/suricata/eve.json</code>.',
+        expectHtml: 'eve.json met alerts: port-scans (ET SCAN), exploit-pogingen, malware C2-traffic. Op het examen vooral als verbetervoorstel: "implementeer NIDS op de DMZ-firewall met ET-rules".' },
+      { group: "Aanvullend", name: "WSUS", file: "patch-management",
+        use: "Centraal patch-management voor Windows-clients.",
+        howHtml: 'Server Manager &rarr; Add Roles &rarr; Windows Server Update Services. GPO targeting via <em>Computer Config &rarr; Administrative Templates &rarr; Windows Components &rarr; Windows Update</em>.',
+        expectHtml: 'WSUS-console toont clients die rapporteren. Approval queue toont nieuwe updates. Compliance-rapport toont clients met ontbrekende patches — direct bruikbaar als bevinding.' },
+      { group: "Aanvullend", name: "Hashing tools", file: "CertUtil / Get-FileHash",
+        use: "Hashes berekenen voor bestand-integriteit (verdachte downloads, bewijsstuk).",
+        howHtml: '<ul><li>PowerShell: <code>Get-FileHash -Algorithm SHA256 bestand.exe</code></li><li>cmd: <code>certutil -hashfile bestand.exe SHA256</code></li></ul>',
+        expectHtml: 'SHA256 hash (64 hex chars). Vergelijken met VirusTotal of bekende good/bad-list. Identieke hash = identiek bestand; verschillende hash = bestand gewijzigd.' }
     ];
 
     const W1 = [
@@ -225,9 +253,10 @@
           ] } },
       { id: "w1-analyse", task: "T1", title: "Security analyse",
         desc: "De veiligheidsrisico's zijn gevonden en de impact is goed ingeschat.",
+        link: { text: "Risicomatrix", href: "risicomatrix.html" },
         details: { werkproces: T.W1_T1,
           beoordeeld: "Het onderdeel <strong>Conclusies</strong> uit het Auditrapport (de risicomatrix).",
-          notesHtml: "Vul voor elk risico zowel de <strong>kans</strong> als de <strong>impact</strong> correct in.",
+          notesHtml: "Vul voor elk risico zowel de <strong>kans</strong> als de <strong>impact</strong> correct in. Zie de Risicomatrix-pagina voor uitleg en template.",
           rubric: [
             { lvl: "Niet/nauwelijks", text: "Geen risicomatrix ingevuld of minder dan drie veiligheidsrisico's correct ingeschat op kans en impact." },
             { lvl: "Enigszins",       text: "Drie veiligheidsrisico's zijn correct ingeschat op kans en impact." },
@@ -318,17 +347,19 @@
     }
 
     function renderTool(t) {
-      return '<div class="tool-card">' +
-               '<div class="tool-name">' + escapeHtml(t.name) + '<span class="tool-file">' + escapeHtml(t.file) + '</span></div>' +
-               '<div class="tool-section"><span class="lbl">Wat:</span>' + t.use + '</div>' +
-               '<div class="tool-section"><span class="lbl">Hoe:</span>' + t.howHtml + '</div>' +
-             '</div>';
+      let html = '<div class="tool-card">' +
+        '<div class="tool-name">' + escapeHtml(t.name) + '<span class="tool-file">' + escapeHtml(t.file) + '</span></div>' +
+        '<div class="tool-section"><span class="lbl">Wat:</span>' + t.use + '</div>' +
+        '<div class="tool-section"><span class="lbl">Hoe:</span>' + t.howHtml + '</div>';
+      if (t.expectHtml) {
+        html += '<div class="tool-section expect"><span class="lbl">Verwacht:</span>' + t.expectHtml + '</div>';
+      }
+      html += '</div>';
+      return html;
     }
 
     function renderTools(tools) {
-      // Group by group field
-      const groups = {};
-      const order = [];
+      const groups = {}; const order = [];
       tools.forEach(function (t) {
         const g = t.group || "Tools";
         if (!groups[g]) { groups[g] = []; order.push(g); }
@@ -406,10 +437,7 @@
       document.getElementById("total-count").textContent = ALL.length;
     }
 
-    function toggleItem(id) {
-      if (state[id]) { delete state[id]; } else { state[id] = true; }
-      saveState(state); applyState();
-    }
+    function toggleItem(id) { if (state[id]) { delete state[id]; } else { state[id] = true; } saveState(state); applyState(); }
 
     function togglePanel(item, kind, btn) {
       const panel = item.querySelector('[data-panel="' + kind + '"]');
