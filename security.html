@@ -1,46 +1,244 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Security Exam — Cisco Packet Tracer Reference</title>
-  <meta name="description" content="Security exam reference for Cisco Packet Tracer." />
+  <title>Security Examen — Checklist</title>
+  <meta name="description" content="Interactieve checklist op basis van het beoordelingsformulier P2-K2: Controleert de security." />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e3a8a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3E%26gt;_%3C/text%3E%3C/svg%3E">
+  <style>
+    .security-main { max-width: 1100px; margin: 0 auto; padding: 28px 36px 80px; }
+    .grade-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+    .grade-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .grade-card .label { color: var(--text-muted); font-size: 13px; margin-bottom: 6px; }
+    .grade-card .score { font-size: 16px; font-weight: 600; color: var(--text); }
+    .grade-card .grade { color: var(--primary); font-size: 28px; font-weight: 800; margin-left: 10px; vertical-align: middle; }
+    .criterion {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin: 10px 0;
+      background: var(--surface);
+    }
+    .criterion-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .task-tag {
+      display: inline-block;
+      background: var(--surface-2); color: var(--text-muted);
+      font: 600 12px ui-monospace, Consolas, monospace;
+      padding: 2px 8px; border-radius: 12px; border: 1px solid var(--border);
+    }
+    .criterion strong { font-size: 16px; }
+    .criterion-desc { color: var(--text-muted); margin: 4px 0 10px; }
+    .score-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .score-btn {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-2);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s, color .15s, border-color .15s;
+      text-align: center;
+    }
+    .score-btn:hover { border-color: var(--primary); }
+    .score-btn.selected[data-score="0"] { background: #b91c1c; color: white; border-color: #b91c1c; }
+    .score-btn.selected[data-score="1"] { background: #c2410c; color: white; border-color: #c2410c; }
+    .score-btn.selected[data-score="2"] { background: #b45309; color: white; border-color: #b45309; }
+    .score-btn.selected[data-score="3"] { background: #15803d; color: white; border-color: #15803d; }
+    .reset-btn {
+      margin-top: 12px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .reset-btn:hover { color: var(--text); border-color: var(--primary); }
+    @media (max-width: 700px) {
+      .grade-summary { grid-template-columns: 1fr; }
+      .score-buttons { grid-template-columns: repeat(2, 1fr); }
+      .security-main { padding: 18px 16px 60px; }
+    }
+  </style>
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-left">
-      <h1>Security Exam Reference</h1>
+      <h1>Security Examen</h1>
     </div>
     <nav class="topbar-tabs" aria-label="Sections">
       <a href="index.html" class="tab-btn">Datacom</a>
       <a href="security.html" class="tab-btn active">Security</a>
     </nav>
     <div class="topbar-right">
-      <a class="icon-btn" id="github-link" href="#" title="View on GitHub" aria-label="View on GitHub">★</a>
       <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle theme">🌙</button>
     </div>
   </header>
 
-  <main class="content" style="max-width: 900px; margin: 0 auto;">
+  <main class="security-main">
     <section class="hero">
-      <h2>Security Exam</h2>
-      <p>Content coming soon — this page is a placeholder. Tell Claude what to add and it'll fill in.</p>
+      <h2>Beoordelingsformulier — P2-K2: Controleert de security</h2>
+      <p>Klik per criterium op <strong>0–3</strong>. De punten worden opgeteld en het cijfer wordt automatisch berekend volgens de cijfertabel. Selecties blijven bewaard in deze browser.</p>
+      <div class="grade-summary">
+        <div class="grade-card">
+          <div class="label">W1 · Geeft security advies en verbetert de security</div>
+          <div class="score"><span id="w1-points">0</span> / 12 punten<span class="grade" id="w1-grade">1.0</span></div>
+        </div>
+        <div class="grade-card">
+          <div class="label">W2 · Reageert op security incidenten</div>
+          <div class="score"><span id="w2-points">0</span> / 15 punten<span class="grade" id="w2-grade">1.0</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="category" id="w1-section">
+      <h3>(P2-K2-W1) Geeft security advies en verbetert de security</h3>
+      <p class="blurb">Cruciaal werkproces · 4 criteria · max 12 punten</p>
+      <div id="w1-criteria"></div>
+      <button class="reset-btn" data-reset="w1">Reset W1</button>
+    </section>
+
+    <section class="category" id="w2-section">
+      <h3>(P2-K2-W2) Reageert op security incidenten</h3>
+      <p class="blurb">Cruciaal werkproces · 5 criteria · max 15 punten</p>
+      <div id="w2-criteria"></div>
+      <button class="reset-btn" data-reset="w2">Reset W2</button>
     </section>
   </main>
 
   <script>
-    // Minimal theme toggle so this page behaves like the Datacom one
+    const LABELS = ["0 · Niet of nauwelijks", "1 · Enigszins", "2 · Grotendeels", "3 · Volledig"];
+    const W1_GRADES = [1.0, 1.8, 2.5, 3.3, 4.0, 4.8, 5.5, 6.3, 7.0, 7.8, 8.5, 9.3, 10.0];
+    const W2_GRADES = [1.0, 1.6, 2.2, 2.8, 3.4, 4.0, 4.6, 5.2, 5.8, 6.4, 7.0, 7.6, 8.2, 8.8, 9.4, 10.0];
+
+    const W1 = [
+      { id: "w1-tools",    task: "T1", title: "Tools kiezen",      desc: "De juiste tools zijn gekozen en correct gebruikt." },
+      { id: "w1-comm",     task: "T1", title: "Communicatie",      desc: "De communicatie is helder en duidelijk." },
+      { id: "w1-analyse",  task: "T1", title: "Security analyse",  desc: "De veiligheidsrisico's zijn gevonden en de impact is goed ingeschat." },
+      { id: "w1-verbeter", task: "T2", title: "Verbetervoorstel",  desc: "De verbetervoorstellen zijn goed onderbouwd en haalbaar." }
+    ];
+    const W2 = [
+      { id: "w2-incident",   task: "T1", title: "Security incidenten",                 desc: "De security incidenten zijn correct geanalyseerd en ingedeeld." },
+      { id: "w2-techoplos",  task: "T2", title: "Technische oplossingen doorvoeren",   desc: "De technische aanpassingen zijn correct doorgevoerd." },
+      { id: "w2-avg",        task: "T2", title: "AVG",                                 desc: "De student handelt conform AVG wetgeving." },
+      { id: "w2-logboek",    task: "T3", title: "Logboek bijhouden",                   desc: "De incidenten zijn correct en volledig gedocumenteerd." },
+      { id: "w2-informeren", task: "T4", title: "Informeren",                          desc: "De juiste betrokken personen en, indien van toepassing, instanties zijn op de hoogte gebracht." }
+    ];
+
+    const STORAGE_KEY = "pkt-security-scores-v1";
+    function loadState() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
+      catch (e) { return {}; }
+    }
+    function saveState(s) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) {}
+    }
+    let state = loadState();
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    function render(listId, list) {
+      const el = document.getElementById(listId);
+      el.innerHTML = "";
+      list.forEach(function (c) {
+        const card = document.createElement("div");
+        card.className = "criterion";
+        card.dataset.id = c.id;
+        card.innerHTML =
+          '<div class="criterion-head">' +
+            '<span class="task-tag">' + escapeHtml(c.task) + '</span>' +
+            '<strong>' + escapeHtml(c.title) + '</strong>' +
+          '</div>' +
+          '<p class="criterion-desc">' + escapeHtml(c.desc) + '</p>' +
+          '<div class="score-buttons" role="radiogroup" aria-label="Score voor ' + escapeHtml(c.title) + '">' +
+            LABELS.map(function (label, i) {
+              return '<button type="button" class="score-btn" data-score="' + i + '">' + escapeHtml(label) + '</button>';
+            }).join("") +
+          '</div>';
+        el.appendChild(card);
+      });
+    }
+
+    function applyState() {
+      document.querySelectorAll(".criterion").forEach(function (card) {
+        const id = card.dataset.id;
+        const sel = state[id];
+        card.querySelectorAll(".score-btn").forEach(function (btn) {
+          btn.classList.toggle("selected", parseInt(btn.dataset.score, 10) === sel);
+        });
+      });
+      updateTotals();
+    }
+
+    function updateTotals() {
+      const w1 = W1.reduce(function (sum, c) { return sum + (typeof state[c.id] === "number" ? state[c.id] : 0); }, 0);
+      const w2 = W2.reduce(function (sum, c) { return sum + (typeof state[c.id] === "number" ? state[c.id] : 0); }, 0);
+      document.getElementById("w1-points").textContent = w1;
+      document.getElementById("w2-points").textContent = w2;
+      document.getElementById("w1-grade").textContent = W1_GRADES[w1].toFixed(1);
+      document.getElementById("w2-grade").textContent = W2_GRADES[w2].toFixed(1);
+    }
+
+    function onClick(e) {
+      const btn = e.target.closest && e.target.closest(".score-btn");
+      if (btn) {
+        const card = btn.closest(".criterion");
+        const id = card.dataset.id;
+        const score = parseInt(btn.dataset.score, 10);
+        if (state[id] === score) {
+          delete state[id];
+        } else {
+          state[id] = score;
+        }
+        saveState(state);
+        applyState();
+        return;
+      }
+      const reset = e.target.closest && e.target.closest(".reset-btn");
+      if (reset) {
+        const which = reset.dataset.reset;
+        const list = which === "w1" ? W1 : W2;
+        list.forEach(function (c) { delete state[c.id]; });
+        saveState(state);
+        applyState();
+      }
+    }
+
+    render("w1-criteria", W1);
+    render("w2-criteria", W2);
+    applyState();
+    document.addEventListener("click", onClick);
+
+    // Theme toggle
     (function () {
-      var saved = localStorage.getItem('theme');
-      if (saved) document.documentElement.setAttribute('data-theme', saved);
-      var btn = document.getElementById('theme-toggle');
-      if (btn) btn.addEventListener('click', function () {
-        var cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', cur);
-        localStorage.setItem('theme', cur);
-        btn.textContent = cur === 'dark' ? '☀️' : '🌙';
+      const saved = localStorage.getItem("theme");
+      if (saved) document.documentElement.setAttribute("data-theme", saved);
+      const btn = document.getElementById("theme-toggle");
+      if (!btn) return;
+      function paintIcon() {
+        const dark = document.documentElement.getAttribute("data-theme") === "dark";
+        btn.textContent = dark ? "☀️" : "🌙";
+      }
+      paintIcon();
+      btn.addEventListener("click", function () {
+        const cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", cur);
+        localStorage.setItem("theme", cur);
+        paintIcon();
       });
     })();
   </script>
