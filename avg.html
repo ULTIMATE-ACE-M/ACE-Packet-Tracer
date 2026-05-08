@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AVG — Examenstof Security</title>
+  <meta name="description" content="AVG-regels die belangrijk zijn voor het IT-security examen P2-K2." />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e3a8a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3E%26gt;_%3C/text%3E%3C/svg%3E">
+  <style>
+    .avg-main { max-width: 950px; margin: 0 auto; padding: 28px 36px 80px; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: var(--text-muted); text-decoration: none;
+      font-size: 14px; margin-bottom: 12px;
+    }
+    .back-link:hover { color: var(--primary); }
+    .rule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      box-shadow: var(--shadow);
+    }
+    .rule-card h3 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      display: flex; align-items: center; gap: 10px;
+      flex-wrap: wrap;
+    }
+    .article-tag {
+      display: inline-block;
+      background: var(--primary); color: white;
+      font: 600 12px ui-monospace, Consolas, monospace;
+      padding: 2px 8px; border-radius: 12px;
+    }
+    .rule-card p { margin: 6px 0; }
+    .rule-card ul { margin: 6px 0; padding-left: 22px; }
+    .rule-card li { margin: 4px 0; }
+    .rule-card .lead {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .callout {
+      background: var(--surface-2);
+      border-left: 4px solid var(--accent);
+      padding: 10px 14px;
+      border-radius: 0 6px 6px 0;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+    .callout.danger { border-left-color: #b91c1c; }
+    .callout.success { border-left-color: #15803d; }
+    .key {
+      background: #fef9c3;
+      color: #1a202c;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+    [data-theme="dark"] .key { background: #92400e; color: #fef9c3; }
+    code { font: 13px ui-monospace, Consolas, monospace; background: var(--surface-2); padding: 1px 6px; border-radius: 3px; }
+    .toc {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin: 16px 0 24px;
+    }
+    .toc strong { display: block; margin-bottom: 6px; color: var(--text); }
+    .toc ol { margin: 0; padding-left: 22px; }
+    .toc a { color: var(--text-muted); text-decoration: none; }
+    .toc a:hover { color: var(--primary); }
+    h2.section-h { font-size: 22px; margin: 28px 0 4px; scroll-margin-top: 80px; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>AVG — Examenstof</h1>
+    </div>
+    <nav class="topbar-tabs" aria-label="Sections">
+      <a href="index.html" class="tab-btn">Datacom</a>
+      <a href="security.html" class="tab-btn active">Security</a>
+    </nav>
+    <div class="topbar-right">
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <main class="avg-main">
+    <a class="back-link" href="security.html">&larr; Terug naar checklist</a>
+    <section class="hero">
+      <h2>AVG — wat moet je weten voor het examen</h2>
+      <p>AVG = <strong>Algemene Verordening Gegevensbescherming</strong> (Engels: GDPR). Geldt sinds 25 mei 2018 voor alle organisaties die persoonsgegevens van EU-burgers verwerken. Toezichthouder in Nederland: <strong>Autoriteit Persoonsgegevens (AP)</strong>.</p>
+    </section>
+
+    <div class="toc">
+      <strong>Inhoud</strong>
+      <ol>
+        <li><a href="#persoonsgegevens">Wat zijn persoonsgegevens?</a></li>
+        <li><a href="#beginselen">6 grondbeginselen (artikel 5)</a></li>
+        <li><a href="#beveiliging">Passende beveiligingsmaatregelen (artikel 32)</a></li>
+        <li><a href="#datalek">Datalek &amp; meldplicht (artikel 33-34)</a></li>
+        <li><a href="#rechten">Rechten van betrokkenen (artikel 15-22)</a></li>
+        <li><a href="#rollen">Verwerkingsverantwoordelijke vs verwerker</a></li>
+        <li><a href="#dpia-dpo">DPIA &amp; DPO</a></li>
+        <li><a href="#boetes">Boetes</a></li>
+        <li><a href="#exam-tips">Examen-tips voor incident response</a></li>
+      </ol>
+    </div>
+
+    <h2 class="section-h" id="persoonsgegevens">1 · Wat zijn persoonsgegevens?</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 4</span> Definitie</h3>
+      <p class="lead">Alle informatie waarmee je een natuurlijke persoon direct of indirect kunt identificeren.</p>
+      <p><strong>Voorbeelden gewone persoonsgegevens:</strong></p>
+      <ul>
+        <li>Naam, adres, e-mail, telefoonnummer</li>
+        <li>IP-adres, MAC-adres, cookies, device-ID</li>
+        <li>Foto, video, stemopname</li>
+        <li>Werknemers-ID, klantnummer, IBAN</li>
+      </ul>
+      <p><strong>Bijzondere persoonsgegevens (extra streng beschermd, artikel 9):</strong></p>
+      <ul>
+        <li>Gezondheidsgegevens (medisch dossier, ziekteverzuim)</li>
+        <li>Ras, etnische afkomst</li>
+        <li>Politieke voorkeur, religie, vakbond</li>
+        <li>Seksuele geaardheid</li>
+        <li>Biometrische gegevens (vingerafdruk, gezichtsherkenning)</li>
+        <li>Strafrechtelijk verleden</li>
+      </ul>
+      <p><strong>BSN</strong> is geen "bijzonder" persoonsgegeven volgens AVG, maar valt in NL onder een aparte wet — alleen gebruiken als de wet het verplicht (zorg, belasting, onderwijs).</p>
+    </div>
+
+    <h2 class="section-h" id="beginselen">2 · 6 grondbeginselen (artikel 5)</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 5</span> Hoe moet je persoonsgegevens verwerken?</h3>
+      <ol>
+        <li><strong>Rechtmatig, behoorlijk en transparant</strong> — er moet een geldige <em>grondslag</em> zijn (toestemming, overeenkomst, wettelijke plicht, vitaal belang, taak van algemeen belang of gerechtvaardigd belang) en de betrokkene moet weten wat je doet.</li>
+        <li><strong>Doelbinding</strong> — alleen verzamelen voor een vooraf bepaald, duidelijk doel; niet later voor iets anders gebruiken.</li>
+        <li><strong>Minimale gegevensverwerking</strong> — niet meer gegevens dan nodig voor dat doel.</li>
+        <li><strong>Juistheid</strong> — gegevens moeten kloppen en up-to-date zijn; onjuiste data corrigeren of wissen.</li>
+        <li><strong>Opslagbeperking</strong> — niet langer bewaren dan nodig; bewaartermijnen vastleggen.</li>
+        <li><strong>Integriteit en vertrouwelijkheid</strong> &mdash; <span class="key">passende beveiliging</span>, dit is het security-onderdeel van AVG.</li>
+      </ol>
+    </div>
+
+    <h2 class="section-h" id="beveiliging">3 · Passende beveiligingsmaatregelen (artikel 32)</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 32</span> Technische &amp; organisatorische maatregelen</h3>
+      <p>Je moet passende maatregelen nemen om persoonsgegevens te beschermen tegen verlies, diefstal, ongeoorloofde toegang of vernietiging. Wat "passend" is hangt af van risico, kosten en stand van de techniek.</p>
+      <p><strong>Technische maatregelen (de IT-kant — vaak gevraagd op het examen):</strong></p>
+      <ul>
+        <li><strong>Encryptie</strong> — at rest (BitLocker, full-disk encryption) en in transit (TLS/HTTPS, VPN).</li>
+        <li><strong>Pseudonimisering</strong> — vervang directe identifiers door tokens (bv. user-ID i.p.v. naam in logs).</li>
+        <li><strong>Toegangscontrole</strong> — least privilege, RBAC, MFA, sterke wachtwoorden.</li>
+        <li><strong>Patch-management</strong> — OS en software up-to-date houden (denk MBSA/Nessus-scans).</li>
+        <li><strong>Logging &amp; monitoring</strong> — audit trail van wie wat wanneer deed.</li>
+        <li><strong>Backup &amp; herstel</strong> — periodieke backups + getest restore-proces.</li>
+        <li><strong>Netwerksegmentatie en firewalls</strong>.</li>
+        <li><strong>Antivirus / EDR</strong> en endpoint hardening.</li>
+      </ul>
+      <p><strong>Organisatorische maatregelen:</strong></p>
+      <ul>
+        <li>Bewerkersovereenkomsten met leveranciers</li>
+        <li>Awareness-training voor medewerkers</li>
+        <li>Clean-desk policy, screen-lock policy</li>
+        <li>Incident-response procedure</li>
+        <li>Periodieke security-audit / pentest</li>
+      </ul>
+    </div>
+
+    <h2 class="section-h" id="datalek">4 · Datalek &amp; meldplicht (artikel 33-34)</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 4 lid 12</span> Wat is een datalek?</h3>
+      <p class="lead">Een inbreuk op de beveiliging waardoor persoonsgegevens verloren gaan, gewijzigd worden of in handen komen van onbevoegden — per ongeluk of door kwade opzet.</p>
+      <p><strong>Voorbeelden van datalekken:</strong></p>
+      <ul>
+        <li>Verloren of gestolen laptop/USB-stick met persoonsgegevens</li>
+        <li>Mailtje per ongeluk naar verkeerde ontvanger (CC i.p.v. BCC bij grote groep)</li>
+        <li>Ransomware-aanval op bestanden met persoonsgegevens</li>
+        <li>Onbevoegde collega toegang gegeven tot HR-systeem</li>
+        <li>Database publiek toegankelijk door verkeerde firewall-config</li>
+        <li>Phishing-aanval waarbij accountgegevens uitlekken</li>
+      </ul>
+    </div>
+
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 33</span> Meldplicht aan Autoriteit Persoonsgegevens</h3>
+      <div class="callout danger">
+        <strong>72-uur-regel</strong> — een datalek moet <span class="key">binnen 72 uur na ontdekking</span> gemeld worden bij de Autoriteit Persoonsgegevens via <code>autoriteitpersoonsgegevens.nl</code>, tenzij het waarschijnlijk geen risico oplevert voor betrokkenen.
+      </div>
+      <p><strong>Wat staat er in de melding?</strong></p>
+      <ul>
+        <li>Aard van de inbreuk (wat is er gebeurd)</li>
+        <li>Categorieën en geschat aantal betrokkenen</li>
+        <li>Categorieën en aantal records</li>
+        <li>Waarschijnlijke gevolgen</li>
+        <li>Genomen of voorgestelde maatregelen</li>
+        <li>Contactgegevens van de FG/DPO of contactpersoon</li>
+      </ul>
+    </div>
+
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 34</span> Melden aan de betrokkenen</h3>
+      <p>Bij een <strong>hoog risico</strong> voor de rechten en vrijheden van betrokkenen moet je ze <em>ook zelf</em> informeren — in begrijpelijke taal en zonder onnodige vertraging.</p>
+      <p><strong>Hoog risico = bijvoorbeeld:</strong></p>
+      <ul>
+        <li>Bijzondere persoonsgegevens uitgelekt (medisch, BSN, financieel)</li>
+        <li>Identiteitsfraude of financiële schade mogelijk</li>
+        <li>Inloggegevens / wachtwoorden in onbevoegde handen</li>
+      </ul>
+      <p><strong>Niet nodig om betrokkenen te informeren als:</strong> de gegevens versleuteld waren, je de risico's hebt afgewend, of het de betrokkenen onevenredig veel moeite zou kosten (dan publiek bericht).</p>
+    </div>
+
+    <div class="rule-card">
+      <h3>Logboek bijhouden</h3>
+      <p>Elke organisatie moet een <strong>intern incidentenregister</strong> bijhouden van <em>alle</em> datalekken — ook degene die níet gemeld zijn. Dit is een AP-vereiste en koppelt direct aan het examen-criterium "Logboek bijhouden".</p>
+      <p>In het register noteer je per incident: datum &amp; tijd, ontdekker, beschrijving, aantal &amp; type betrokkenen, oorzaak, genomen maatregelen, of er gemeld is en wanneer.</p>
+    </div>
+
+    <h2 class="section-h" id="rechten">5 · Rechten van betrokkenen (artikel 15-22)</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 15-22</span> Wat mag een betrokkene vragen?</h3>
+      <ul>
+        <li><strong>Inzagerecht (15)</strong> — kopie opvragen van wat je over hem opslaat.</li>
+        <li><strong>Rectificatie (16)</strong> — onjuiste gegevens laten corrigeren.</li>
+        <li><strong>Vergetelheid (17)</strong> — gegevens laten wissen als ze niet meer nodig zijn of de toestemming wordt ingetrokken.</li>
+        <li><strong>Beperking van verwerking (18)</strong> — gegevens "op pauze" zetten tijdens een geschil.</li>
+        <li><strong>Dataportabiliteit (20)</strong> — gegevens in machineleesbaar formaat (CSV/JSON) meenemen naar een andere dienst.</li>
+        <li><strong>Bezwaar (21)</strong> — bezwaar maken tegen verwerking, met name voor direct marketing.</li>
+        <li><strong>Niet onderworpen aan geautomatiseerde besluitvorming (22)</strong> — geen volledig automatisch genomen beslissingen met grote impact.</li>
+      </ul>
+      <p>Reageren binnen <span class="key">één maand</span> (bij complexe verzoeken te verlengen met 2 maanden, mits gemotiveerd).</p>
+    </div>
+
+    <h2 class="section-h" id="rollen">6 · Verwerkingsverantwoordelijke vs verwerker</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 4 lid 7-8</span> Twee rollen</h3>
+      <ul>
+        <li><strong>Verwerkingsverantwoordelijke</strong> — bepaalt het doel en de middelen van de verwerking (bv. de werkgever die HR-data bijhoudt).</li>
+        <li><strong>Verwerker</strong> — verwerkt persoonsgegevens namens een ander (bv. een SaaS-leverancier of cloud-provider).</li>
+      </ul>
+      <p>Tussen verantwoordelijke en verwerker is een <strong>verwerkersovereenkomst</strong> verplicht (artikel 28).</p>
+    </div>
+
+    <h2 class="section-h" id="dpia-dpo">7 · DPIA &amp; DPO</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 35</span> DPIA — Data Protection Impact Assessment</h3>
+      <p>Een verplichte risicoanalyse vooraf voor verwerkingen met <strong>hoog risico</strong>: bv. grootschalige bijzondere persoonsgegevens, systematisch monitoren van openbare ruimte, of profiling met grote impact.</p>
+    </div>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 37</span> DPO — Functionaris voor Gegevensbescherming</h3>
+      <p>Verplicht voor overheidsorganisaties, organisaties die op grote schaal volgen of grote schaal bijzondere persoonsgegevens verwerken (ziekenhuizen, verzekeraars, etc.). De DPO is intern aanspreekpunt en houdt toezicht op AVG-compliance.</p>
+    </div>
+
+    <h2 class="section-h" id="boetes">8 · Boetes</h2>
+    <div class="rule-card">
+      <h3><span class="article-tag">Art. 83</span> Maximale boetes</h3>
+      <ul>
+        <li><strong>Tot &euro;10 mln of 2% van wereldwijde jaaromzet</strong> (de hoogste van de twee) — voor lichte schendingen (bv. geen DPO, geen verwerkersovereenkomst).</li>
+        <li><strong>Tot &euro;20 mln of 4% van wereldwijde jaaromzet</strong> — voor zware schendingen (bv. gegevens zonder grondslag, rechten van betrokkenen schenden, geen passende beveiliging).</li>
+      </ul>
+    </div>
+
+    <h2 class="section-h" id="exam-tips">9 · Examen-tips voor incident response</h2>
+    <div class="rule-card">
+      <h3>Stappen bij een vermoedelijk datalek</h3>
+      <ol>
+        <li><strong>Detecteren &amp; vaststellen</strong> — is het echt een datalek? (persoonsgegevens betrokken?)</li>
+        <li><strong>Inperken</strong> — schakel het lek uit (account blokkeren, systeem isoleren, patchen).</li>
+        <li><strong>Documenteren</strong> — neem op in het incidentenregister vanaf moment van ontdekking.</li>
+        <li><strong>Risico inschatten</strong> — laag, midden of hoog risico voor betrokkenen?</li>
+        <li><strong>Melden aan AP</strong> binnen 72 uur als er waarschijnlijk risico is.</li>
+        <li><strong>Betrokkenen informeren</strong> bij hoog risico (artikel 34).</li>
+        <li><strong>Maatregelen nemen</strong> om herhaling te voorkomen (verbetervoorstel — koppelt aan W1!).</li>
+        <li><strong>Evalueren</strong> en proces aanpassen.</li>
+      </ol>
+      <div class="callout success">
+        <strong>Onthoud op het examen:</strong> noem altijd <span class="key">72 uur</span>, <span class="key">Autoriteit Persoonsgegevens</span>, <span class="key">incidentenregister</span>, en <span class="key">passende technische &amp; organisatorische maatregelen (artikel 32)</span>. Dat zijn de termen waar de beoordelaar op let.
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Theme toggle
+    (function () {
+      const saved = localStorage.getItem("theme");
+      if (saved) document.documentElement.setAttribute("data-theme", saved);
+      const btn = document.getElementById("theme-toggle");
+      if (!btn) return;
+      function paintIcon() {
+        const dark = document.documentElement.getAttribute("data-theme") === "dark";
+        btn.textContent = dark ? "☀️" : "🌙";
+      }
+      paintIcon();
+      btn.addEventListener("click", function () {
+        const cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", cur);
+        localStorage.setItem("theme", cur);
+        paintIcon();
+      });
+    })();
+  </script>
+</body>
+</html>
