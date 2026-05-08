@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Woordenboek — ICT naar Management</title>
+  <meta name="description" content="Vertaalwoordenboek van technische ICT-termen naar managementtaal voor het IT-security examen." />
+  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e3a8a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3E%26gt;_%3C/text%3E%3C/svg%3E">
+  <style>
+    .wb-main { max-width: 1100px; margin: 0 auto; padding: 28px 36px 80px; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); text-decoration: none; font-size: 14px; margin-bottom: 12px; }
+    .back-link:hover { color: var(--primary); }
+
+    .wb-search {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 15px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      margin: 16px 0 8px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .wb-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(96,165,250,0.25); }
+    .wb-stats { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+
+    .wb-cat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 14px 0;
+      box-shadow: var(--shadow);
+    }
+    .wb-cat h3 { margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; gap: 10px; }
+    .wb-cat .cnt { color: var(--text-muted); font-size: 12px; font-weight: 500; }
+
+    .wb-row {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 14px;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+    .wb-row:first-of-type { border-top: none; }
+    .wb-row.hidden { display: none; }
+    .wb-cat.hidden { display: none; }
+    .wb-term { font-weight: 700; color: var(--primary); font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; }
+    .wb-term .alt { color: var(--text-muted); font-weight: 500; font-size: 12px; display: block; margin-top: 2px; }
+    .wb-trans { color: var(--text); }
+    .wb-example { display: block; margin-top: 4px; color: var(--text-muted); font-size: 13px; font-style: italic; padding-left: 10px; border-left: 2px solid var(--border); }
+    @media (max-width: 700px) {
+      .wb-row { grid-template-columns: 1fr; gap: 4px; }
+    }
+
+    mark { background: var(--hl); color: inherit; padding: 0 2px; border-radius: 3px; }
+
+    .tip { background: var(--surface-2); border-left: 4px solid var(--accent); padding: 10px 14px; border-radius: 0 6px 6px 0; margin: 10px 0; font-size: 14px; }
+    .tip.success { border-left-color: #15803d; }
+    .tip.danger { border-left-color: #b91c1c; }
+
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 10px 0;
+    }
+    .compare > div {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+    .compare .bad { border-left: 4px solid #b91c1c; }
+    .compare .good { border-left: 4px solid #15803d; }
+    .compare strong { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+    .compare .bad strong { color: #b91c1c; }
+    .compare .good strong { color: #15803d; }
+    [data-theme="dark"] .compare .good strong { color: #4ade80; }
+    @media (max-width: 600px) {
+      .compare { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-left"><h1>Woordenboek &mdash; ICT &rarr; Management</h1></div>
+    <nav class="topbar-tabs" aria-label="Sections">
+      <a href="index.html" class="tab-btn">Datacom</a>
+      <a href="security.html" class="tab-btn active">Security</a>
+    </nav>
+    <div class="topbar-right">
+      <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode" title="Toggle theme">🌙</button>
+    </div>
+  </header>
+
+  <main class="wb-main">
+    <a class="back-link" href="security.html">&larr; Terug naar checklist</a>
+
+    <section class="hero">
+      <h2>Vertaalwoordenboek voor je managementsamenvatting</h2>
+      <p>Het criterium <strong>Communicatie</strong> beoordeelt of je rapport <em>op managementniveau, kort, gestructureerd, geen technisch verhaal</em> is geschreven. Vertaal je technische bevindingen met onderstaande termen.</p>
+    </section>
+
+    <input class="wb-search" id="wb-search" type="search" placeholder="Zoek een term (bv. 'phishing', 'patch', 'hash')…" autocomplete="off" />
+    <div class="wb-stats" id="wb-stats">&nbsp;</div>
+
+    <section class="wb-cat" data-cat="tips">
+      <h3>Vertaal-tips voor de Managementsamenvatting</h3>
+      <p class="tip success"><strong>Drie regels:</strong> 1) Beschrijf <em>impact</em>, niet techniek. 2) Gebruik bedragen, klanten, downtime, reputatie &mdash; niet packets/CVE-nummers. 3) Maximaal één pagina, opbouw: situatie &rarr; risico &rarr; advies.</p>
+      <div class="compare">
+        <div class="bad">
+          <strong>Te technisch</strong>
+          We hebben EternalBlue (MS17-010) op SRV001 gedetecteerd via een TCP/445 SMBv1 banner-grab.
+        </div>
+        <div class="good">
+          <strong>Managementtaal</strong>
+          De server SRV001 heeft een verouderde Windows-versie waardoor ransomware kan binnenkomen. Dit risico is in 2017 misbruikt door WannaCry, dat wereldwijd voor miljarden schade zorgde.
+        </div>
+      </div>
+      <div class="compare">
+        <div class="bad">
+          <strong>Te technisch</strong>
+          De TLS-config gebruikt RC4 en SHA-1 in de cipher suite, wat MITM-aanvallen mogelijk maakt.
+        </div>
+        <div class="good">
+          <strong>Managementtaal</strong>
+          De website gebruikt verouderde versleuteling. Een aanvaller kan op een openbaar wifi-netwerk de wachtwoorden van klanten meelezen.
+        </div>
+      </div>
+      <div class="compare">
+        <div class="bad">
+          <strong>Te technisch</strong>
+          Account lockout policy ontbreekt; brute-force op SMB/RDP is ongelimiteerd mogelijk.
+        </div>
+        <div class="good">
+          <strong>Managementtaal</strong>
+          Er is geen automatische blokkade als iemand vaak het verkeerde wachtwoord intoetst. Daardoor kunnen aanvallers wachtwoorden ongelimiteerd raden.
+        </div>
+      </div>
+    </section>
+
+    <div id="wb-list"></div>
+  </main>
+
+  <script>
+    const DICT = [
+      { cat: "Aanvallen & bedreigingen", entries: [
+        { term: "Vulnerability / kwetsbaarheid",
+          trans: "Een zwakke plek in software of configuratie waarlangs een aanvaller binnen kan komen.",
+          example: "Op SRV001 zijn 6 zwakke plekken aangetroffen die direct misbruikt kunnen worden." },
+        { term: "CVE",
+          trans: "Officieel geregistreerde, wereldwijd bekende kwetsbaarheid in software, met een uniek nummer.",
+          example: "" },
+        { term: "Exploit",
+          trans: "Een methode of stuk code waarmee een aanvaller een kwetsbaarheid daadwerkelijk misbruikt.",
+          example: "" },
+        { term: "Zero-day / 0-day",
+          trans: "Een kwetsbaarheid waar nog geen update voor bestaat &mdash; extra risicovol omdat er nog geen oplossing is.",
+          example: "" },
+        { term: "Patch / hotfix / update",
+          trans: "Een software-update die een gevonden kwetsbaarheid repareert.",
+          example: "Door het systeem twee maanden niet bij te werken zijn 14 beveiligingsupdates gemist." },
+        { term: "Brute-force",
+          trans: "Wachtwoorden raden door miljoenen combinaties te proberen. Lukt makkelijk als er geen blokkade is.",
+          example: "" },
+        { term: "Credential stuffing",
+          trans: "Inloggegevens uit een eerder datalek hergebruiken op andere websites.",
+          example: "" },
+        { term: "Man-in-the-middle (MITM)",
+          trans: "Een aanvaller die ongemerkt het verkeer tussen twee partijen meeleest of wijzigt.",
+          example: "" },
+        { term: "DoS / DDoS",
+          trans: "Aanval die een dienst onbereikbaar maakt door overbelasting (DDoS = vanaf veel computers tegelijk).",
+          example: "Een DDoS van een uur kost gemiddeld &euro;X aan gemiste omzet." },
+        { term: "SQL-injection",
+          trans: "Aanvaller voert ongeautoriseerde database-opdrachten uit via een onveilig invoerveld op de website.",
+          example: "" },
+        { term: "XSS / Cross-site scripting",
+          trans: "Aanvaller injecteert kwaadaardige scripts in een website om bezoekers te treffen.",
+          example: "" },
+        { term: "Privilege escalation",
+          trans: "Een aanvaller verhoogt zijn rechten op een systeem &mdash; bijvoorbeeld van gewone gebruiker naar beheerder.",
+          example: "" },
+        { term: "Lateral movement",
+          trans: "Aanvaller beweegt vanaf het eerste gehackte systeem naar andere systemen in het netwerk.",
+          example: "" },
+        { term: "Social engineering",
+          trans: "Mensen psychologisch manipuleren om informatie of toegang te ontfutselen.",
+          example: "" },
+        { term: "IOC / Indicator of Compromise",
+          trans: "Aanwijzing dat een systeem mogelijk is gehackt &mdash; zoals onbekende processen of vreemde uitgaande verbindingen.",
+          example: "" }
+      ]},
+      { cat: "Soorten malware", entries: [
+        { term: "Malware",
+          trans: "Verzamelnaam voor alle kwaadaardige software (virussen, ransomware, spyware enz.).",
+          example: "" },
+        { term: "Ransomware",
+          trans: "Software die alle bestanden versleutelt en losgeld eist om ze terug te krijgen. Veroorzaakt vaak dagen tot weken bedrijfsstilstand.",
+          example: "" },
+        { term: "Trojan / Trojaans paard",
+          trans: "Programma dat zich voordoet als nuttig maar in werkelijkheid kwaadaardig is.",
+          example: "" },
+        { term: "Spyware",
+          trans: "Software die ongemerkt informatie verzamelt en doorstuurt naar de aanvaller.",
+          example: "" },
+        { term: "Rootkit",
+          trans: "Geavanceerde malware die zich diep in het besturingssysteem verstopt en moeilijk te verwijderen is.",
+          example: "" },
+        { term: "Backdoor",
+          trans: "Verborgen toegangspoort waarmee een aanvaller later opnieuw binnen kan komen.",
+          example: "" },
+        { term: "Worm",
+          trans: "Malware die zichzelf automatisch verspreidt over het netwerk.",
+          example: "" },
+        { term: "Botnet",
+          trans: "Groot netwerk van geïnfecteerde computers die door één aanvaller worden aangestuurd.",
+          example: "" },
+        { term: "C2 / Command-and-Control",
+          trans: "Server waarmee de aanvaller geïnfecteerde machines aanstuurt.",
+          example: "" }
+      ]},
+      { cat: "Phishing & social engineering", entries: [
+        { term: "Phishing",
+          trans: "Misleidende mail of bericht om wachtwoorden, geld of toegang te ontfutselen.",
+          example: "" },
+        { term: "Spear phishing",
+          trans: "Phishing gericht op specifieke personen, met persoonlijke details om geloofwaardiger te zijn.",
+          example: "" },
+        { term: "Whaling",
+          trans: "Phishing gericht op directie of bestuurders.",
+          example: "" },
+        { term: "Smishing",
+          trans: "Phishing via sms.",
+          example: "" },
+        { term: "Vishing",
+          trans: "Phishing via de telefoon.",
+          example: "" },
+        { term: "CEO-fraude",
+          trans: "Aanvaller doet zich voor als de directeur en vraagt een spoedoverboeking.",
+          example: "" }
+      ]},
+      { cat: "Security-concepten", entries: [
+        { term: "CIA-triade",
+          trans: "De drie pijlers van security: Vertrouwelijkheid, Integriteit en Beschikbaarheid.",
+          example: "" },
+        { term: "Confidentiality",
+          trans: "Vertrouwelijkheid &mdash; alleen bevoegde personen kunnen de informatie inzien.",
+          example: "" },
+        { term: "Integrity",
+          trans: "Integriteit &mdash; data klopt en is niet ongemerkt gewijzigd.",
+          example: "" },
+        { term: "Availability",
+          trans: "Beschikbaarheid &mdash; systemen en data zijn bereikbaar wanneer ze nodig zijn.",
+          example: "" },
+        { term: "Defense in depth",
+          trans: "Meerdere beveiligingslagen, zodat als één laag faalt de volgende het opvangt.",
+          example: "" },
+        { term: "Least privilege",
+          trans: "Iedereen krijgt alleen die rechten die strikt nodig zijn voor zijn werk.",
+          example: "" },
+        { term: "Zero trust",
+          trans: "Geen enkele gebruiker of apparaat wordt automatisch vertrouwd &mdash; elke toegang wordt gecontroleerd.",
+          example: "" },
+        { term: "Hardening",
+          trans: "Een systeem extra dichtzetten door onnodige functies uit te schakelen en beveiliging strakker te configureren.",
+          example: "" },
+        { term: "Baseline",
+          trans: "De vastgelegde, gewenste veilige configuratie waar tegen gemeten wordt.",
+          example: "" }
+      ]},
+      { cat: "Authenticatie & toegang", entries: [
+        { term: "Authenticatie",
+          trans: "Aantonen wie je bent (bv. met wachtwoord + sms-code).",
+          example: "" },
+        { term: "Autorisatie",
+          trans: "Bepalen wat je mag doen nadat je bent ingelogd.",
+          example: "" },
+        { term: "MFA / 2FA",
+          trans: "Inloggen met meerdere bewijzen tegelijk &mdash; bijvoorbeeld wachtwoord + sms-code of vingerafdruk.",
+          example: "Door MFA in te voeren wordt 99% van de inlog-aanvallen tegengehouden." },
+        { term: "SSO / Single Sign-On",
+          trans: "Eenmalig inloggen, daarna automatisch toegang tot meerdere systemen.",
+          example: "" },
+        { term: "RBAC / Role-Based Access Control",
+          trans: "Toegangsrechten toekennen op basis van iemands rol in de organisatie.",
+          example: "" },
+        { term: "Privileged account",
+          trans: "Account met verhoogde rechten &mdash; een beheerders- of admin-account.",
+          example: "" },
+        { term: "Service account",
+          trans: "Account waarmee een dienst draait, geen mens.",
+          example: "" }
+      ]},
+      { cat: "Netwerk & infrastructuur", entries: [
+        { term: "Firewall",
+          trans: "Filter die alleen toegestaan netwerkverkeer doorlaat &mdash; als een digitale poortwachter.",
+          example: "" },
+        { term: "DMZ / DeMilitarized Zone",
+          trans: "Afgeschermde netwerk-zone voor servers die vanaf internet bereikbaar moeten zijn.",
+          example: "" },
+        { term: "WAF / Web Application Firewall",
+          trans: "Firewall speciaal voor websites en webapplicaties.",
+          example: "" },
+        { term: "IDS / Intrusion Detection System",
+          trans: "Systeem dat aanvallen detecteert en alarm slaat.",
+          example: "" },
+        { term: "IPS / Intrusion Prevention System",
+          trans: "Systeem dat aanvallen actief blokkeert.",
+          example: "" },
+        { term: "VPN",
+          trans: "Versleutelde verbinding over internet die het lijkt alsof je in het bedrijfsnetwerk zit.",
+          example: "" },
+        { term: "Poort / port",
+          trans: "Logisch toegangspunt op een server. Te zien als een deur (poort 443 = HTTPS, poort 3389 = RDP).",
+          example: "" },
+        { term: "Network segmentation",
+          trans: "Het netwerk opdelen in zones, zodat een aanvaller bij een inbraak niet vrij kan rondbewegen.",
+          example: "" },
+        { term: "VLAN",
+          trans: "Apart logisch netwerk binnen hetzelfde fysieke netwerk.",
+          example: "" },
+        { term: "DNS",
+          trans: "Telefoonboek van internet &mdash; vertaalt domeinnamen naar IP-adressen.",
+          example: "" }
+      ]},
+      { cat: "Versleuteling & privacy", entries: [
+        { term: "Encryptie / versleuteling",
+          trans: "Data omzetten naar onleesbare vorm voor onbevoegden, alleen met de juiste sleutel weer leesbaar.",
+          example: "" },
+        { term: "TLS / SSL / HTTPS",
+          trans: "Standaard versleuteling voor netwerkverkeer en websites &mdash; het slotje in de browser.",
+          example: "" },
+        { term: "Hash",
+          trans: "Unieke digitale vingerafdruk van een bestand, om te controleren of het ongewijzigd is.",
+          example: "" },
+        { term: "Salt",
+          trans: "Extra willekeurige toevoeging aan een wachtwoord-hash om kraken moeilijker te maken.",
+          example: "" },
+        { term: "Pseudonimisering",
+          trans: "Persoonsgegevens vervangen door een code, zodat ze niet direct herleidbaar zijn naar een persoon.",
+          example: "" },
+        { term: "Anonimisering",
+          trans: "Persoonsgegevens onomkeerbaar onherkenbaar maken &mdash; ze zijn niet meer te herleiden.",
+          example: "" },
+        { term: "BitLocker / Full-disk encryption",
+          trans: "Volledige harde schijf versleutelen, zodat data bij diefstal van het apparaat niet leesbaar is.",
+          example: "" },
+        { term: "PKI / Public Key Infrastructure",
+          trans: "Systeem van digitale certificaten en sleutels dat veilig communicatie en identiteit garandeert.",
+          example: "" }
+      ]},
+      { cat: "Risico, wetgeving & compliance", entries: [
+        { term: "Risk = Kans × Impact",
+          trans: "Risico bepaal je door de kans dat het gebeurt te vermenigvuldigen met de schade als het gebeurt.",
+          example: "" },
+        { term: "Threat / dreiging",
+          trans: "Een mogelijke gebeurtenis die schade kan veroorzaken.",
+          example: "" },
+        { term: "Risk acceptance",
+          trans: "Bewust besluiten een risico te accepteren in plaats van het te beperken.",
+          example: "" },
+        { term: "Risk mitigation",
+          trans: "Maatregelen nemen om de kans of impact van een risico te verkleinen.",
+          example: "" },
+        { term: "Compliance",
+          trans: "Voldoen aan wet- en regelgeving (zoals AVG, NIS2, ISO 27001).",
+          example: "" },
+        { term: "AVG / GDPR",
+          trans: "Europese privacywet voor het verwerken van persoonsgegevens.",
+          example: "" },
+        { term: "Datalek",
+          trans: "Persoonsgegevens komen onbedoeld in onbevoegde handen &mdash; meldplicht binnen 72 uur bij de AP.",
+          example: "" },
+        { term: "DPIA",
+          trans: "Verplichte risicoanalyse vooraf voor verwerkingen met hoog privacy-risico.",
+          example: "" },
+        { term: "FG / DPO",
+          trans: "Functionaris voor Gegevensbescherming &mdash; intern toezichthouder voor privacy.",
+          example: "" }
+      ]},
+      { cat: "Operations & continuïteit", entries: [
+        { term: "Patching",
+          trans: "Beveiligingsupdates installeren om bekende kwetsbaarheden dicht te zetten.",
+          example: "" },
+        { term: "Backup",
+          trans: "Reservekopie van data, zodat je bij verlies of ransomware terug kunt.",
+          example: "" },
+        { term: "Restore",
+          trans: "Het terugzetten van een backup &mdash; pas zinvol als getest is.",
+          example: "" },
+        { term: "High availability",
+          trans: "Continue beschikbaarheid via dubbele systemen die elkaar overnemen bij uitval.",
+          example: "" },
+        { term: "Failover",
+          trans: "Automatisch overschakelen naar een reserve-systeem bij uitval van het hoofdsysteem.",
+          example: "" },
+        { term: "Disaster recovery",
+          trans: "Plan om na een grote storing of ramp weer operationeel te worden.",
+          example: "" },
+        { term: "RTO / Recovery Time Objective",
+          trans: "Maximale tijd dat een dienst uit mag liggen.",
+          example: "Voor de webshop is de RTO 1 uur &mdash; langer offline = direct omzetverlies." },
+        { term: "RPO / Recovery Point Objective",
+          trans: "Maximaal toelaatbaar dataverlies in tijd uitgedrukt (bv. 1 uur).",
+          example: "" },
+        { term: "SLA",
+          trans: "Afspraak met een leverancier over minimale dienstverlening (uptime, hersteltijd).",
+          example: "" }
+      ]},
+      { cat: "Active Directory & Windows", entries: [
+        { term: "Active Directory (AD)",
+          trans: "Centraal systeem voor het beheren van gebruikers, computers en rechten in een Windows-omgeving.",
+          example: "" },
+        { term: "GPO / Group Policy",
+          trans: "Centrale beleidsregel die op alle aangesloten Windows-computers wordt toegepast.",
+          example: "" },
+        { term: "Domain controller",
+          trans: "Server die de Active Directory beheert &mdash; het hart van een Windows-netwerk.",
+          example: "" },
+        { term: "Account lockout",
+          trans: "Account tijdelijk blokkeren na een aantal mislukte login-pogingen.",
+          example: "" },
+        { term: "Audit policy / auditing",
+          trans: "Welke gebeurtenissen Windows moet vastleggen in de logboeken voor controle achteraf.",
+          example: "" },
+        { term: "WSUS",
+          trans: "Centraal systeem dat Windows-updates beheert en uitrolt naar alle pc\'s.",
+          example: "" }
+      ]},
+      { cat: "Monitoring & response", entries: [
+        { term: "SIEM / Security Information and Event Management",
+          trans: "Centraal systeem dat security-meldingen verzamelt en verbanden legt tussen events.",
+          example: "" },
+        { term: "SOC / Security Operations Center",
+          trans: "Beveiligingsteam dat 24/7 het netwerk in de gaten houdt.",
+          example: "" },
+        { term: "Log",
+          trans: "Vastlegging van wat er op een systeem is gebeurd.",
+          example: "" },
+        { term: "Alert / alarm",
+          trans: "Melding van het beveiligingssysteem dat er mogelijk iets mis is.",
+          example: "" },
+        { term: "Incident",
+          trans: "Een gebeurtenis met negatieve impact op de beveiliging.",
+          example: "" },
+        { term: "Containment",
+          trans: "Het probleem inperken zodat het zich niet verder verspreidt.",
+          example: "" },
+        { term: "Eradication",
+          trans: "De oorzaak van het probleem volledig verwijderen.",
+          example: "" },
+        { term: "Recovery",
+          trans: "Het systeem weer in normale werking brengen.",
+          example: "" },
+        { term: "Forensics",
+          trans: "Diepgaand onderzoek naar wat er precies is gebeurd, voor bewijs en lessen.",
+          example: "" },
+        { term: "Root cause",
+          trans: "De onderliggende oorzaak van het probleem &mdash; niet alleen het symptoom.",
+          example: "" }
+      ]}
+    ];
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+      });
+    }
+
+    function highlight(text, q) {
+      if (!q) return text;
+      const safe = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re = new RegExp("(" + safe + ")", "ig");
+      return text.replace(re, "<mark>$1</mark>");
+    }
+
+    function renderAll() {
+      const list = document.getElementById("wb-list");
+      list.innerHTML = DICT.map(function (cat) {
+        const rows = cat.entries.map(function (e, i) {
+          return '<div class="wb-row" data-search="' + escapeHtml((e.term + ' ' + e.trans).toLowerCase()) + '">' +
+                   '<div class="wb-term">' + e.term + '</div>' +
+                   '<div class="wb-trans">' + e.trans +
+                     (e.example ? '<span class="wb-example">"' + e.example + '"</span>' : '') +
+                   '</div>' +
+                 '</div>';
+        }).join("");
+        return '<section class="wb-cat" data-cat="' + escapeHtml(cat.cat) + '">' +
+                 '<h3>' + escapeHtml(cat.cat) + ' <span class="cnt">(' + cat.entries.length + ')</span></h3>' +
+                 rows +
+               '</section>';
+      }).join("");
+      countTotal();
+    }
+
+    function countTotal() {
+      let total = 0;
+      DICT.forEach(function (c) { total += c.entries.length; });
+      document.getElementById("wb-stats").textContent = total + " termen in " + DICT.length + " categorieën";
+    }
+
+    function applyFilter(q) {
+      q = (q || "").trim().toLowerCase();
+      const stats = document.getElementById("wb-stats");
+      let visible = 0;
+      document.querySelectorAll(".wb-cat").forEach(function (cat) {
+        if (cat.dataset.cat === "tips") {
+          cat.classList.toggle("hidden", !!q);
+          return;
+        }
+        let any = false;
+        cat.querySelectorAll(".wb-row").forEach(function (row) {
+          const match = !q || row.dataset.search.indexOf(q) !== -1;
+          row.classList.toggle("hidden", !match);
+          if (match) { any = true; visible++; }
+        });
+        cat.classList.toggle("hidden", !any);
+      });
+      if (q) stats.textContent = visible + " resultaten voor \"" + q + "\"";
+      else countTotal();
+    }
+
+    renderAll();
+    document.getElementById("wb-search").addEventListener("input", function (e) {
+      applyFilter(e.target.value);
+    });
+
+    (function () {
+      const saved = localStorage.getItem("theme");
+      if (saved) document.documentElement.setAttribute("data-theme", saved);
+      const btn = document.getElementById("theme-toggle");
+      if (!btn) return;
+      function paintIcon() { btn.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; }
+      paintIcon();
+      btn.addEventListener("click", function () {
+        const cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", cur);
+        localStorage.setItem("theme", cur);
+        paintIcon();
+      });
+    })();
+  </script>
+</body>
+</html>
