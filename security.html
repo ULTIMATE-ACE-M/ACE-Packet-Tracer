@@ -9,167 +9,61 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231e3a8a'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' text-anchor='middle' fill='white' font-weight='bold'%3E%26gt;_%3C/text%3E%3C/svg%3E">
   <style>
     .security-main { max-width: 1100px; margin: 0 auto; padding: 28px 36px 80px; }
-    .progress-card {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px 16px;
-      margin-top: 14px;
-      color: var(--text);
-      font-size: 14px;
-    }
+    .progress-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-top: 14px; color: var(--text); font-size: 14px; }
     .progress-card strong { color: var(--primary); }
-    .check-item {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin: 8px 0;
-      background: var(--surface);
-      transition: border-color .15s, background .15s;
-    }
+    .check-item { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 8px 0; background: var(--surface); transition: border-color .15s, background .15s; }
     .check-item:hover { border-color: var(--primary); }
     .check-item.checked { background: var(--surface-2); }
-    .check-item.checked .check-title,
-    .check-item.checked .check-desc { text-decoration: line-through; opacity: 0.65; }
-    .check-row-main {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      cursor: pointer;
-    }
-    .check-box {
-      flex-shrink: 0;
-      width: 22px; height: 22px;
-      border: 2px solid var(--border);
-      border-radius: 5px;
-      margin-top: 2px;
-      display: inline-flex; align-items: center; justify-content: center;
-      background: var(--surface);
-      transition: background .15s, border-color .15s;
-    }
-    .check-item.checked .check-box {
-      background: #15803d;
-      border-color: #15803d;
-      color: white;
-    }
-    .check-box::after {
-      content: "";
-      display: block;
-      width: 6px; height: 11px;
-      border: solid white;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg) scale(0);
-      transition: transform .15s;
-      margin-bottom: 2px;
-    }
+    .check-item.checked .check-title, .check-item.checked .check-desc { text-decoration: line-through; opacity: 0.65; }
+    .check-row-main { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; }
+    .check-box { flex-shrink: 0; width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 5px; margin-top: 2px; display: inline-flex; align-items: center; justify-content: center; background: var(--surface); transition: background .15s, border-color .15s; }
+    .check-item.checked .check-box { background: #15803d; border-color: #15803d; color: white; }
+    .check-box::after { content: ""; display: block; width: 6px; height: 11px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg) scale(0); transition: transform .15s; margin-bottom: 2px; }
     .check-item.checked .check-box::after { transform: rotate(45deg) scale(1); }
     .check-body { flex: 1; min-width: 0; }
     .check-row { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; flex-wrap: wrap; }
-    .task-tag {
-      display: inline-block;
-      background: var(--surface-2); color: var(--text-muted);
-      font: 600 12px ui-monospace, Consolas, monospace;
-      padding: 2px 8px; border-radius: 12px; border: 1px solid var(--border);
-    }
+    .task-tag { display: inline-block; background: var(--surface-2); color: var(--text-muted); font: 600 12px ui-monospace, Consolas, monospace; padding: 2px 8px; border-radius: 12px; border: 1px solid var(--border); }
     .check-title { font-weight: 600; font-size: 15px; color: var(--text); }
     .check-desc { color: var(--text-muted); font-size: 14px; margin: 2px 0 0; }
-
     .item-actions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-    .info-btn, .link-btn {
-      background: var(--surface-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      text-decoration: none;
-    }
+    .info-btn, .link-btn { background: var(--surface-2); color: var(--text); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
     .info-btn:hover, .link-btn:hover { border-color: var(--primary); background: var(--surface); color: var(--text); }
-    .info-btn .chev {
-      display: inline-block;
-      transition: transform .2s;
-      font-size: 11px;
-    }
+    .info-btn .chev { display: inline-block; transition: transform .2s; font-size: 11px; }
     .info-btn[aria-expanded="true"] .chev { transform: rotate(90deg); }
     .link-btn { color: var(--primary); }
-
-    .tools-panel {
-      display: none;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px dashed var(--border);
-    }
-    .tools-panel.open { display: block; }
-    .tool-card {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px 14px;
-      margin: 8px 0;
-      background: var(--surface);
-    }
-    .tool-name {
-      font: 700 14px ui-monospace, Consolas, monospace;
-      color: var(--primary);
-      margin-bottom: 2px;
-    }
-    .tool-file {
-      display: inline-block;
-      font: 600 11px ui-monospace, Consolas, monospace;
-      color: var(--text-muted);
-      background: var(--surface-2);
-      padding: 1px 6px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      margin-left: 6px;
-      vertical-align: middle;
-    }
-    .tool-section {
-      margin-top: 6px;
-      font-size: 13.5px;
-      line-height: 1.55;
-    }
-    .tool-section .lbl {
-      display: inline-block;
-      font-weight: 700;
-      color: var(--text);
-      margin-right: 4px;
-    }
-    .tool-section code {
-      font: 12.5px ui-monospace, Consolas, monospace;
-      background: var(--code-bg);
-      color: var(--code-text);
-      padding: 1px 5px;
-      border-radius: 3px;
-    }
+    .info-panel { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+    .info-panel.open { display: block; }
+    .detail-block { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 8px 0; }
+    .detail-block .lbl { display: block; font-weight: 700; color: var(--text); margin-bottom: 4px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .detail-block p, .detail-block ul { margin: 4px 0; font-size: 13.5px; line-height: 1.55; }
+    .detail-block ul { padding-left: 22px; }
+    .rubric { display: grid; gap: 8px; margin-top: 6px; }
+    .rubric-row { display: grid; grid-template-columns: 130px 1fr; gap: 12px; align-items: start; padding: 8px 12px; border-radius: 6px; border-left: 4px solid var(--border); background: var(--surface-2); font-size: 13px; line-height: 1.5; }
+    .rubric-row .lvl { font-weight: 700; color: var(--text); }
+    .rubric-row .pts { color: var(--text-muted); font-size: 11.5px; font-weight: 500; display: block; }
+    .rubric-row.lv0 { border-left-color: #b91c1c; }
+    .rubric-row.lv1 { border-left-color: #c2410c; }
+    .rubric-row.lv2 { border-left-color: #b45309; }
+    .rubric-row.lv3 { border-left-color: #15803d; }
+    @media (max-width: 600px) { .rubric-row { grid-template-columns: 1fr; } }
+    .tool-card { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin: 8px 0; background: var(--surface); }
+    .tool-name { font: 700 14px ui-monospace, Consolas, monospace; color: var(--primary); margin-bottom: 2px; }
+    .tool-file { display: inline-block; font: 600 11px ui-monospace, Consolas, monospace; color: var(--text-muted); background: var(--surface-2); padding: 1px 6px; border-radius: 10px; border: 1px solid var(--border); margin-left: 6px; vertical-align: middle; }
+    .tool-section { margin-top: 6px; font-size: 13.5px; line-height: 1.55; }
+    .tool-section .lbl { display: inline-block; font-weight: 700; color: var(--text); margin-right: 4px; }
+    .tool-section code, .detail-block code { font: 12.5px ui-monospace, Consolas, monospace; background: var(--code-bg); color: var(--code-text); padding: 1px 5px; border-radius: 3px; }
     .tool-section ul { margin: 4px 0 0 0; padding-left: 20px; }
     .tool-section li { margin: 2px 0; }
-
-    .reset-btn {
-      margin-top: 12px;
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
-    }
+    .tools-group-h { font-weight: 700; color: var(--text); margin: 16px 0 4px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+    .tools-group-h:first-child { margin-top: 0; }
+    .reset-btn { margin-top: 12px; background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
     .reset-btn:hover { color: var(--text); border-color: var(--primary); }
-    @media (max-width: 700px) {
-      .security-main { padding: 18px 16px 60px; }
-    }
+    @media (max-width: 700px) { .security-main { padding: 18px 16px 60px; } }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="topbar-left">
-      <h1>Security Examen</h1>
-    </div>
+    <div class="topbar-left"><h1>Security Examen</h1></div>
     <nav class="topbar-tabs" aria-label="Sections">
       <a href="index.html" class="tab-btn">Datacom</a>
       <a href="security.html" class="tab-btn active">Security</a>
@@ -182,7 +76,7 @@
   <main class="security-main">
     <section class="hero">
       <h2>Checklist — P2-K2: Controleert de security</h2>
-      <p>Beoordelingscriteria uit het examen. Klik op een onderdeel om het af te vinken.</p>
+      <p>Klik op een onderdeel om af te vinken. Klik op <strong>Details</strong> voor de scoring-rubric (Niet/nauwelijks &rarr; Volledig).</p>
       <div class="progress-card">
         Voortgang: <strong><span id="checked-count">0</span> / <span id="total-count">0</span></strong> onderdelen afgevinkt
       </div>
@@ -190,146 +84,231 @@
 
     <section class="category" id="w1-section">
       <h3>(P2-K2-W1) Geeft security advies en verbetert de security</h3>
-      <p class="blurb">4 beoordelingscriteria</p>
+      <p class="blurb">Opdracht 1 &middot; Bijlage 1.3 Auditrapport voorbeelduitwerking &middot; 4 criteria</p>
       <div id="w1-criteria"></div>
       <button class="reset-btn" data-reset="w1">Reset W1</button>
     </section>
 
     <section class="category" id="w2-section">
       <h3>(P2-K2-W2) Reageert op security incidenten</h3>
-      <p class="blurb">5 beoordelingscriteria</p>
+      <p class="blurb">Opdracht 2 &middot; Bijlage 2.5 Onderzoeksverslag voorbeelduitwerking &middot; 5 criteria</p>
       <div id="w2-criteria"></div>
       <button class="reset-btn" data-reset="w2">Reset W2</button>
     </section>
   </main>
 
   <script>
+    const T = {
+      W1_T1: "De kandidaat inventariseert veiligheidsrisico's, zet tools in en voert testen uit om veiligheidslekken en/of kwetsbaarheden op te sporen en oorzaken te benoemen.",
+      W1_T2: "De kandidaat adviseert over de benodigde beveiligingsoplossingen (beleidsmatig en technisch) om de veiligheid te vergroten. Deze voorstellen worden indien mogelijk doorgevoerd.",
+      W2_T1: "De kandidaat detecteert en analyseert een security-incident, waarbij potentie en omvang van het incident worden ingeschat.",
+      W2_T2: "De kandidaat voert (technische) oplossingen door.",
+      W2_T3: "De kandidaat houdt een logboek bij.",
+      W2_T4: "De kandidaat houdt betrokken personen en, indien van toepassing, instanties op de hoogte."
+    };
+
     const TOOLS = [
-      {
-        name: "Nessus",
-        file: "Nessus-10.5.0-x64",
-        use: "Vulnerability scanner — scant hosts/netwerk op bekende kwetsbaarheden (CVE's) en misconfiguraties. Kerntool voor je security-analyse.",
-        howHtml:
-          'Open <code>https://localhost:8834</code> in Chrome. ' +
-          'Klik <strong>New Scan</strong> &rarr; <strong>Basic Network Scan</strong>. ' +
-          'Vul bij <em>Targets</em> het IP-bereik in (bv. <code>192.168.1.0/24</code> of een specifiek IP), Save &rarr; Launch. ' +
-          'Filter resultaten op <strong>Critical</strong> en <strong>High</strong> — die zet je in je advies/verbetervoorstel.'
-      },
-      {
-        name: "Nmap",
-        file: "nmap-7.93-setup",
-        use: "Network/port scanner — ontdekt hosts, open poorten, services en OS. Gebruik het om in kaart te brengen wat er draait voordat je een Nessus-scan doet.",
-        howHtml:
-          'Open een <code>cmd</code> of PowerShell:' +
-          '<ul>' +
-            '<li>Host-discovery: <code>nmap -sn 192.168.1.0/24</code></li>' +
-            '<li>Services + OS detect: <code>nmap -sV -O 192.168.1.10</code></li>' +
-            '<li>Volledige scan met scripts: <code>nmap -sC -sV -p- 192.168.1.10</code></li>' +
-          '</ul>' +
-          'Onverwachte open poorten/services = bevinding voor je rapport.'
-      },
-      {
-        name: "MBSA — Microsoft Baseline Security Analyzer",
-        file: "MBSASetup-x64-EN",
-        use: "Controleert een Windows-host op ontbrekende patches/updates, zwakke wachtwoorden en onveilige Windows/IIS-config.",
-        howHtml:
-          'Start <strong>MBSA 2.3</strong> &rarr; <em>Scan a computer</em> &rarr; vul hostname of IP in &rarr; <em>Start scan</em>. ' +
-          'Bekijk het rapport: <strong>Security Updates</strong> (ontbrekende KB-patches) en <strong>Administrative Vulnerabilities</strong> (zwakke wachtwoorden, anonymous shares, Guest-account). ' +
-          'Tip: vink <em>Configure computers for Microsoft Update</em> aan zodat het de meest recente catalogus pakt.'
-      },
-      {
-        name: "AuditTAP — Audit Test Automation Package",
-        file: "AuditTAP-5.4",
-        use: "PowerShell-tool die Windows/Office config afzet tegen DISA STIG of CIS benchmarks. Genereert een HTML-rapport met pass/fail per hardening-item.",
-        howHtml:
-          'Open <strong>PowerShell als administrator</strong>, ga naar de AuditTAP-map en run:' +
-          '<ul>' +
-            '<li>Module laden: <code>Import-Module .\\AuditTAP.psm1</code></li>' +
-            '<li>Rapport voor Windows 10/11: <code>Invoke-ATAPHtmlReport -RuleSet "Windows10-21H2" -SavePath .\\report.html</code></li>' +
-          '</ul>' +
-          'Open het HTML-bestand in Chrome — alle <strong>Failed</strong> regels zijn kandidaten voor je verbetervoorstel.'
-      },
-      {
-        name: "ManageEngine ADAudit Plus",
-        file: "ManageEngine_ADAudit_Plus_x64",
-        use: "Realtime audit van Active Directory — logins, account lockouts, GPO-changes, wijzigingen in privileged groepen. Gebruik het om security incidenten in AD te analyseren en te documenteren.",
-        howHtml:
-          'Na install opent de webinterface op <code>http://localhost:8081</code>. ' +
-          'Log in (<em>admin / admin</em>), voeg de domain controller toe als <em>data source</em>, ' +
-          'en bekijk <strong>Reports</strong>: failed logons, account lockouts, recent password changes, ' +
-          'changes to admin groups. Exporteer findings naar PDF/CSV voor je logboek.'
-      },
-      {
-        name: "Sysinternals Suite",
-        file: "SysinternalsSuite (zip)",
-        use: "Bundel van Microsoft-tools voor diepe Windows-analyse — onmisbaar bij het onderzoeken van een security incident.",
-        howHtml:
-          'Pak de zip uit en gebruik per situatie de juiste tool:' +
-          '<ul>' +
-            '<li><strong>Process Monitor</strong> (procmon) — filter op proces om bestand-/registry-/netwerkactiviteit te zien (verdacht proces).</li>' +
-            '<li><strong>Autoruns</strong> — toont alles dat automatisch start (services, scheduled tasks, run-keys). Gebruik <em>Hide Microsoft Entries</em> om malware op te sporen.</li>' +
-            '<li><strong>TCPView</strong> — live overzicht van processen met open netwerkverbindingen en luisterende poorten.</li>' +
-            '<li><strong>Process Explorer</strong> — taakbeheer-plus: signature-check, VirusTotal-integratie, parent/child boom.</li>' +
-            '<li><strong>PsExec</strong> — commando\'s uitvoeren op een remote host: <code>psexec \\\\HOST -s cmd</code></li>' +
-            '<li><strong>Sigcheck</strong> — controleer of een binary digitaal getekend is: <code>sigcheck -a -h C:\\pad\\bestand.exe</code></li>' +
-          '</ul>'
-      },
-      {
-        name: "SQL Server Express + SSMS",
-        file: "SQLEXPRADV / SQL2019-SSEI-Expr / SSMS-Setup-ENU / SQLServerReportingServices",
-        use: "Database-stack die als <em>backend</em> dient voor andere tools (ADAudit Plus, MBSA-history, custom rapportages). SSMS gebruik je om audit-DB\'s en user permissions te bekijken.",
-        howHtml:
-          'Installeervolgorde: ' +
-          '<strong>SQL2019-SSEI-Expr</strong> (basis-installer) of <strong>SQLEXPRADV_x64_ENU</strong> (advanced edition) ' +
-          '&rarr; <strong>SSMS</strong> voor de management-GUI ' +
-          '&rarr; optioneel <strong>SQL Server Reporting Services</strong> voor BI-rapporten. ' +
-          'In SSMS: connect to <code>(local)\\SQLEXPRESS</code>, query bv. <code>SELECT name FROM sys.database_principals WHERE type = \'S\'</code> om SQL-logins te checken.'
-      },
-      {
-        name: "Google Chrome",
-        file: "ChromeSetup",
-        use: "Browser voor de webinterfaces van Nessus (8834), ADAudit Plus (8081) en HTML-rapporten van AuditTAP/MBSA.",
-        howHtml:
-          'Standaard installeren. Bookmark de tool-URLs: ' +
-          '<code>https://localhost:8834</code> (Nessus), ' +
-          '<code>http://localhost:8081</code> (ADAudit Plus). ' +
-          'Bij <em>Your connection is not private</em> op Nessus: <em>Advanced</em> &rarr; <em>Proceed</em> (self-signed certificaat is normaal in een lab).'
-      },
-      {
-        name: "Visual Studio",
-        file: "VisualStudioSetup",
-        use: "IDE voor het lezen of aanpassen van scripts (PowerShell, C#) als je AuditTAP-modules of een eigen audit-tool moet bewerken. Niet altijd nodig — meestal volstaat Notepad/VS Code.",
-        howHtml:
-          'Bij installatie alleen de <strong>".NET desktop development"</strong> en <strong>".NET Core / Windows PowerShell"</strong> workloads kiezen — scheelt veel ruimte. ' +
-          'Open .ps1 / .psm1 bestanden direct, of gebruik de <em>PowerShell ISE</em> (sneller voor kleine edits).'
-      }
+      // ---- In de Tools-map (uit screenshot) ----
+      { group: "Aanwezig in Tools-map", name: "Nessus", file: "Nessus-10.5.0-x64",
+        use: "Vulnerability scanner — scant hosts/netwerk op bekende kwetsbaarheden (CVE's) en misconfiguraties. Kerntool voor de security-analyse op SRV001.",
+        howHtml: 'Open <code>https://localhost:8834</code> in Chrome. <strong>New Scan</strong> &rarr; <strong>Basic Network Scan</strong>. Targets = <code>192.168.1.0/24</code> of specifiek IP. Save &rarr; Launch. Filter op <strong>Critical</strong> en <strong>High</strong> voor je advies/verbetervoorstel.' },
+      { group: "Aanwezig in Tools-map", name: "Nmap", file: "nmap-7.93-setup",
+        use: "Network/port scanner — ontdekt hosts, open poorten, services en OS. Inzetten vóór Nessus om in kaart te brengen wat er draait.",
+        howHtml: 'In <code>cmd</code>/PowerShell:<ul><li>Host-discovery: <code>nmap -sn 192.168.1.0/24</code></li><li>Services + OS: <code>nmap -sV -O 192.168.1.10</code></li><li>Volledig + scripts: <code>nmap -sC -sV -p- 192.168.1.10</code></li></ul>Onverwachte open poorten = bevinding voor je rapport.' },
+      { group: "Aanwezig in Tools-map", name: "MBSA — Microsoft Baseline Security Analyzer", file: "MBSASetup-x64-EN",
+        use: "Controleert een Windows-host op ontbrekende patches, zwakke wachtwoorden en onveilige Windows/IIS-config.",
+        howHtml: 'Start MBSA &rarr; <em>Scan a computer</em> &rarr; hostname/IP &rarr; <em>Start scan</em>. Bekijk <strong>Security Updates</strong> en <strong>Administrative Vulnerabilities</strong>.' },
+      { group: "Aanwezig in Tools-map", name: "AuditTAP", file: "AuditTAP-5.4",
+        use: "PowerShell-tool die Windows/Office config afzet tegen DISA STIG of CIS benchmarks. HTML-rapport met pass/fail per hardening-item.",
+        howHtml: 'PowerShell als admin:<ul><li><code>Import-Module .\\AuditTAP.psm1</code></li><li><code>Invoke-ATAPHtmlReport -RuleSet "Windows10-21H2" -SavePath .\\report.html</code></li></ul>Open in Chrome — <strong>Failed</strong> regels = kandidaten voor je verbetervoorstel.' },
+      { group: "Aanwezig in Tools-map", name: "ManageEngine ADAudit Plus", file: "ManageEngine_ADAudit_Plus_x64",
+        use: "Realtime Active Directory audit — logins, account lockouts, GPO-changes, privileged-group changes. Voor het analyseren van AD-incidenten.",
+        howHtml: 'Webinterface op <code>http://localhost:8081</code>. Voeg de DC toe als <em>data source</em>. Reports: failed logons, lockouts, password changes, admin-group changes. Exporteer naar PDF/CSV voor je logboek.' },
+      { group: "Aanwezig in Tools-map", name: "Sysinternals Suite", file: "SysinternalsSuite (zip)",
+        use: "Bundel Microsoft-tools voor diepe Windows-analyse — onmisbaar bij het onderzoeken van een security incident.",
+        howHtml: '<ul><li><strong>Process Monitor</strong> (procmon) — bestand-/registry-/netwerkactiviteit per proces.</li><li><strong>Autoruns</strong> — auto-start items, <em>Hide Microsoft Entries</em> voor malware.</li><li><strong>TCPView</strong> — proces &harr; poort overzicht live.</li><li><strong>Process Explorer</strong> — taakbeheer-plus met VirusTotal-integratie.</li><li><strong>PsExec</strong> — remote command: <code>psexec \\\\HOST -s cmd</code></li><li><strong>Sigcheck</strong> — signature-check: <code>sigcheck -a -h bestand.exe</code></li></ul>' },
+      { group: "Aanwezig in Tools-map", name: "SQL Server Express + SSMS", file: "SQLEXPRADV / SQL2019-SSEI-Expr / SSMS-Setup-ENU / SSRS",
+        use: "Database-stack als backend voor andere tools (ADAudit Plus, MBSA-history, custom rapporten). SSMS om audit-DB en permissions te bekijken.",
+        howHtml: 'Volgorde: <strong>SQL2019-SSEI-Expr</strong> of <strong>SQLEXPRADV</strong> &rarr; <strong>SSMS</strong> &rarr; optioneel <strong>SSRS</strong>. Connect to <code>(local)\\SQLEXPRESS</code>.' },
+      { group: "Aanwezig in Tools-map", name: "Google Chrome", file: "ChromeSetup",
+        use: "Browser voor de webinterfaces (Nessus 8834, ADAudit Plus 8081) en HTML-rapporten van AuditTAP/MBSA.",
+        howHtml: 'Bookmark de tool-URLs. Bij self-signed cert: <em>Advanced</em> &rarr; <em>Proceed</em>.' },
+      { group: "Aanwezig in Tools-map", name: "Visual Studio", file: "VisualStudioSetup",
+        use: "IDE om PowerShell/C#-scripts te lezen of aanpassen (bv. AuditTAP-modules). Vaak volstaat ook PowerShell ISE / Notepad++.",
+        howHtml: 'Bij installatie alleen ".NET desktop development" + "Windows PowerShell" workloads kiezen.' },
+
+      // ---- Built-in Windows tools ----
+      { group: "Windows ingebouwd — analyse", name: "Event Viewer", file: "eventvwr.msc",
+        use: "Centrale Windows logs — onmisbaar bij incident-analyse. Loginpogingen, service crashes, applicatiefouten, Windows Defender alerts.",
+        howHtml: 'Run &rarr; <code>eventvwr.msc</code>. Belangrijke locaties:<ul><li><strong>Security</strong> — events 4624 (logon success), 4625 (logon failure), 4720 (account created), 4732 (added to group)</li><li><strong>System</strong> — service-/driver-events</li><li><strong>Application</strong> — software-crashes</li><li><strong>Applications and Services Logs &rarr; Microsoft &rarr; Windows &rarr; Defender</strong> — antivirus alerts</li></ul>Filter via <em>Filter Current Log...</em> op event ID of timeframe. Exporteer naar .evtx of CSV voor je logboek.' },
+      { group: "Windows ingebouwd — analyse", name: "PowerShell + ISE", file: "powershell.exe / powershell_ise.exe",
+        use: "Scripting voor audits, log-analyse en geautomatiseerde acties. Veel onderzoeken kun je sneller met PowerShell dan met klikken.",
+        howHtml: 'Voorbeelden:<ul><li>Lokale admins: <code>Get-LocalGroupMember -Group "Administrators"</code></li><li>Open poorten: <code>Get-NetTCPConnection -State Listen</code></li><li>Failed logons: <code>Get-WinEvent -FilterHashtable @{LogName="Security";Id=4625} -MaxEvents 50</code></li><li>Auto-start services: <code>Get-CimInstance -ClassName Win32_Service | Where-Object StartMode -eq "Auto"</code></li><li>Patches: <code>Get-HotFix | Sort-Object InstalledOn -Descending</code></li></ul>' },
+      { group: "Windows ingebouwd — analyse", name: "Task Manager / Resource Monitor", file: "taskmgr / resmon",
+        use: "Snelle blik op draaiende processen, CPU/memory/disk/netwerk per proces. Eerste check bij verdacht traag systeem.",
+        howHtml: '<code>Ctrl+Shift+Esc</code> voor Task Manager. Resource Monitor (<em>resmon</em>) toont per-proces netwerkverbindingen en file-handles. Verdacht proces &rarr; <em>Open file location</em>, dan Sigcheck of VirusTotal.' },
+      { group: "Windows ingebouwd — analyse", name: "Netwerk-CLI (netstat / ipconfig / arp / route / tracert)", file: "ingebouwd",
+        use: "Snelle netwerk-diagnostiek tijdens incidentanalyse — open poorten, gateway, ARP-cache, routing.",
+        howHtml: '<ul><li><code>netstat -ano</code> — open verbindingen + PID</li><li><code>ipconfig /all</code> — interfaces + DNS</li><li><code>arp -a</code> — ARP-cache (vreemde MAC = ARP-spoof?)</li><li><code>route print</code> — routing-table</li><li><code>tracert 8.8.8.8</code> — pad naar buiten</li></ul>' },
+
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Group Policy Management", file: "gpmc.msc / gpedit.msc",
+        use: "Doorvoeren van security-policies op domain- of lokaal niveau (wachtwoordbeleid, account lockout, audit policy, Windows Defender, BitLocker enforcement).",
+        howHtml: 'Run &rarr; <code>gpmc.msc</code> (domain) of <code>gpedit.msc</code> (lokaal). Belangrijke paden:<ul><li><strong>Computer Config &rarr; Windows Settings &rarr; Security Settings &rarr; Account Policies</strong> &mdash; password &amp; lockout</li><li><strong>... &rarr; Local Policies &rarr; Audit Policy</strong> &mdash; logon, object access, policy change auditing aanzetten</li><li><strong>Administrative Templates &rarr; Windows Components &rarr; Windows Defender Antivirus</strong></li></ul>Na wijziging op client: <code>gpupdate /force</code>.' },
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Windows Firewall", file: "wf.msc",
+        use: "Inkomende/uitgaande regels beheren — vaak gevraagd als technische oplossing om onnodige services te blokkeren.",
+        howHtml: 'Run &rarr; <code>wf.msc</code>. <em>Inbound Rules</em> &rarr; <em>New Rule...</em>. CLI: <code>netsh advfirewall firewall add rule name="Block 3389" dir=in action=block protocol=TCP localport=3389</code>. Tip: blokkeer poorten die Nessus als overbodig open vond.' },
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Local Users and Groups / Computer Management", file: "lusrmgr.msc / compmgmt.msc",
+        use: "Lokale accounts beheren — accounts uitschakelen, wachtwoord resetten, groepslidmaatschap aanpassen (least privilege!).",
+        howHtml: 'Run &rarr; <code>lusrmgr.msc</code>. Schakel <strong>Guest</strong> en ongebruikte accounts uit. Verwijder gewone gebruikers uit <em>Administrators</em>. Set <em>User must change password at next logon</em> waar nodig.' },
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Services / Task Scheduler", file: "services.msc / taskschd.msc",
+        use: "Onnodige services uitschakelen (attack surface verkleinen) en geplande taken controleren op verdachte entries.",
+        howHtml: 'Bekijk via <code>services.msc</code> services met StartMode=Automatic die niet nodig zijn (Telnet, SMBv1, oude IIS). Set op <em>Disabled</em>. Check <code>taskschd.msc</code> &rarr; <em>Task Scheduler Library</em> op onbekende taken (kan persistence-mechanisme zijn).' },
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "BitLocker", file: "manage-bde / Control Panel",
+        use: "Full-disk encryption — vaak een verplicht onderdeel van een verbetervoorstel om data te beschermen bij diefstal.",
+        howHtml: 'GUI: <em>Control Panel &rarr; BitLocker Drive Encryption &rarr; Turn on BitLocker</em>. CLI: <code>manage-bde -on C: -RecoveryPassword</code>. Status: <code>manage-bde -status</code>. Bewaar de recovery-key in AD of een safe.' },
+      { group: "Windows ingebouwd — oplossingen doorvoeren", name: "Windows Defender / Defender Firewall", file: "ingebouwd",
+        use: "Standaard antivirus + firewall op Windows. Aanzetten en up-to-date houden is vaak het minimum-verbetervoorstel.",
+        howHtml: 'PowerShell:<ul><li>Status: <code>Get-MpComputerStatus</code></li><li>Update signatures: <code>Update-MpSignature</code></li><li>Quick scan: <code>Start-MpScan -ScanType QuickScan</code></li><li>Full scan: <code>Start-MpScan -ScanType FullScan</code></li></ul>' },
+
+      // ---- Aanvullende analyse-tools ----
+      { group: "Aanvullend", name: "Wireshark", file: "extra installeren",
+        use: "Packet capture &amp; analyse — must-have bij netwerkincidenten. Toont exact welk verkeer over de lijn gaat (welke protocollen, plain-text wachtwoorden, verdachte connecties).",
+        howHtml: 'Selecteer interface &rarr; <em>Start capturing</em>. Filters:<ul><li><code>http</code> &mdash; alleen HTTP</li><li><code>tcp.port == 3389</code> &mdash; RDP</li><li><code>ip.addr == 192.168.1.10</code> &mdash; specifieke host</li><li><code>tcp.flags.syn == 1 and tcp.flags.ack == 0</code> &mdash; SYN-scans</li></ul>Tip: Save als .pcapng en voeg toe aan je logboek als bewijs.' },
+      { group: "Aanvullend", name: "Notepad++", file: "extra installeren",
+        use: "Editor voor log-files, scripts en config. Veel sneller dan Notepad bij grote logs (MB+) en heeft regex-search.",
+        howHtml: 'Open een log &rarr; <em>Search &rarr; Find in Files</em> met regex om bv. failed logons of error-codes te vinden. Kleurt syntax voor PowerShell, XML, JSON.' },
+      { group: "Aanvullend", name: "VirusTotal", file: "virustotal.com (web)",
+        use: "Reputation-check voor verdachte bestanden, hashes, IP\'s en URL\'s. Gratis &mdash; geen install nodig.",
+        howHtml: 'Bereken hash met PowerShell: <code>Get-FileHash -Algorithm SHA256 bestand.exe</code>. Plak hash op <code>virustotal.com</code> &rarr; zie hoeveel AV-engines het als malicious markeren. Upload alleen bestanden waarvan je zeker weet dat ze geen privégegevens bevatten (AVG!).' },
+      { group: "Aanvullend", name: "OpenVAS / Greenbone", file: "alternatief voor Nessus",
+        use: "Open-source vulnerability scanner. Goed alternatief als Nessus geen license heeft, of voor cross-check van bevindingen.",
+        howHtml: 'Webinterface op <code>https://localhost:9392</code>. <em>Scans &rarr; Tasks &rarr; New Task</em>, kies target en scan-config (bv. <em>Full and fast</em>).' },
+      { group: "Aanvullend", name: "Microsoft Security Compliance Toolkit + LGPO", file: "extra installeren",
+        use: "Officiële Microsoft baseline-templates (CIS-niveau) plus LGPO.exe om die GPO\'s lokaal toe te passen op een machine zonder domain.",
+        howHtml: 'Download de baseline ZIP &rarr; uitpakken &rarr; in PowerShell als admin: <code>.\\Baseline-LocalInstall.ps1</code> of <code>LGPO.exe /g .\\GPOs</code>. Daarna <code>gpupdate /force</code> en <code>secedit /export /cfg before.inf</code> om vóór/ná te vergelijken.' },
+      { group: "Aanvullend", name: "KeePass / Bitwarden", file: "wachtwoordmanager",
+        use: "Password manager — vaak een vast onderdeel van het verbetervoorstel om zwakke/hergebruikte wachtwoorden uit te bannen.",
+        howHtml: 'KeePass: portable .exe, alle wachtwoorden in één encrypted .kdbx-bestand. Bitwarden: cloud-gebaseerd, free tier. Adviseer in je rapport: minimum lengte 14 chars, MFA waar mogelijk, password manager verplicht.' },
+      { group: "Aanvullend", name: "Snort / Suricata", file: "IDS",
+        use: "Intrusion Detection / Prevention System — vaak als preventieve maatregel in het verbetervoorstel om aanvallen op het netwerk te detecteren.",
+        howHtml: 'Suricata draait op een netwerk-tap of op een edge-host. Default rules via <em>Emerging Threats</em>. Alerts in <code>/var/log/suricata/eve.json</code>. Op het examen vooral noemen als <strong>verbetervoorstel</strong>: "implementeer een NIDS zoals Suricata met ET-rules op de DMZ-firewall".' },
+      { group: "Aanvullend", name: "WSUS — Windows Server Update Services", file: "patch-management",
+        use: "Centraal patch-management voor Windows-clients. Onmisbaar bij elk \'patches missen\' verbetervoorstel.",
+        howHtml: 'Op een Windows Server: <em>Server Manager &rarr; Add Roles &rarr; Windows Server Update Services</em>. Configureer client-targeting via GPO (<em>Computer Config &rarr; Administrative Templates &rarr; Windows Components &rarr; Windows Update</em>). Plan een wekelijks maintenance-window voor approvals.' },
+      { group: "Aanvullend", name: "Hash &amp; integrity (CertUtil / Get-FileHash)", file: "ingebouwd",
+        use: "Hashes berekenen om bestand-integriteit te controleren (verdachte downloads, bewijsstuk in onderzoek).",
+        howHtml: '<ul><li>PowerShell: <code>Get-FileHash -Algorithm SHA256 bestand.exe</code></li><li>cmd: <code>certutil -hashfile bestand.exe SHA256</code></li><li>MD5/SHA1 voor oude tools, SHA256 voor alles nieuw.</li></ul>' }
     ];
 
     const W1 = [
-      { id: "w1-tools",    task: "T1", title: "Tools kiezen",      desc: "De juiste tools zijn gekozen en correct gebruikt.", tools: TOOLS },
-      { id: "w1-comm",     task: "T1", title: "Communicatie",      desc: "De communicatie is helder en duidelijk." },
-      { id: "w1-analyse",  task: "T1", title: "Security analyse",  desc: "De veiligheidsrisico's zijn gevonden en de impact is goed ingeschat." },
-      { id: "w1-verbeter", task: "T2", title: "Verbetervoorstel",  desc: "De verbetervoorstellen zijn goed onderbouwd en haalbaar." }
+      { id: "w1-tools", task: "T1", title: "Tools kiezen",
+        desc: "De juiste tools zijn gekozen en correct gebruikt.",
+        tools: TOOLS,
+        details: { werkproces: T.W1_T1, beoordeeld: "Hoofdstuk <strong>Gedetailleerde resultaten</strong> in Bijlage 1.3 Auditrapport voorbeelduitwerking.",
+          notesHtml: "Op SRV001 staan <strong>6 benoemde kwetsbaarheden</strong> die je moet vinden.",
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Twee of minder van de benoemde kwetsbaarheden zijn gevonden op SRV001." },
+            { lvl: "Enigszins",       text: "Drie van de benoemde kwetsbaarheden zijn gevonden op SRV001." },
+            { lvl: "Grotendeels",     text: "Vier of vijf van de benoemde kwetsbaarheden zijn gevonden op SRV001." },
+            { lvl: "Volledig",        text: "Alle (6) van de benoemde kwetsbaarheden zijn gevonden op SRV001." }
+          ] } },
+      { id: "w1-comm", task: "T1", title: "Communicatie",
+        desc: "De communicatie is helder en duidelijk.",
+        details: { werkproces: T.W1_T1,
+          beoordeeld: "De onderdelen <strong>Managementsamenvatting</strong>, <strong>Overzicht onderzoek</strong>, <strong>Onderbouwing keuze onderzoekshulpmiddelen</strong> en <strong>Gedetailleerde resultaten</strong> uit het Auditrapport.",
+          notesHtml: "<em>Volledig, helder en duidelijk</em> = op managementniveau, kort, gestructureerd, geen technisch verhaal.",
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Geen of één van de bovenstaande onderdelen zijn volledig, helder en duidelijk beschreven." },
+            { lvl: "Enigszins",       text: "Twee onderdelen zijn volledig, helder en duidelijk beschreven." },
+            { lvl: "Grotendeels",     text: "Drie onderdelen zijn volledig, helder en duidelijk beschreven." },
+            { lvl: "Volledig",        text: "Alle vier onderdelen zijn volledig, helder en duidelijk beschreven." }
+          ] } },
+      { id: "w1-analyse", task: "T1", title: "Security analyse",
+        desc: "De veiligheidsrisico's zijn gevonden en de impact is goed ingeschat.",
+        details: { werkproces: T.W1_T1,
+          beoordeeld: "Het onderdeel <strong>Conclusies</strong> uit het Auditrapport (de risicomatrix).",
+          notesHtml: "Vul voor elk risico zowel de <strong>kans</strong> als de <strong>impact</strong> correct in.",
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Geen risicomatrix ingevuld of minder dan drie veiligheidsrisico's correct ingeschat op kans en impact." },
+            { lvl: "Enigszins",       text: "Drie veiligheidsrisico's zijn correct ingeschat op kans en impact." },
+            { lvl: "Grotendeels",     text: "Vier of vijf veiligheidsrisico's zijn correct ingeschat op kans en impact." },
+            { lvl: "Volledig",        text: "Alle (6) veiligheidsrisico's zijn correct ingeschat op kans en impact." }
+          ] } },
+      { id: "w1-verbeter", task: "T2", title: "Verbetervoorstel",
+        desc: "De verbetervoorstellen zijn goed onderbouwd en haalbaar.",
+        details: { werkproces: T.W1_T2,
+          beoordeeld: "Het onderdeel <strong>Advies</strong> uit het Auditrapport (zie Bijlage 1.3).",
+          notesHtml: "Hoe meer van de beschreven eisen je dekt, hoe hoger je scoort. Zorg dat elk voorstel <strong>onderbouwd</strong> en <strong>haalbaar</strong> is.",
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Niet aangeleverd of bevat 4 of minder van de eisen uit Bijlage 1.3. Voorstellen niet onderbouwd en/of niet haalbaar." },
+            { lvl: "Enigszins",       text: "Bevat minimaal 5 eisen. Voorstellen zijn summier onderbouwd. Het merendeel is niet haalbaar." },
+            { lvl: "Grotendeels",     text: "Bevat minimaal 6 eisen. Op een enkel detail na volledig onderbouwd en haalbaar." },
+            { lvl: "Volledig",        text: "Bevat minimaal 7 eisen. Alle voorstellen helder onderbouwd en allemaal haalbaar." }
+          ] } }
     ];
+
     const W2 = [
-      { id: "w2-incident",   task: "T1", title: "Security incidenten",                desc: "De security incidenten zijn correct geanalyseerd en ingedeeld." },
-      { id: "w2-techoplos",  task: "T2", title: "Technische oplossingen doorvoeren",  desc: "De technische aanpassingen zijn correct doorgevoerd." },
-      { id: "w2-avg",        task: "T2", title: "AVG",                                desc: "De student handelt conform AVG wetgeving.",
-        link: { text: "AVG-regels", href: "avg.html" } },
-      { id: "w2-logboek",    task: "T3", title: "Logboek bijhouden",                  desc: "De incidenten zijn correct en volledig gedocumenteerd." },
-      { id: "w2-informeren", task: "T4", title: "Informeren",                         desc: "De juiste betrokken personen en, indien van toepassing, instanties zijn op de hoogte gebracht." }
+      { id: "w2-incident", task: "T1", title: "Security incidenten",
+        desc: "De security incidenten zijn correct geanalyseerd en ingedeeld.",
+        details: { werkproces: T.W2_T1,
+          beoordeeld: "Bijlage 2.5 Onderzoeksverslag voorbeelduitwerking. Een correcte analyse:",
+          listHtml: '<ul><li>benoemt de gevonden sporen</li><li>levert drie aandachtspunten op die zijn ingedeeld in risicoklassen</li><li>geeft antwoord op de vragen van het management</li></ul>',
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Geen van de bovenstaande onderdelen is correct en volledig beschreven." },
+            { lvl: "Enigszins",       text: "Eén van de bovenstaande onderdelen is correct en volledig beschreven." },
+            { lvl: "Grotendeels",     text: "Twee van de bovenstaande onderdelen zijn correct en volledig beschreven." },
+            { lvl: "Volledig",        text: "Alle drie onderdelen zijn correct en volledig beschreven." }
+          ] } },
+      { id: "w2-techoplos", task: "T2", title: "Technische oplossingen doorvoeren",
+        desc: "De technische aanpassingen zijn correct doorgevoerd.",
+        details: { werkproces: T.W2_T2,
+          beoordeeld: "Of de drie genoemde kwetsbaarheden daadwerkelijk verholpen zijn op het systeem.",
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Geen van de genoemde kwetsbaarheden zijn verholpen." },
+            { lvl: "Enigszins",       text: "Eén van de genoemde kwetsbaarheden is verholpen." },
+            { lvl: "Grotendeels",     text: "Twee van de genoemde kwetsbaarheden zijn verholpen." },
+            { lvl: "Volledig",        text: "Alle drie genoemde kwetsbaarheden zijn verholpen." }
+          ] } },
+      { id: "w2-avg", task: "T2", title: "AVG",
+        desc: "De student handelt conform AVG wetgeving.",
+        link: { text: "AVG-regels", href: "avg.html" },
+        details: { werkproces: T.W2_T2,
+          beoordeeld: "Of je persoonsgegevens hebt gerapporteerd, opgeslagen of er kennis van hebt genomen die niet noodzakelijk waren voor de analyse.",
+          notesHtml: "Persoonsgegevens die <strong>niet</strong> mogen worden gerapporteerd/opgeslagen:",
+          listHtml: '<ul><li>Voornamen van klanten</li><li>Achternamen van klanten</li><li>E-mailadressen van klanten</li></ul>',
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Alle drie persoonsgegevens zijn gerapporteerd, opgeslagen of er is kennis van genomen." },
+            { lvl: "Enigszins",       text: "Twee van de drie persoonsgegevens zijn gerapporteerd, opgeslagen of er is kennis van genomen." },
+            { lvl: "Grotendeels",     text: "Eén van de drie persoonsgegevens is gerapporteerd, opgeslagen of er is kennis van genomen." },
+            { lvl: "Volledig",        text: "Op geen enkele manier persoonsinformatie gerapporteerd, opgeslagen of kennisgenomen anders dan voor de analyse noodzakelijk." }
+          ] } },
+      { id: "w2-logboek", task: "T3", title: "Logboek bijhouden",
+        desc: "De incidenten zijn correct en volledig gedocumenteerd.",
+        details: { werkproces: T.W2_T3,
+          beoordeeld: "Logboek-onderdelen: <strong>datum</strong>, <strong>tijd</strong>, <strong>kwetsbaarheden</strong>, <strong>uitgevoerde acties</strong>, en <strong>relevante screenshots</strong>.",
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "Datum, tijd, kwetsbaarheden en acties zijn niet omschreven. Geen relevante screenshots aanwezig." },
+            { lvl: "Enigszins",       text: "Minimaal twee onderdelen omschreven. Voor enkele acties zijn relevante screenshots aanwezig." },
+            { lvl: "Grotendeels",     text: "Minimaal drie onderdelen omschreven. Voor de meeste acties zijn relevante screenshots aanwezig." },
+            { lvl: "Volledig",        text: "Logboek volledig en correct ingevuld. Voor alle acties zijn relevante screenshots aanwezig." }
+          ] } },
+      { id: "w2-informeren", task: "T4", title: "Informeren",
+        desc: "De juiste betrokken personen en, indien van toepassing, instanties zijn op de hoogte gebracht.",
+        details: { werkproces: T.W2_T4,
+          beoordeeld: "Het onderdeel <strong>Communicatiematrix</strong> uit het Onderzoeksverslag.",
+          rubric: [
+            { lvl: "Niet/nauwelijks", text: "De communicatiematrix is niet ingevuld." },
+            { lvl: "Enigszins",       text: "De communicatiematrix is voor minder dan de helft volledig en correct ingevuld." },
+            { lvl: "Grotendeels",     text: "De communicatiematrix is voor meer dan de helft volledig en correct ingevuld. Enkele fouten gemaakt." },
+            { lvl: "Volledig",        text: "De communicatiematrix is in zijn geheel volledig en correct ingevuld." }
+          ] } }
     ];
 
     const ALL = W1.concat(W2);
     const STORAGE_KEY = "pkt-security-checklist-v2";
 
-    function loadState() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); }
-      catch (e) { return {}; }
-    }
-    function saveState(s) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) {}
-    }
+    function loadState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}"); } catch (e) { return {}; } }
+    function saveState(s) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) {} }
     let state = loadState();
 
     function escapeHtml(s) {
@@ -339,12 +318,44 @@
     }
 
     function renderTool(t) {
-      return '' +
-        '<div class="tool-card">' +
-          '<div class="tool-name">' + escapeHtml(t.name) + '<span class="tool-file">' + escapeHtml(t.file) + '</span></div>' +
-          '<div class="tool-section"><span class="lbl">Wat:</span>' + t.use + '</div>' +
-          '<div class="tool-section"><span class="lbl">Hoe:</span>' + t.howHtml + '</div>' +
-        '</div>';
+      return '<div class="tool-card">' +
+               '<div class="tool-name">' + escapeHtml(t.name) + '<span class="tool-file">' + escapeHtml(t.file) + '</span></div>' +
+               '<div class="tool-section"><span class="lbl">Wat:</span>' + t.use + '</div>' +
+               '<div class="tool-section"><span class="lbl">Hoe:</span>' + t.howHtml + '</div>' +
+             '</div>';
+    }
+
+    function renderTools(tools) {
+      // Group by group field
+      const groups = {};
+      const order = [];
+      tools.forEach(function (t) {
+        const g = t.group || "Tools";
+        if (!groups[g]) { groups[g] = []; order.push(g); }
+        groups[g].push(t);
+      });
+      return order.map(function (g) {
+        return '<div class="tools-group-h">' + escapeHtml(g) + '</div>' + groups[g].map(renderTool).join("");
+      }).join("");
+    }
+
+    function renderRubric(rubric) {
+      return rubric.map(function (r, i) {
+        return '<div class="rubric-row lv' + i + '">' +
+                 '<div><span class="lvl">' + escapeHtml(r.lvl) + '</span><span class="pts">' + i + ' punten</span></div>' +
+                 '<div>' + escapeHtml(r.text) + '</div>' +
+               '</div>';
+      }).join("");
+    }
+
+    function renderDetails(d) {
+      let html = '<div class="detail-block"><span class="lbl">Werkproces (T-taak)</span><p>' + escapeHtml(d.werkproces) + '</p></div>';
+      html += '<div class="detail-block"><span class="lbl">Wat wordt beoordeeld</span><p>' + (d.beoordeeld || '') + '</p>';
+      if (d.listHtml) html += d.listHtml;
+      if (d.notesHtml) html += '<p>' + d.notesHtml + '</p>';
+      html += '</div>';
+      html += '<div class="detail-block"><span class="lbl">Beoordelingsschaal</span><div class="rubric">' + renderRubric(d.rubric) + '</div></div>';
+      return html;
     }
 
     function render(listId, list) {
@@ -356,6 +367,7 @@
         item.dataset.id = c.id;
         const hasTools = Array.isArray(c.tools) && c.tools.length > 0;
         const hasLink = c.link && c.link.href;
+        const hasDetails = !!c.details;
         let html =
           '<div class="check-row-main" data-toggle="check" role="checkbox" tabindex="0" aria-checked="false">' +
             '<span class="check-box" aria-hidden="true"></span>' +
@@ -367,24 +379,14 @@
               '<p class="check-desc">' + escapeHtml(c.desc) + '</p>' +
             '</div>' +
           '</div>';
-        if (hasTools || hasLink) {
+        if (hasTools || hasLink || hasDetails) {
           html += '<div class="item-actions">';
-          if (hasTools) {
-            html +=
-              '<button type="button" class="info-btn" data-toggle="tools" aria-expanded="false">' +
-                '<span class="chev">&#9656;</span> Tools' +
-              '</button>';
-          }
-          if (hasLink) {
-            html +=
-              '<a class="link-btn" href="' + escapeHtml(c.link.href) + '" data-noprop="1">' +
-                '&#128279; ' + escapeHtml(c.link.text) +
-              '</a>';
-          }
+          if (hasDetails) html += '<button type="button" class="info-btn" data-toggle="details" aria-expanded="false"><span class="chev">&#9656;</span> Details</button>';
+          if (hasTools) html += '<button type="button" class="info-btn" data-toggle="tools" aria-expanded="false"><span class="chev">&#9656;</span> Tools</button>';
+          if (hasLink) html += '<a class="link-btn" href="' + escapeHtml(c.link.href) + '" data-noprop="1">&#128279; ' + escapeHtml(c.link.text) + '</a>';
           html += '</div>';
-          if (hasTools) {
-            html += '<div class="tools-panel">' + c.tools.map(renderTool).join("") + '</div>';
-          }
+          if (hasDetails) html += '<div class="info-panel" data-panel="details">' + renderDetails(c.details) + '</div>';
+          if (hasTools) html += '<div class="info-panel" data-panel="tools">' + renderTools(c.tools) + '</div>';
         }
         item.innerHTML = html;
         el.appendChild(item);
@@ -406,66 +408,50 @@
 
     function toggleItem(id) {
       if (state[id]) { delete state[id]; } else { state[id] = true; }
-      saveState(state);
-      applyState();
+      saveState(state); applyState();
+    }
+
+    function togglePanel(item, kind, btn) {
+      const panel = item.querySelector('[data-panel="' + kind + '"]');
+      if (!panel) return;
+      const open = panel.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
     }
 
     document.addEventListener("click", function (e) {
       const link = e.target.closest && e.target.closest('[data-noprop="1"]');
-      if (link) {
-        e.stopPropagation();
-        return; // let the link navigate normally
-      }
+      if (link) { e.stopPropagation(); return; }
+      const det = e.target.closest && e.target.closest('[data-toggle="details"]');
+      if (det) { e.stopPropagation(); togglePanel(det.closest(".check-item"), "details", det); return; }
       const tools = e.target.closest && e.target.closest('[data-toggle="tools"]');
-      if (tools) {
-        e.stopPropagation();
-        const panel = tools.parentElement.nextElementSibling;
-        if (panel && panel.classList.contains("tools-panel")) {
-          const open = panel.classList.toggle("open");
-          tools.setAttribute("aria-expanded", open ? "true" : "false");
-        }
-        return;
-      }
+      if (tools) { e.stopPropagation(); togglePanel(tools.closest(".check-item"), "tools", tools); return; }
       const main = e.target.closest && e.target.closest('[data-toggle="check"]');
-      if (main) {
-        const item = main.closest(".check-item");
-        toggleItem(item.dataset.id);
-        return;
-      }
+      if (main) { toggleItem(main.closest(".check-item").dataset.id); return; }
       const reset = e.target.closest && e.target.closest(".reset-btn");
       if (reset) {
         const which = reset.dataset.reset;
         const list = which === "w1" ? W1 : W2;
         list.forEach(function (c) { delete state[c.id]; });
-        saveState(state);
-        applyState();
+        saveState(state); applyState();
       }
     });
 
     document.addEventListener("keydown", function (e) {
       if (e.key !== " " && e.key !== "Enter") return;
       const main = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.toggle === "check" ? document.activeElement : null;
-      if (main) {
-        e.preventDefault();
-        const item = main.closest(".check-item");
-        toggleItem(item.dataset.id);
-      }
+      if (main) { e.preventDefault(); toggleItem(main.closest(".check-item").dataset.id); }
     });
 
     render("w1-criteria", W1);
     render("w2-criteria", W2);
     applyState();
 
-    // Theme toggle
     (function () {
       const saved = localStorage.getItem("theme");
       if (saved) document.documentElement.setAttribute("data-theme", saved);
       const btn = document.getElementById("theme-toggle");
       if (!btn) return;
-      function paintIcon() {
-        const dark = document.documentElement.getAttribute("data-theme") === "dark";
-        btn.textContent = dark ? "☀️" : "🌙";
-      }
+      function paintIcon() { btn.textContent = document.documentElement.getAttribute("data-theme") === "dark" ? "☀️" : "🌙"; }
       paintIcon();
       btn.addEventListener("click", function () {
         const cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
