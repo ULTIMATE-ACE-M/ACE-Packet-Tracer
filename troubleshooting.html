@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Troubleshooting - ACE Packet Tracer</title>
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .ts-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+    gap: 28px;
+  }
+  .ts-sidebar {
+    position: sticky;
+    top: 80px;
+    align-self: start;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+  .ts-sidebar h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin: 0 0 8px;
+    padding: 0 12px;
+  }
+  .ts-sidebar ul { list-style: none; margin: 0; padding: 0; }
+  .ts-sidebar a {
+    display: block;
+    padding: 8px 12px;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 2px;
+  }
+  .ts-sidebar a:hover { background: var(--surface-2); color: var(--text); }
+  .ts-sidebar a.active { background: var(--primary); color: white; }
+  .ts-main h1 {
+    font-size: 28px;
+    margin: 0 0 4px;
+  }
+  .ts-intro {
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    margin: 0 0 32px;
+    max-width: 720px;
+  }
+  .ts-scenario {
+    margin-bottom: 48px;
+    scroll-margin-top: 80px;
+  }
+  .ts-scenario-head {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ts-scenario-head h2 {
+    font-size: 22px;
+    margin: 0 0 4px;
+    color: var(--text);
+  }
+  .ts-scenario-head p {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .ts-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .ts-num {
+    background: var(--primary);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .ts-card-body { flex: 1; min-width: 0; }
+  .ts-card-body h3 {
+    font-size: 15px;
+    margin: 0 0 6px;
+    color: var(--text);
+  }
+  .ts-card-body p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+    line-height: 1.6;
+  }
+  .ts-cmds {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: ui-monospace, Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    margin: 0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .ts-cmds .prompt { color: #7ec7ff; font-weight: 600; }
+  .ts-pitfall {
+    background: var(--surface-2);
+    border-left: 3px solid #f59e0b;
+    border-radius: 0 6px 6px 0;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .ts-pitfall strong { color: #f59e0b; }
+  .ts-pitfall code {
+    font-family: ui-monospace, Consolas, monospace;
+    background: var(--surface);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--accent);
+  }
+  .tip-inline {
+    font-family: ui-monospace, Consolas, monospace;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+  }
+  .topbar-tabs { display: flex; gap: 4px; align-items: center; }
+  .tab-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .tab-btn:hover { color: var(--text); background: var(--surface-2); }
+  .tab-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+  @media (max-width: 900px) {
+    .ts-layout { grid-template-columns: 1fr; }
+    .ts-sidebar { position: static; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-left">
+    <a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;">Cisco Packet Tracer Reference</a>
+  </div>
+  <nav class="topbar-tabs">
+    <a class="tab-btn" href="index.html">Datacom</a>
+    <a class="tab-btn" href="security.html">Security</a>
+    <a class="tab-btn active" href="troubleshooting.html">Troubleshooting</a>
+  </nav>
+  <div class="topbar-right">
+    <button id="theme-toggle" class="icon-btn" title="Toggle theme" aria-label="Toggle theme">☀️</button>
+  </div>
+</header>
+
+<div class="ts-layout">
+  <aside class="ts-sidebar">
+    <h2>Scenario's</h2>
+    <ul id="scenario-list"></ul>
+  </aside>
+  <main class="ts-main" id="content">
+    <h1>Troubleshooting flowcharts</h1>
+    <p class="ts-intro">Stappenplannen voor de meestvoorkomende netwerk-problemen. Werk de checklist van boven naar beneden door, en stop bij de eerste fout. Elk scenario eindigt met een veelvoorkomende valkuil.</p>
+    <div id="scenarios"></div>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const root = document.documentElement;
+  const tt = document.getElementById("theme-toggle");
+  let cur;
+  try {
+    cur = localStorage.getItem("ciscoref-theme") || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  } catch (e) { cur = "dark"; }
+  function apply(t) {
+    root.setAttribute("data-theme", t);
+    tt.textContent = t === "dark" ? "☀️" : "🌙";
+  }
+  apply(cur);
+  tt.addEventListener("click", () => {
+    cur = cur === "dark" ? "light" : "dark";
+    try { localStorage.setItem("ciscoref-theme", cur); } catch (e) {}
+    apply(cur);
+  });
+
+  const SCENARIOS = [
+    {
+      id: "no-ping",
+      title: "PC kan niet pingen",
+      desc: "Werk van onder naar boven door de OSI-lagen. Stop bij de eerste fout en los die op voordat je verder gaat.",
+      steps: [
+        { t: "Fysiek: is de link op?", d: "Brandt het lampje op de switchpoort? Kabel goed ingeprikt aan beide kanten? Check op PC- en switch-zijde.",
+          cmds: [{p:"SW1#",c:"show interfaces status"},{p:"SW1#",c:"show interfaces Fa0/1"}] },
+        { t: "L2: poort in het juiste VLAN?", d: "Access port \u2192 klopt de access VLAN met het IP-subnet van de PC? Trunk port \u2192 mag dit VLAN over de trunk?",
+          cmds: [{p:"SW1#",c:"show vlan brief"},{p:"SW1#",c:"show interfaces trunk"}] },
+        { t: "L3: PC zelf - IP, mask, gateway", d: "Open Desktop \u2192 IP Configuration. Klopt het IP, mask, default gateway? Test eerst <span class=\"tip-inline\">ping 127.0.0.1</span>, dan eigen IP, dan gateway.",
+          cmds: [{p:"PC>",c:"ipconfig /all"},{p:"PC>",c:"ping <gateway>"}] },
+        { t: "Router-interface: up + IP correct?", d: "Op de router: staat de interface naar dat VLAN administratively up en line protocol up? Is het IP in het juiste subnet?",
+          cmds: [{p:"R1#",c:"show ip interface brief"},{p:"R1#",c:"show running-config interface Gi0/0"}] },
+        { t: "Routing: kent de router het andere subnet?", d: "Bij ping naar ander netwerk: staat er een route in de routing tabel? Static, OSPF of EIGRP geleerd?",
+          cmds: [{p:"R1#",c:"show ip route"},{p:"R1#",c:"show ip protocols"}] }
+      ],
+      pitfall: "Bij router-on-a-stick vergeet je de subinterface een <code>encapsulation dot1q &lt;vlan&gt;</code> te geven - interface blijft dan up maar leest geen verkeer."
+    },
+    {
+      id: "trunk",
+      title: "Trunk-link werkt niet",
+      desc: "Trunks vereisen dat beide kanten over alles overeenstemmen: mode, encapsulatie, native VLAN en allowed list.",
+      steps: [
+        { t: "Beide kanten in compatibele mode?", d: "Mode-combinaties die WEL trunken: trunk-trunk, trunk-desirable, trunk-auto, desirable-desirable, desirable-auto. NIET: access-trunk, auto-auto.",
+          cmds: [{p:"SW1#",c:"show interfaces trunk"},{p:"SW1#",c:"show interfaces Fa0/24 switchport"}] },
+        { t: "Encapsulatie klopt aan beide kanten?", d: "Op 3560/3550 moet je expliciet <span class=\"tip-inline\">switchport trunk encapsulation dot1q</span> doen voor je mode trunk zet.",
+          cmds: [{p:"SW1(config-if)#",c:"switchport trunk encapsulation dot1q"},{p:"SW1(config-if)#",c:"switchport mode trunk"}] },
+        { t: "Native VLAN gelijk aan beide kanten?", d: "Verschillende native VLANs geven een CDP-mismatch waarschuwing en frames kunnen op het verkeerde VLAN belanden. Default is VLAN 1.",
+          cmds: [{p:"SW1#",c:"show interfaces trunk"}] },
+        { t: "VLAN aanwezig in allowed-list?", d: "Default staan alle VLANs toegestaan op de trunk. Als allowed-list expliciet is gezet: staat jouw VLAN er bij?",
+          cmds: [{p:"SW1#",c:"show interfaces Fa0/24 switchport"},{p:"SW1(config-if)#",c:"switchport trunk allowed vlan 10,20,30"}] },
+        { t: "VLAN bestaat in de VLAN-database?", d: "Een VLAN dat niet in <span class=\"tip-inline\">show vlan brief</span> staat wordt automatisch geblokkeerd op trunks. Maak het VLAN aan met <span class=\"tip-inline\">vlan X</span>.",
+          cmds: [{p:"SW1#",c:"show vlan brief"},{p:"SW1(config)#",c:"vlan 10"}] }
+      ],
+      pitfall: "<code>switchport mode trunk</code> op een 3560 zonder eerst <code>switchport trunk encapsulation dot1q</code> geeft de fout <em>Command rejected: An interface whose trunk encapsulation is 'Auto' can not be configured to 'trunk' mode</em>."
+    },
+    {
+      id: "dhcp",
+      title: "DHCP geeft geen IP",
+      desc: "Werk van client naar server: staat de PC echt op DHCP, kan hij de server bereiken, en heeft de pool ruimte over?",
+      steps: [
+        { t: "PC echt op DHCP gezet?", d: "Op de PC: Desktop \u2192 IP Configuration \u2192 staat het rondje op 'DHCP'? Niet bij static blijven hangen.",
+          cmds: [{p:"PC>",c:"ipconfig /all"}] },
+        { t: "L2/L3-pad: kan PC bij de DHCP-server?", d: "Test of het basis-netwerk werkt. Geef PC tijdelijk een statisch IP om te kunnen pingen naar de gateway/server.",
+          cmds: [{p:"PC>",c:"ping <gateway>"},{p:"PC>",c:"ping <dhcp-server-ip>"}] },
+        { t: "DHCP-server pool actief en niet vol?", d: "Op de router: bestaat de pool? Hoeveel adressen al uitgedeeld? Kijk ook of de range klopt met het subnet van de client.",
+          cmds: [{p:"R1#",c:"show ip dhcp pool"},{p:"R1#",c:"show ip dhcp binding"}] },
+        { t: "Helper-address op de client-interface?", d: "DHCP-broadcasts gaan niet over een router. Op de interface waar de CLIENT zit moet <span class=\"tip-inline\">ip helper-address &lt;dhcp-server-ip&gt;</span> staan.",
+          cmds: [{p:"R1#",c:"show running-config interface Gi0/0"},{p:"R1(config-if)#",c:"ip helper-address 10.0.0.5"}] },
+        { t: "Excluded range niet te groot?", d: "Check welke adressen je uitsluit met <span class=\"tip-inline\">ip dhcp excluded-address</span>. Als bv het hele eerste segment uitgesloten is blijft niks over.",
+          cmds: [{p:"R1#",c:"show running-config | include excluded"}] }
+      ],
+      pitfall: "<code>ip helper-address</code> staat aan de verkeerde kant - op de SERVER-interface in plaats van op de CLIENT-interface. Het moet op de interface waar de DHCP-broadcasts binnenkomen."
+    },
+    {
+      id: "ospf",
+      title: "OSPF buren komen niet up",
+      desc: "Voor een OSPF-neighborship moeten subnet, area, timers, network-type, MTU en authenticatie aan beide kanten gelijk zijn.",
+      steps: [
+        { t: "Zijn ze in hetzelfde subnet?", d: "Het meest voorkomende: een /24 aan de ene kant, /25 aan de andere. OSPF blijft dan in INIT/EXSTART hangen. Check IP en mask op beide interfaces.",
+          cmds: [{p:"R1#",c:"show ip interface brief"},{p:"R1#",c:"show ip ospf interface Gi0/0"}] },
+        { t: "Beide in dezelfde OSPF area?", d: "Area-ID moet identiek zijn op deze link. <span class=\"tip-inline\">network 192.168.1.0 0.0.0.255 area 0</span> aan ene kant, area 1 aan andere \u2192 geen buurschap.",
+          cmds: [{p:"R1#",c:"show ip ospf neighbor"},{p:"R1#",c:"show ip ospf interface Gi0/0"}] },
+        { t: "Hello/dead timers gelijk?", d: "Default: 10/40 sec op broadcast, 30/120 op NBMA. Als een kant aangepast is, mismatch \u2192 geen neighborship.",
+          cmds: [{p:"R1#",c:"show ip ospf interface Gi0/0"}] },
+        { t: "Network-type aan beide kanten gelijk?", d: "Broadcast vs point-to-point. <span class=\"tip-inline\">show ip ospf interface</span> toont 'Network Type'. Forceer met <span class=\"tip-inline\">ip ospf network point-to-point</span>.",
+          cmds: [{p:"R1#",c:"show ip ospf interface Gi0/0 | include Network"}] },
+        { t: "Authentication / passive-interface?", d: "Staat de interface op passive aan een kant? Of OSPF-authenticatie met andere key? Beide blokkeren neighborship.",
+          cmds: [{p:"R1#",c:"show ip protocols"},{p:"R1#",c:"show ip ospf interface Gi0/0 | include authentication"}] }
+      ],
+      pitfall: "Wildcard-mask in het <code>network</code> statement matcht niet wat je denkt. <code>network 192.168.1.0 0.0.0.255</code> include alleen 192.168.1.0/24 - een /23 valt er buiten."
+    },
+    {
+      id: "ssh",
+      title: "SSH werkt niet",
+      desc: "SSH heeft vier dingen nodig: een hostname + domain, een RSA-key, lokale users, en VTY-lines die SSH toestaan.",
+      steps: [
+        { t: "Hostname en ip domain-name ingesteld?", d: "Een RSA-key kun je pas genereren als het apparaat een hostname (niet 'Router') en een domain heeft.",
+          cmds: [{p:"R1(config)#",c:"hostname R1"},{p:"R1(config)#",c:"ip domain-name campus.local"}] },
+        { t: "RSA-key gegenereerd?", d: "Zonder key geen SSH. Genereer met minimaal 1024 bits (2048 aanbevolen). SSH versie 2 vereist 768+ bits.",
+          cmds: [{p:"R1(config)#",c:"crypto key generate rsa modulus 2048"},{p:"R1#",c:"show crypto key mypubkey rsa"}] },
+        { t: "SSH versie 2 geforceerd?", d: "Default is versie 1+2. Forceer versie 2 - veiliger en standaard verwacht.",
+          cmds: [{p:"R1(config)#",c:"ip ssh version 2"},{p:"R1#",c:"show ip ssh"}] },
+        { t: "VTY-lines staan SSH toe + lokale login?", d: "Zonder <span class=\"tip-inline\">transport input ssh</span> en <span class=\"tip-inline\">login local</span> wordt SSH geweigerd op de VTY.",
+          cmds: [{p:"R1(config)#",c:"line vty 0 4"},{p:"R1(config-line)#",c:"transport input ssh"},{p:"R1(config-line)#",c:"login local"}] },
+        { t: "Lokale user bestaat met password?", d: "Bij <span class=\"tip-inline\">login local</span> moet er minimaal een <span class=\"tip-inline\">username ... secret ...</span> staan.",
+          cmds: [{p:"R1#",c:"show running-config | include username"},{p:"R1(config)#",c:"username admin privilege 15 secret Cisco123"}] }
+      ],
+      pitfall: "<code>ip domain-name</code> nooit gezet - <code>crypto key generate rsa</code> faalt met <em>% Please define a domain-name first.</em>"
+    },
+    {
+      id: "acl",
+      title: "ACL blokkeert verkeer onbedoeld",
+      desc: "ACLs zijn top-down met een impliciete deny aan het eind. Een verkeerde regel of richting kan al je verkeer blokkeren.",
+      steps: [
+        { t: "ACL aan de juiste interface gebonden?", d: "Inbound of outbound? Op welke interface? <span class=\"tip-inline\">ip access-group X in</span> blokkeert binnenkomend verkeer; <span class=\"tip-inline\">out</span> blokkeert uitgaand.",
+          cmds: [{p:"R1#",c:"show running-config interface Gi0/0"}] },
+        { t: "Regels staan in de juiste volgorde?", d: "Top-down: eerste match wint. Een specifieke 'permit' onder een brede 'deny' wordt nooit bereikt.",
+          cmds: [{p:"R1#",c:"show access-lists 101"}] },
+        { t: "Source/dest niet verwisseld bij extended?", d: "Extended ACL: <span class=\"tip-inline\">access-list 101 permit ip SRC SRC-WC DST DST-WC</span>. Source eerst, dan destination. Bij twijfel: teken het op papier.",
+          cmds: [{p:"R1#",c:"show access-lists"}] },
+        { t: "Impliciete deny aan het einde", d: "Elke ACL eindigt met onzichtbare <span class=\"tip-inline\">deny any any</span>. Vergeet niet een <span class=\"tip-inline\">permit any</span> (of specifieker) toe te voegen voor alles wat door moet.",
+          cmds: [{p:"R1(config-ext-nacl)#",c:"permit ip any any"}] },
+        { t: "Match-counters checken: welke regels werken?", d: "<span class=\"tip-inline\">show access-lists</span> toont hit-counters per regel. Veel hits op de impliciete deny = je mist een permit-regel.",
+          cmds: [{p:"R1#",c:"show access-lists"},{p:"R1#",c:"clear access-list counters"}] }
+      ],
+      pitfall: "Inbound ACL op de LAN-interface met source = LAN-subnet - eigen verkeer wordt direct geblokkeerd voordat het ergens heen kan."
+    }
+  ];
+
+  const list = document.getElementById("scenario-list");
+  SCENARIOS.forEach(s => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#" + s.id;
+    a.textContent = s.title;
+    a.dataset.id = s.id;
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  const container = document.getElementById("scenarios");
+  function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  SCENARIOS.forEach(s => {
+    let html = '<section class="ts-scenario" id="' + s.id + '">';
+    html += '<div class="ts-scenario-head"><h2>' + esc(s.title) + '</h2><p>' + esc(s.desc) + '</p></div>';
+    s.steps.forEach((step, i) => {
+      html += '<div class="ts-card"><div class="ts-num">' + (i + 1) + '</div><div class="ts-card-body">';
+      html += '<h3>' + esc(step.t) + '</h3><p>' + step.d + '</p>';
+      if (step.cmds && step.cmds.length) {
+        html += '<pre class="ts-cmds">';
+        step.cmds.forEach((c, j) => {
+          if (j > 0) html += '\n';
+          html += '<span class="prompt">' + esc(c.p) + '</span> ' + esc(c.c);
+        });
+        html += '</pre>';
+      }
+      html += '</div></div>';
+    });
+    html += '<div class="ts-pitfall"><strong>Veelvoorkomende val:</strong> ' + s.pitfall + '</div>';
+    html += '</section>';
+    container.insertAdjacentHTML("beforeend", html);
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        document.querySelectorAll(".ts-sidebar a").forEach(a => a.classList.remove("active"));
+        const link = document.querySelector('.ts-sidebar a[data-id="' + entry.target.id + '"]');
+        if (link) link.classList.add("active");
+      }
+    });
+  }, { rootMargin: "-100px 0px -60% 0px", threshold: 0 });
+  document.querySelectorAll(".ts-scenario").forEach(s => observer.observe(s));
+})();
+</script>
+</body>
+</html>
