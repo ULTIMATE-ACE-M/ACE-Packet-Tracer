@@ -210,17 +210,71 @@
     if (m.includes("global config")) return "(config)#";
     return "#";
   }
+  function subModeFor(mode) {
+    const m = (mode || "").toLowerCase();
+    if (m.includes("interface config / range")) return "interface range FastEthernet0/1 - 12";
+    if (m.includes("sub-interface")) return "interface GigabitEthernet0/0.10";
+    if (m.includes("interface config")) return "interface GigabitEthernet0/1";
+    if (m.includes("vlan config")) return "vlan 10";
+    if (m.includes("line config")) return "line vty 0 4";
+    if (m.includes("router config")) {
+      if (cat.id === "rip") return "router rip";
+      if (cat.id === "ospf") return "router ospf 1";
+      if (cat.id === "eigrp") return "router eigrp 100";
+      return "router ospf 1";
+    }
+    if (m.includes("dhcp config")) return "ip dhcp pool LAN_POOL";
+    if (m.includes("std-nacl")) return "ip access-list standard BLOCK_HR";
+    if (m.includes("ext-nacl")) return "ip access-list extended WEB_FILTER";
+    if (m.includes("std/ext")) return cat.id === "acl-extended" ? "ip access-list extended WEB_FILTER" : "ip access-list standard BLOCK_HR";
+    return null;
+  }
+  function concretize(step) {
+    const p = (step || "").trim();
+    if (p === "enable") return "enable";
+    if (p === "configure terminal" || p === "conf t") return "configure terminal";
+    if (p === "<enter the desired sub-mode>") return subModeFor(cmd.mode) || p;
+    if (p === "interface <type><number>") return "interface GigabitEthernet0/1";
+    if (p === "interface Serial<number>") return "interface Serial0/0/0";
+    if (p === "interface <type><number>.<sub-id>") return "interface GigabitEthernet0/0.10";
+    if (p === "interface range <type><range>") return "interface range FastEthernet0/1 - 12";
+    if (p === "vlan <id>") return "vlan 10";
+    if (/^router /.test(p)) {
+      if (cat.id === "rip") return "router rip";
+      if (cat.id === "ospf") return "router ospf 1";
+      if (cat.id === "eigrp") return "router eigrp 100";
+      return "router ospf 1";
+    }
+    if (/^line /.test(p)) return "line vty 0 4";
+    if (p === "ip access-list standard <name>") return "ip access-list standard BLOCK_HR";
+    if (p === "ip access-list extended <name>") return "ip access-list extended WEB_FILTER";
+    if (p === "ip access-list standard|extended <name>") {
+      return cat.id === "acl-extended" ? "ip access-list extended WEB_FILTER" : "ip access-list standard BLOCK_HR";
+    }
+    if (p === "ip dhcp pool <name>") return "ip dhcp pool LAN_POOL";
+    return p;
+  }
+  function finalCommand() {
+    if (cmd.example) {
+      const firstLine = cmd.example.split("\n").map(l => l.trim()).find(l => l.length > 0);
+      if (firstLine) {
+        const m = firstLine.match(/^[\w-]+(?:\([^)]+\))?[#>]\s*(.+)$/);
+        if (m) return m[1].trim();
+      }
+    }
+    return cmd.syntax || cmd.name;
+  }
   const dev = deviceFor();
   const lines = [];
   let curr = ">";
   for (const step of (cmd.prereqs || [])) {
     const s = step.toLowerCase().trim();
-    lines.push({ prompt: dev + curr, cmd: step });
+    lines.push({ prompt: dev + curr, cmd: concretize(step) });
     if (s === "enable") curr = "#";
     else if (s === "configure terminal" || s === "conf t") curr = "(config)#";
     else curr = modePrompt(cmd.mode);
   }
-  lines.push({ prompt: dev + curr, cmd: cmd.syntax || cmd.name });
+  lines.push({ prompt: dev + curr, cmd: finalCommand() });
   return lines;
 }
 
