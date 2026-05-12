@@ -359,4 +359,306 @@ const CATEGORIES = [
       {"name": "dir", "mode": "Privileged EXEC", "syntax": "dir [<filesystem>]", "description": "Lists files in a filesystem.", "example": "R1# dir flash:", "customize": "Replace `flash:` \u2192 the filesystem.", "prereqs": ["enable"]},
     ]
   },
+  {
+    id: "loopback",
+    title: "Loopback Interfaces",
+    blurb: "Virtuele interfaces die altijd up zijn — handig voor router-ID, management, en testen.",
+    commands: [
+      {"name": "interface Loopback", "mode": "Global Config", "syntax": "interface Loopback <number>", "description": "Maakt of betreedt een loopback-interface.", "example": "R1(config)# interface Loopback 0", "customize": "Vervang \`0\` \u2192 eigen loopback-nummer (0-2147483647).", "prereqs": ["enable", "configure terminal"]},
+      {"name": "ip address (loopback)", "mode": "Interface Config", "syntax": "ip address <ip> <mask>", "description": "Geef het loopback een IP - vaak /32 voor router-ID gebruik.", "example": "R1(config-if)# ip address 1.1.1.1 255.255.255.255", "customize": "Eigen IP en mask (vaak /32 = 255.255.255.255).", "prereqs": ["enable", "configure terminal", "interface Loopback <number>"]},
+      {"name": "no shutdown (loopback)", "mode": "Interface Config", "syntax": "no shutdown", "description": "Loopbacks zijn standaard up, maar bevestig met no shutdown.", "example": "R1(config-if)# no shutdown", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface Loopback <number>"]}
+    ]
+  },
+  {
+    id: "banners",
+    title: "Banners & Login Messages",
+    blurb: "Boodschappen die verschijnen bij login. Wettelijk verplicht: meld dat ongeautoriseerd gebruik verboden is.",
+    commands: [
+      {"name": "banner motd", "mode": "Global Config", "syntax": "banner motd <delim> <text> <delim>", "description": "Message-Of-The-Day banner - eerste boodschap bij elke verbinding.", "example": "R1(config)# banner motd #\n  AUTHORIZED ACCESS ONLY\n#", "customize": "Vervang \`#\` \u2192 eigen delimiter (mag niet in tekst voorkomen).", "prereqs": ["enable", "configure terminal"]},
+      {"name": "banner login", "mode": "Global Config", "syntax": "banner login <delim> <text> <delim>", "description": "Banner v\u00f3\u00f3r de username prompt.", "example": "R1(config)# banner login %Welkom - log in om verder te gaan%", "customize": "Eigen delimiter + tekst.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "banner exec", "mode": "Global Config", "syntax": "banner exec <delim> <text> <delim>", "description": "Banner n\u00e1 succesvolle login (in EXEC mode).", "example": "R1(config)# banner exec #EXEC-shell beschikbaar#", "customize": "Eigen delimiter + tekst.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "no banner motd", "mode": "Global Config", "syntax": "no banner motd", "description": "Verwijder de MOTD banner.", "example": "R1(config)# no banner motd", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]}
+    ]
+  },
+  {
+    id: "ntp",
+    title: "NTP (Network Time Protocol)",
+    blurb: "Klok-synchronisatie - cruciaal voor logging, certificaten en troubleshooting van timestamps.",
+    commands: [
+      {"name": "clock timezone", "mode": "Global Config", "syntax": "clock timezone <name> <hours-offset>", "description": "Stel de tijdzone in (UTC offset).", "example": "R1(config)# clock timezone CET 1", "customize": "Vervang \`CET\` \u2192 zone-naam, \`1\` \u2192 uren offset van UTC.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "clock summer-time", "mode": "Global Config", "syntax": "clock summer-time <name> recurring", "description": "Zomertijd-regeling (zelf instellen of recurring auto).", "example": "R1(config)# clock summer-time CEST recurring", "customize": "Vervang \`CEST\` \u2192 zomertijdnaam.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "ntp server", "mode": "Global Config", "syntax": "ntp server <ip-of-hostname>", "description": "Synchroniseer klok met een NTP-server.", "example": "R1(config)# ntp server 213.154.229.18", "customize": "Vervang IP \u2192 jouw NTP-server.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "ntp authentication-key", "mode": "Global Config", "syntax": "ntp authentication-key <id> md5 <key>", "description": "Definieer een NTP-authenticatie sleutel.", "example": "R1(config)# ntp authentication-key 1 md5 mySecret", "customize": "Eigen key-id en wachtwoord.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "show clock", "mode": "Privileged EXEC", "syntax": "show clock [detail]", "description": "Toon huidige tijd op het apparaat.", "example": "R1# show clock\n*15:33:12.456 CET Tue May 12 2026", "customize": "Optioneel \`detail\` voor extra info.", "prereqs": ["enable"]},
+      {"name": "show ntp status", "mode": "Privileged EXEC", "syntax": "show ntp status", "description": "Check of NTP gesynchroniseerd is met een server.", "example": "R1# show ntp status\nClock is synchronized, stratum 3", "customize": "Geen parameters.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "snmp",
+    title: "SNMP (Simple Network Management Protocol)",
+    blurb: "Monitoring en management van netwerkapparaten via SNMP v2c of v3.",
+    commands: [
+      {"name": "snmp-server community", "mode": "Global Config", "syntax": "snmp-server community <string> {RO|RW}", "description": "Zet een SNMPv2c community string (read-only of read-write).", "example": "R1(config)# snmp-server community public RO", "customize": "Vervang \`public\` \u2192 eigen string, kies RO of RW.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "snmp-server location", "mode": "Global Config", "syntax": "snmp-server location <text>", "description": "Stel de fysieke locatie in voor SNMP.", "example": "R1(config)# snmp-server location DataCenter-Amsterdam", "customize": "Eigen locatie-tekst.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "snmp-server contact", "mode": "Global Config", "syntax": "snmp-server contact <text>", "description": "Beheerder-contact voor SNMP.", "example": "R1(config)# snmp-server contact admin@firma.nl", "customize": "Eigen contact-info.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "snmp-server host", "mode": "Global Config", "syntax": "snmp-server host <ip> <community>", "description": "Stuur SNMP traps naar een management station.", "example": "R1(config)# snmp-server host 192.168.1.50 public", "customize": "IP van NMS + community.", "prereqs": ["enable", "configure terminal"]}
+    ]
+  },
+  {
+    id: "hsrp",
+    title: "HSRP (Hot Standby Router Protocol)",
+    blurb: "First-hop redundancy: twee routers delen \u00e9\u00e9n virtueel IP - clients merken niets van failover.",
+    commands: [
+      {"name": "standby version", "mode": "Interface Config", "syntax": "standby version {1|2}", "description": "Kies HSRPv1 (default) of v2 (256 groups, IPv6).", "example": "R1(config-if)# standby version 2", "customize": "Vervang \`2\` \u2192 versie.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "standby ip", "mode": "Interface Config", "syntax": "standby <group> ip <virtual-ip>", "description": "Definieer een HSRP-groep en virtueel IP. Active router beantwoordt het virtuele IP.", "example": "R1(config-if)# standby 10 ip 192.168.1.1", "customize": "Vervang \`10\` \u2192 group-id, \`192.168.1.1\` \u2192 virtueel IP.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "standby priority", "mode": "Interface Config", "syntax": "standby <group> priority <0-255>", "description": "Stel HSRP-prioriteit in. Hoogste prio wordt active (default 100).", "example": "R1(config-if)# standby 10 priority 110", "customize": "Group-id + nieuwe prio.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "standby preempt", "mode": "Interface Config", "syntax": "standby <group> preempt", "description": "Sta toe dat hoger-prio router de active rol terugneemt.", "example": "R1(config-if)# standby 10 preempt", "customize": "Group-id.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "standby authentication", "mode": "Interface Config", "syntax": "standby <group> authentication md5 key-string <key>", "description": "HSRP authenticatie met MD5.", "example": "R1(config-if)# standby 10 authentication md5 key-string secret123", "customize": "Group-id + key.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "standby timers", "mode": "Interface Config", "syntax": "standby <group> timers <hello> <hold>", "description": "Wijzig HSRP hello (default 3s) en hold (default 10s).", "example": "R1(config-if)# standby 10 timers 1 4", "customize": "Group-id + tijden in seconden.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "show standby", "mode": "Privileged EXEC", "syntax": "show standby [brief]", "description": "Toon HSRP-status: wie is active/standby, priorities, virtueel IP.", "example": "R1# show standby brief", "customize": "Optioneel \`brief\`.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "aaa-local",
+    title: "AAA & Local Users",
+    blurb: "Authenticatie, autorisatie en accounting met lokale users of via RADIUS/TACACS+.",
+    commands: [
+      {"name": "username (local)", "mode": "Global Config", "syntax": "username <name> privilege <0-15> secret <password>", "description": "Maak een lokaal user account met privilege-level en hashed password.", "example": "R1(config)# username admin privilege 15 secret Cisco123", "customize": "Vervang naam, level (15 = full), password.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "aaa new-model", "mode": "Global Config", "syntax": "aaa new-model", "description": "Activeer het AAA-framework. Verplicht voor de meeste AAA-features.", "example": "R1(config)# aaa new-model", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "aaa authentication login", "mode": "Global Config", "syntax": "aaa authentication login {default|<list>} <method1> [<method2>]", "description": "Definieer login-authenticatie methodes (local, radius, tacacs+, enable).", "example": "R1(config)# aaa authentication login default local", "customize": "Lijst-naam en methodes.", "prereqs": ["enable", "configure terminal", "aaa new-model"]},
+      {"name": "login local", "mode": "Line Config", "syntax": "login local", "description": "Gebruik lokale user database voor login op deze line.", "example": "R1(config-line)# login local", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "line <console|vty|aux> <number>"]},
+      {"name": "enable secret", "mode": "Global Config", "syntax": "enable secret <password>", "description": "Hashed password voor enable mode (Privileged EXEC).", "example": "R1(config)# enable secret StrongP@ss", "customize": "Vervang \u2192 sterk wachtwoord.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "service password-encryption", "mode": "Global Config", "syntax": "service password-encryption", "description": "Versleutel alle plaintext passwords (zwakke Type 7 - beter: \`secret\`).", "example": "R1(config)# service password-encryption", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]}
+    ]
+  },
+  {
+    id: "dhcp-relay",
+    title: "DHCP Relay (helper-address)",
+    blurb: "DHCP requests werken alleen in eigen broadcast-domein. Helper-address forward ze naar een centrale DHCP server.",
+    commands: [
+      {"name": "ip helper-address", "mode": "Interface Config", "syntax": "ip helper-address <dhcp-server-ip>", "description": "Forward broadcasts (DHCP, TFTP, NTP, etc.) naar het opgegeven IP.", "example": "R1(config-if)# ip helper-address 10.0.0.5", "customize": "Vervang \u2192 IP van je DHCP server.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ip forward-protocol", "mode": "Global Config", "syntax": "ip forward-protocol udp <port>", "description": "Welke UDP-poorten helper-address forward (default: DHCP, TFTP, DNS, etc.).", "example": "R1(config)# ip forward-protocol udp 67", "customize": "UDP-poortnummer.", "prereqs": ["enable", "configure terminal"]}
+    ]
+  },
+  {
+    id: "dtp-vtp",
+    title: "DTP & VTP (Trunking & VLAN sync)",
+    blurb: "DTP onderhandelt trunks automatisch, VTP synchroniseert VLAN-database tussen switches.",
+    commands: [
+      {"name": "switchport nonegotiate", "mode": "Interface Config", "syntax": "switchport nonegotiate", "description": "Schakel DTP uit op deze poort - statisch mode.", "example": "SW1(config-if)# switchport nonegotiate", "customize": "Geen parameters. Gebruik na switchport mode access/trunk.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "switchport mode dynamic auto", "mode": "Interface Config", "syntax": "switchport mode dynamic auto", "description": "DTP passive: wordt trunk als peer trunk wil. Default op 2960.", "example": "SW1(config-if)# switchport mode dynamic auto", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "switchport mode dynamic desirable", "mode": "Interface Config", "syntax": "switchport mode dynamic desirable", "description": "DTP active: probeert actief trunk te vormen met peer.", "example": "SW1(config-if)# switchport mode dynamic desirable", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "vtp mode", "mode": "Global Config", "syntax": "vtp mode {server|client|transparent}", "description": "Stel VTP modus in: server (default, kan VLANs cre\u00ebren), client (volgt server), transparent (negeert VTP).", "example": "SW1(config)# vtp mode client", "customize": "Kies een mode.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "vtp domain", "mode": "Global Config", "syntax": "vtp domain <name>", "description": "Stel VTP-domeinnaam in. Alle switches in zelfde domein synchroniseren VLAN-info.", "example": "SW1(config)# vtp domain campus.local", "customize": "Eigen domein-naam.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "vtp password", "mode": "Global Config", "syntax": "vtp password <pwd>", "description": "Beveilig VTP updates met een wachtwoord (case-sensitive, beide kanten gelijk).", "example": "SW1(config)# vtp password Vtp$ecret", "customize": "Sterk wachtwoord.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "vtp version", "mode": "Global Config", "syntax": "vtp version {1|2|3}", "description": "VTP versie - v3 ondersteunt extended VLANs (1006-4094).", "example": "SW1(config)# vtp version 2", "customize": "Versienummer.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "show vtp status", "mode": "Privileged EXEC", "syntax": "show vtp status", "description": "Toon VTP modus, versie, domeinnaam, revisie, aantal VLANs.", "example": "SW1# show vtp status", "customize": "Geen parameters.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "storm-control",
+    title: "Storm Control",
+    blurb: "Beperk broadcast/multicast/unknown-unicast stormen die de switch kunnen overbelasten.",
+    commands: [
+      {"name": "storm-control broadcast", "mode": "Interface Config", "syntax": "storm-control broadcast level <percent>", "description": "Beperk inkomende broadcasts tot een percentage van de bandbreedte.", "example": "SW1(config-if)# storm-control broadcast level 5.00", "customize": "Vervang \`5.00\` \u2192 percentage (0-100).", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "storm-control multicast", "mode": "Interface Config", "syntax": "storm-control multicast level <percent>", "description": "Idem voor multicast verkeer.", "example": "SW1(config-if)# storm-control multicast level 10.00", "customize": "Percentage.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "storm-control action", "mode": "Interface Config", "syntax": "storm-control action {shutdown|trap}", "description": "Wat te doen bij overschrijding: shutdown (err-disable) of trap (SNMP melding).", "example": "SW1(config-if)# storm-control action shutdown", "customize": "Kies actie.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]}
+    ]
+  },
+  {
+    id: "cdp-lldp",
+    title: "CDP & LLDP (Neighbor Discovery)",
+    blurb: "CDP (Cisco only) en LLDP (open standaard) helpen je buren te vinden. CDP is default aan op Cisco.",
+    commands: [
+      {"name": "cdp run", "mode": "Global Config", "syntax": "cdp run", "description": "Activeer CDP globaal (default aan).", "example": "R1(config)# cdp run", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "no cdp run", "mode": "Global Config", "syntax": "no cdp run", "description": "Zet CDP uit globaal - beveiliging best practice op externe interfaces.", "example": "R1(config)# no cdp run", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "no cdp enable", "mode": "Interface Config", "syntax": "no cdp enable", "description": "Zet CDP uit op deze specifieke interface (bv. naar ISP).", "example": "R1(config-if)# no cdp enable", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "lldp run", "mode": "Global Config", "syntax": "lldp run", "description": "Activeer LLDP globaal (default UIT op Cisco).", "example": "R1(config)# lldp run", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "show cdp neighbors", "mode": "Privileged EXEC", "syntax": "show cdp neighbors [detail]", "description": "Lijst directe Cisco-buren: device-ID, lokale poort, capability, platform, remote poort.", "example": "R1# show cdp neighbors detail", "customize": "Optioneel \`detail\` voor IP en IOS-versie.", "prereqs": ["enable"]},
+      {"name": "show lldp neighbors", "mode": "Privileged EXEC", "syntax": "show lldp neighbors [detail]", "description": "Lijst LLDP-buren (alle vendors).", "example": "R1# show lldp neighbors", "customize": "Optioneel \`detail\`.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "ipv6-routing",
+    title: "IPv6 Routing (OSPFv3, static)",
+    blurb: "IPv6 dynamic en statische routing. Maakt gebruik van link-local adressen voor next-hop.",
+    commands: [
+      {"name": "ipv6 unicast-routing", "mode": "Global Config", "syntax": "ipv6 unicast-routing", "description": "Schakel IPv6 routing aan (default uit op routers).", "example": "R1(config)# ipv6 unicast-routing", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "ipv6 route", "mode": "Global Config", "syntax": "ipv6 route <prefix>/<len> <next-hop|interface>", "description": "Statische IPv6 route. Next-hop kan IPv6 address of uitgaande interface zijn.", "example": "R1(config)# ipv6 route 2001:db8:2::/64 2001:db8:1::2", "customize": "Vervang prefix en next-hop.", "prereqs": ["enable", "configure terminal", "ipv6 unicast-routing"]},
+      {"name": "ipv6 route ::/0", "mode": "Global Config", "syntax": "ipv6 route ::/0 <next-hop>", "description": "IPv6 default route (\u00abIPv6 quad-zero\u00bb).", "example": "R1(config)# ipv6 route ::/0 2001:db8:0::1", "customize": "Vervang next-hop \u2192 ISP/upstream router.", "prereqs": ["enable", "configure terminal", "ipv6 unicast-routing"]},
+      {"name": "ipv6 router ospf", "mode": "Global Config", "syntax": "ipv6 router ospf <pid>", "description": "Activeer OSPFv3 voor IPv6.", "example": "R1(config)# ipv6 router ospf 1", "customize": "Vervang \`1\` \u2192 process-id (lokaal).", "prereqs": ["enable", "configure terminal", "ipv6 unicast-routing"]},
+      {"name": "router-id (OSPFv3)", "mode": "Router Config", "syntax": "router-id <ipv4>", "description": "Verplicht voor OSPFv3 - 32-bit ID in IPv4 notatie (loopback IP).", "example": "R1(config-rtr)# router-id 1.1.1.1", "customize": "Vervang \u2192 loopback-IP of unieke 32-bit waarde.", "prereqs": ["enable", "configure terminal", "ipv6 router ospf <pid>"]},
+      {"name": "ipv6 ospf area (interface)", "mode": "Interface Config", "syntax": "ipv6 ospf <pid> area <area>", "description": "OSPFv3 wordt per interface aangezet (geen network statements zoals OSPFv2).", "example": "R1(config-if)# ipv6 ospf 1 area 0", "customize": "Process-id + area.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ipv6 nd ra suppress", "mode": "Interface Config", "syntax": "ipv6 nd ra suppress", "description": "Onderdruk Router Advertisements (geen RA naar dit segment).", "example": "R1(config-if)# ipv6 nd ra suppress", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "show ipv6 route", "mode": "Privileged EXEC", "syntax": "show ipv6 route", "description": "Toon de IPv6 routing tabel (C=connected, S=static, O=OSPF, D=EIGRP).", "example": "R1# show ipv6 route", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show ipv6 interface brief", "mode": "Privileged EXEC", "syntax": "show ipv6 interface brief", "description": "Korte lijst van IPv6 interface adressen (link-local + global).", "example": "R1# show ipv6 interface brief", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show ipv6 ospf neighbor", "mode": "Privileged EXEC", "syntax": "show ipv6 ospf neighbor", "description": "Lijst OSPFv3 neighbors en state.", "example": "R1# show ipv6 ospf neighbor", "customize": "Geen parameters.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "routing-tweaks",
+    title: "Routing Tweaks (passive, summary, default)",
+    blurb: "Knobs die je vaak nodig hebt: routes adverteren, samenvatten, of stilte op LAN-interfaces.",
+    commands: [
+      {"name": "passive-interface", "mode": "Router Config", "syntax": "passive-interface <type><number>", "description": "Stuur geen routing-updates uit deze interface (wel ontvangen). Gebruik op LAN poorten.", "example": "R1(config-router)# passive-interface GigabitEthernet0/0", "customize": "Vervang interface.", "prereqs": ["enable", "configure terminal", "router <protocol> <process-id|as-number>"]},
+      {"name": "passive-interface default", "mode": "Router Config", "syntax": "passive-interface default", "description": "Zet ALLE interfaces passive (sluit daarna selectief uit met \`no passive-interface\`).", "example": "R1(config-router)# passive-interface default", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "router <protocol> <process-id|as-number>"]},
+      {"name": "default-information originate", "mode": "Router Config", "syntax": "default-information originate", "description": "Adverteer een default route (0.0.0.0/0) naar OSPF/EIGRP/RIP neighbors.", "example": "R1(config-router)# default-information originate", "customize": "Geen parameters. Soms \`always\` toevoegen om altijd te adverteren.", "prereqs": ["enable", "configure terminal", "router <protocol> <process-id|as-number>"]},
+      {"name": "summary-address (OSPF)", "mode": "Router Config", "syntax": "summary-address <prefix> <mask>", "description": "Geef een samenvattend prefix om naar andere areas/AS te adverteren (alleen op ABR/ASBR).", "example": "R1(config-router)# summary-address 10.0.0.0 255.255.0.0", "customize": "Prefix + mask.", "prereqs": ["enable", "configure terminal", "router <protocol> <process-id|as-number>"]},
+      {"name": "redistribute", "mode": "Router Config", "syntax": "redistribute <protocol> [metric <m>] [subnets]", "description": "Import routes van een ander protocol in dit proces.", "example": "R1(config-router)# redistribute static metric 10 subnets", "customize": "Bron-protocol + metric.", "prereqs": ["enable", "configure terminal", "router <protocol> <process-id|as-number>"]},
+      {"name": "auto-cost reference-bandwidth", "mode": "Router Config", "syntax": "auto-cost reference-bandwidth <Mbps>", "description": "Pas OSPF cost-berekening aan (default 100 Mbps - te laag voor moderne netwerken).", "example": "R1(config-router)# auto-cost reference-bandwidth 10000", "customize": "Mbps-waarde (vaak 10000 of 100000).", "prereqs": ["enable", "configure terminal", "router ospf <pid>"]},
+      {"name": "ip ospf cost (interface)", "mode": "Interface Config", "syntax": "ip ospf cost <1-65535>", "description": "Forceer OSPF cost op een interface (override auto-cost).", "example": "R1(config-if)# ip ospf cost 10", "customize": "Cost-waarde.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ip ospf hello-interval", "mode": "Interface Config", "syntax": "ip ospf hello-interval <seconds>", "description": "Wijzig OSPF hello interval (default 10s broadcast, 30s NBMA).", "example": "R1(config-if)# ip ospf hello-interval 5", "customize": "Seconden.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ip ospf priority", "mode": "Interface Config", "syntax": "ip ospf priority <0-255>", "description": "DR-verkiezing prioriteit op een interface (default 1; 0 = nooit DR/BDR).", "example": "R1(config-if)# ip ospf priority 100", "customize": "Prio-waarde.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]}
+    ]
+  },
+  {
+    id: "more-show",
+    title: "Show & Diagnose Commands (extra)",
+    blurb: "Extra show-commando's voor diepere troubleshooting. Hoog op de exam-frequentie.",
+    commands: [
+      {"name": "show running-config", "mode": "Privileged EXEC", "syntax": "show running-config [interface <if>]", "description": "Toon de actuele config in geheugen. Filter optioneel op interface of section.", "example": "R1# show running-config interface Gi0/0", "customize": "Optioneel interface-filter.", "prereqs": ["enable"]},
+      {"name": "show startup-config", "mode": "Privileged EXEC", "syntax": "show startup-config", "description": "Toon de opgeslagen config in NVRAM (wat na reboot laadt).", "example": "R1# show startup-config", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show version", "mode": "Privileged EXEC", "syntax": "show version", "description": "IOS-versie, uptime, hardware-info, registers.", "example": "R1# show version", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show ip protocols", "mode": "Privileged EXEC", "syntax": "show ip protocols", "description": "Welke routing-protocollen draaien + parameters (timers, AD, networks).", "example": "R1# show ip protocols", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show ip ospf", "mode": "Privileged EXEC", "syntax": "show ip ospf [neighbor|database|interface]", "description": "OSPF status detail: process, areas, neighbors, LSDB.", "example": "R1# show ip ospf neighbor", "customize": "Optioneel sub-command.", "prereqs": ["enable"]},
+      {"name": "show ip eigrp neighbors", "mode": "Privileged EXEC", "syntax": "show ip eigrp neighbors", "description": "EIGRP buren met hold-tijd, SRTT, uptime.", "example": "R1# show ip eigrp neighbors", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show interfaces", "mode": "Privileged EXEC", "syntax": "show interfaces [<type><number>]", "description": "Uitgebreide interface-info: status, statistieken, errors.", "example": "R1# show interfaces Gi0/0", "customize": "Optioneel specifieke interface.", "prereqs": ["enable"]},
+      {"name": "show interfaces status", "mode": "Privileged EXEC", "syntax": "show interfaces status", "description": "Korte lijst (alleen switch): status, VLAN, duplex, speed, type.", "example": "SW1# show interfaces status", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show interfaces trunk", "mode": "Privileged EXEC", "syntax": "show interfaces trunk", "description": "Lijst van actieve trunks, encapsulatie, native VLAN, allowed.", "example": "SW1# show interfaces trunk", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show mac address-table", "mode": "Privileged EXEC", "syntax": "show mac address-table [interface <if>|vlan <id>]", "description": "MAC adres tabel - leer welke MACs op welke poorten zitten.", "example": "SW1# show mac address-table vlan 10", "customize": "Optioneel filter.", "prereqs": ["enable"]},
+      {"name": "show port-security", "mode": "Privileged EXEC", "syntax": "show port-security [interface <if>|address]", "description": "Port-security status: count, max, action, violations.", "example": "SW1# show port-security interface Fa0/1", "customize": "Optioneel filter.", "prereqs": ["enable"]},
+      {"name": "show etherchannel summary", "mode": "Privileged EXEC", "syntax": "show etherchannel summary", "description": "EtherChannel groepen, protocol (LACP/PAgP), member-poorten met flags.", "example": "SW1# show etherchannel summary", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show spanning-tree", "mode": "Privileged EXEC", "syntax": "show spanning-tree [vlan <id>]", "description": "STP info per VLAN: root bridge, priorities, port roles/states.", "example": "SW1# show spanning-tree vlan 10", "customize": "Optioneel VLAN-filter.", "prereqs": ["enable"]},
+      {"name": "show ip nat translations", "mode": "Privileged EXEC", "syntax": "show ip nat translations", "description": "Live NAT-translaties (inside-local \u2194 inside-global, etc.).", "example": "R1# show ip nat translations", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show ip dhcp binding", "mode": "Privileged EXEC", "syntax": "show ip dhcp binding", "description": "Lijst uitgeven DHCP leases (welke client kreeg welk IP, voor hoe lang).", "example": "R1# show ip dhcp binding", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show ip dhcp pool", "mode": "Privileged EXEC", "syntax": "show ip dhcp pool [<name>]", "description": "DHCP pool statistieken: gebruikt/vrij, range.", "example": "R1# show ip dhcp pool LAN10", "customize": "Optioneel pool-naam.", "prereqs": ["enable"]},
+      {"name": "show access-lists", "mode": "Privileged EXEC", "syntax": "show access-lists [<name|num>]", "description": "Configurereerde ACLs met hit-counters per regel.", "example": "R1# show access-lists 101", "customize": "Optioneel filter op naam/nummer.", "prereqs": ["enable"]},
+      {"name": "show arp", "mode": "Privileged EXEC", "syntax": "show arp", "description": "ARP-tabel: IP \u2194 MAC binding op router/switch.", "example": "R1# show arp", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show flash:", "mode": "Privileged EXEC", "syntax": "show flash:", "description": "Inhoud van flash geheugen (IOS images, configs).", "example": "R1# show flash:", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show users", "mode": "Privileged EXEC", "syntax": "show users", "description": "Wie is op dit moment ingelogd via console/VTY.", "example": "R1# show users", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show sessions", "mode": "Privileged EXEC", "syntax": "show sessions", "description": "Open Telnet/SSH sessions vanaf dit apparaat naar andere.", "example": "R1# show sessions", "customize": "Geen parameters.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "diagnostic-tools",
+    title: "Diagnostiek (ping, traceroute, telnet)",
+    blurb: "Tools om connectiviteit te testen.",
+    commands: [
+      {"name": "ping", "mode": "User/Privileged EXEC", "syntax": "ping <ip-or-hostname>", "description": "ICMP echo - test basis connectiviteit.", "example": "R1# ping 192.168.1.1", "customize": "Vervang \u2192 target.", "prereqs": []},
+      {"name": "ping (extended)", "mode": "Privileged EXEC", "syntax": "ping <ip> source <if> size <bytes> repeat <count>", "description": "Extended ping - kies source-interface, packet-size, aantal pings.", "example": "R1# ping 8.8.8.8 source Lo0 repeat 10", "customize": "Bron-interface, grootte, aantal.", "prereqs": ["enable"]},
+      {"name": "traceroute", "mode": "User/Privileged EXEC", "syntax": "traceroute <ip-or-hostname>", "description": "Lijst hops onderweg naar de bestemming.", "example": "R1# traceroute 8.8.8.8", "customize": "Vervang \u2192 target.", "prereqs": []},
+      {"name": "telnet", "mode": "User/Privileged EXEC", "syntax": "telnet <ip>", "description": "Open een Telnet-sessie naar een apparaat (onveilig - gebruik SSH).", "example": "R1# telnet 192.168.1.1", "customize": "Vervang \u2192 IP.", "prereqs": []},
+      {"name": "ssh -l", "mode": "User/Privileged EXEC", "syntax": "ssh -l <user> <ip>", "description": "Open een SSH-sessie als specifieke user.", "example": "R1# ssh -l admin 192.168.1.1", "customize": "Vervang \u2192 user en IP.", "prereqs": []},
+      {"name": "clear ip route *", "mode": "Privileged EXEC", "syntax": "clear ip route *", "description": "Wis de hele routing tabel - dwingt herberekening.", "example": "R1# clear ip route *", "customize": "Optioneel specifiek prefix i.p.v. \`*\`.", "prereqs": ["enable"]},
+      {"name": "clear counters", "mode": "Privileged EXEC", "syntax": "clear counters [<if>]", "description": "Reset interface-statistieken (input/output errors, packets).", "example": "R1# clear counters Gi0/0", "customize": "Optioneel interface.", "prereqs": ["enable"]},
+      {"name": "clear arp-cache", "mode": "Privileged EXEC", "syntax": "clear arp-cache", "description": "Verwijder alle ARP-entries - forceer ARP-resolution opnieuw.", "example": "R1# clear arp-cache", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "clear mac address-table dynamic", "mode": "Privileged EXEC", "syntax": "clear mac address-table dynamic", "description": "Wis dynamische MAC-entries op de switch.", "example": "SW1# clear mac address-table dynamic", "customize": "Geen parameters.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "ssh-deep",
+    title: "SSH Configuration (deep dive)",
+    blurb: "SSH veiliger maken: key-grootte, version, timeouts en exclusief.",
+    commands: [
+      {"name": "ip domain-name", "mode": "Global Config", "syntax": "ip domain-name <name>", "description": "Stel een domain-naam in - vereist voor RSA-keygeneratie.", "example": "R1(config)# ip domain-name campus.local", "customize": "Vervang \u2192 jouw domein.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "crypto key generate rsa", "mode": "Global Config", "syntax": "crypto key generate rsa modulus <bits>", "description": "Genereer RSA keypair (1024 minimum, 2048 aanbevolen voor SSHv2).", "example": "R1(config)# crypto key generate rsa modulus 2048", "customize": "Bits-grootte.", "prereqs": ["enable", "configure terminal", "ip domain-name <name>"]},
+      {"name": "ip ssh version", "mode": "Global Config", "syntax": "ip ssh version 2", "description": "Forceer SSHv2 (veiliger dan v1).", "example": "R1(config)# ip ssh version 2", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "ip ssh time-out", "mode": "Global Config", "syntax": "ip ssh time-out <seconds>", "description": "Time-out voor SSH login (default 120s).", "example": "R1(config)# ip ssh time-out 60", "customize": "Seconden.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "ip ssh authentication-retries", "mode": "Global Config", "syntax": "ip ssh authentication-retries <0-5>", "description": "Aantal login-pogingen voordat verbinding wordt verbroken.", "example": "R1(config)# ip ssh authentication-retries 3", "customize": "Aantal pogingen.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "transport input ssh", "mode": "Line Config", "syntax": "transport input ssh", "description": "Alleen SSH toestaan op deze VTY (geen Telnet).", "example": "R1(config-line)# transport input ssh", "customize": "Optioneel \`telnet\` ook toevoegen.", "prereqs": ["enable", "configure terminal", "line <console|vty|aux> <number>"]},
+      {"name": "transport output", "mode": "Line Config", "syntax": "transport output {none|ssh|telnet|all}", "description": "Welke protocollen vanaf deze line uitgaan.", "example": "R1(config-line)# transport output ssh", "customize": "Kies protocol.", "prereqs": ["enable", "configure terminal", "line <console|vty|aux> <number>"]},
+      {"name": "exec-timeout", "mode": "Line Config", "syntax": "exec-timeout <minutes> [seconds]", "description": "Auto-logout na inactiviteit (default 10 min op VTY/aux, never op console).", "example": "R1(config-line)# exec-timeout 5 0", "customize": "Minuten en optioneel seconden. \`0 0\` = nooit.", "prereqs": ["enable", "configure terminal", "line <console|vty|aux> <number>"]},
+      {"name": "logging synchronous", "mode": "Line Config", "syntax": "logging synchronous", "description": "Toon logs niet midden in commando-typen (handig op console).", "example": "R1(config-line)# logging synchronous", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "line <console|vty|aux> <number>"]},
+      {"name": "show ip ssh", "mode": "Privileged EXEC", "syntax": "show ip ssh", "description": "SSH configuratie en sessies overzicht.", "example": "R1# show ip ssh", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "show ssh", "mode": "Privileged EXEC", "syntax": "show ssh", "description": "Actieve SSH-verbindingen met user en encryption.", "example": "R1# show ssh", "customize": "Geen parameters.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "named-acls",
+    title: "Named ACLs (extra)",
+    blurb: "ACL-regels per naam beheren - flexibeler dan numbered. Met regel-nummers, remarks, en insert.",
+    commands: [
+      {"name": "remark", "mode": "Std/Ext-NACL Config", "syntax": "remark <text>", "description": "Voeg een commentaar toe binnen een named ACL voor leesbaarheid.", "example": "R1(config-ext-nacl)# remark Toegang voor HR-subnet", "customize": "Eigen commentaar.", "prereqs": ["enable", "configure terminal", "ip access-list standard|extended <name>"]},
+      {"name": "permit (named, met regel-nr)", "mode": "Std/Ext-NACL Config", "syntax": "<seq> permit <source> [<wildcard>]", "description": "Voeg een regel met seq-nummer toe - laat ruimte tussen voor latere edits.", "example": "R1(config-std-nacl)# 15 permit 192.168.1.0 0.0.0.255", "customize": "Seq-nummer + regel.", "prereqs": ["enable", "configure terminal", "ip access-list standard|extended <name>"]},
+      {"name": "deny (named, met regel-nr)", "mode": "Std/Ext-NACL Config", "syntax": "<seq> deny <source> [<wildcard>]", "description": "Idem maar deny.", "example": "R1(config-std-nacl)# 20 deny 192.168.2.0 0.0.0.255", "customize": "Seq-nummer + regel.", "prereqs": ["enable", "configure terminal", "ip access-list standard|extended <name>"]},
+      {"name": "no <seq>", "mode": "Std/Ext-NACL Config", "syntax": "no <seq>", "description": "Verwijder een specifieke regel uit een named ACL.", "example": "R1(config-std-nacl)# no 20", "customize": "Vervang \u2192 het seq-nummer.", "prereqs": ["enable", "configure terminal", "ip access-list standard|extended <name>"]},
+      {"name": "ip access-list resequence", "mode": "Global Config", "syntax": "ip access-list resequence <name> <start> <step>", "description": "Hernummer alle regels in een named ACL (handig na veel inserts).", "example": "R1(config)# ip access-list resequence BLOCK_HR 10 10", "customize": "ACL-naam + start + step.", "prereqs": ["enable", "configure terminal"]}
+    ]
+  },
+  {
+    id: "qos-basics",
+    title: "QoS Basics (markering & prioritering)",
+    blurb: "Verkeer markeren en prioriteren - simpele PT-versies van klasses, policies en service-policies.",
+    commands: [
+      {"name": "class-map", "mode": "Global Config", "syntax": "class-map match-any <name>", "description": "Definieer een traffic-class door match criteria te combineren.", "example": "R1(config)# class-map match-any VOICE", "customize": "Vervang \u2192 eigen class-naam.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "match ip dscp", "mode": "Any config sub-mode", "syntax": "match ip dscp <dscp-value>", "description": "Match verkeer op DSCP-markering.", "example": "R1(config-cmap)# match ip dscp ef", "customize": "Vervang \u2192 DSCP code (bv \`ef\` voor voice).", "prereqs": ["enable", "configure terminal", "class-map <name>"]},
+      {"name": "policy-map", "mode": "Global Config", "syntax": "policy-map <name>", "description": "Maak een policy die per class een actie definieert.", "example": "R1(config)# policy-map QOS_OUT", "customize": "Eigen policy-naam.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "class (in policy-map)", "mode": "Any config sub-mode", "syntax": "class <name>", "description": "Selecteer welke class je in deze policy aanstuurt.", "example": "R1(config-pmap)# class VOICE", "customize": "Class-naam.", "prereqs": ["enable", "configure terminal", "policy-map <name>"]},
+      {"name": "priority", "mode": "Any config sub-mode", "syntax": "priority <kbps>", "description": "Reserveer bandbreedte voor delay-sensitive verkeer (low-latency queueing).", "example": "R1(config-pmap-c)# priority 256", "customize": "kbps-waarde.", "prereqs": ["enable", "configure terminal", "policy-map <name>", "class <name>"]},
+      {"name": "service-policy", "mode": "Interface Config", "syntax": "service-policy {input|output} <policy-name>", "description": "Pas de policy toe op een interface (in of uit).", "example": "R1(config-if)# service-policy output QOS_OUT", "customize": "Richting + policy.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]}
+    ]
+  },
+  {
+    id: "stp-tuning",
+    title: "STP Tuning (root, portfast, BPDU guard)",
+    blurb: "Spanning-tree fine-tunen: kies wie de root bridge is en bescherm access-poorten.",
+    commands: [
+      {"name": "spanning-tree mode", "mode": "Global Config", "syntax": "spanning-tree mode {pvst|rapid-pvst|mst}", "description": "Kies de STP-variant: PVST+ (Cisco default), Rapid-PVST+ (sneller), MST.", "example": "SW1(config)# spanning-tree mode rapid-pvst", "customize": "Vervang \u2192 modus.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "spanning-tree vlan root primary", "mode": "Global Config", "syntax": "spanning-tree vlan <id> root primary", "description": "Maak deze switch de root bridge voor het VLAN (zet priority op 24576).", "example": "SW1(config)# spanning-tree vlan 10 root primary", "customize": "VLAN-id.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "spanning-tree vlan root secondary", "mode": "Global Config", "syntax": "spanning-tree vlan <id> root secondary", "description": "Backup root bridge voor het VLAN (priority 28672).", "example": "SW1(config)# spanning-tree vlan 10 root secondary", "customize": "VLAN-id.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "spanning-tree vlan priority", "mode": "Global Config", "syntax": "spanning-tree vlan <id> priority <0-61440>", "description": "Stel handmatig de STP priority in (in stappen van 4096).", "example": "SW1(config)# spanning-tree vlan 10 priority 8192", "customize": "VLAN-id + priority (laag = waarschijnlijk root).", "prereqs": ["enable", "configure terminal"]},
+      {"name": "spanning-tree portfast", "mode": "Interface Config", "syntax": "spanning-tree portfast", "description": "Skip listening/learning - direct naar forwarding. Alleen op access-poorten naar PC's.", "example": "SW1(config-if)# spanning-tree portfast", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "spanning-tree portfast default", "mode": "Global Config", "syntax": "spanning-tree portfast default", "description": "Maak portfast default op alle non-trunk poorten.", "example": "SW1(config)# spanning-tree portfast default", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "spanning-tree bpduguard enable", "mode": "Interface Config", "syntax": "spanning-tree bpduguard enable", "description": "Disable poort meteen als er BPDU's binnenkomen - bescherm access-poorten.", "example": "SW1(config-if)# spanning-tree bpduguard enable", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "spanning-tree portfast bpduguard default", "mode": "Global Config", "syntax": "spanning-tree portfast bpduguard default", "description": "Activeer BPDU guard op alle portfast-poorten automatisch.", "example": "SW1(config)# spanning-tree portfast bpduguard default", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "spanning-tree guard root", "mode": "Interface Config", "syntax": "spanning-tree guard root", "description": "Voorkomt dat deze poort een superior BPDU accepteert (forceer root upstream).", "example": "SW1(config-if)# spanning-tree guard root", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "spanning-tree cost", "mode": "Interface Config", "syntax": "spanning-tree cost <1-200000000>", "description": "Forceer STP-cost op de poort (override automatische berekening).", "example": "SW1(config-if)# spanning-tree cost 100", "customize": "Cost-waarde.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "spanning-tree port-priority", "mode": "Interface Config", "syntax": "spanning-tree port-priority <0-240>", "description": "Beslis welke poort designated wordt op een gedeeld segment (default 128).", "example": "SW1(config-if)# spanning-tree port-priority 64", "customize": "Priority-waarde (stappen van 16).", "prereqs": ["enable", "configure terminal", "interface <type><number>"]}
+    ]
+  },
+  {
+    id: "ipv6-extra",
+    title: "IPv6 SLAAC, EUI-64 & DHCPv6",
+    blurb: "IPv6 hosts kunnen zichzelf adresseren via SLAAC of via DHCPv6 (stateless of stateful).",
+    commands: [
+      {"name": "ipv6 address eui-64", "mode": "Interface Config", "syntax": "ipv6 address <prefix>/<len> eui-64", "description": "Maak IPv6 adres met EUI-64 host-portion uit MAC-adres.", "example": "R1(config-if)# ipv6 address 2001:db8:1::/64 eui-64", "customize": "Vervang prefix.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ipv6 address link-local", "mode": "Interface Config", "syntax": "ipv6 address <link-local-addr> link-local", "description": "Stel handmatig een link-local adres in (anders automatisch fe80::/64 met EUI-64).", "example": "R1(config-if)# ipv6 address fe80::1 link-local", "customize": "Eigen link-local IP.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ipv6 dhcp pool", "mode": "Global Config", "syntax": "ipv6 dhcp pool <name>", "description": "Maak een DHCPv6 pool (vaak stateless: alleen DNS/info, prefix via SLAAC).", "example": "R1(config)# ipv6 dhcp pool IPV6_POOL", "customize": "Eigen pool-naam.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "dns-server (DHCPv6)", "mode": "DHCP Config", "syntax": "dns-server <ipv6-addr>", "description": "DNS server in DHCPv6 pool.", "example": "R1(config-dhcpv6)# dns-server 2001:4860:4860::8888", "customize": "DNS IPv6.", "prereqs": ["enable", "configure terminal", "ipv6 dhcp pool <name>"]},
+      {"name": "domain-name (DHCPv6)", "mode": "DHCP Config", "syntax": "domain-name <name>", "description": "Domain name in DHCPv6 pool.", "example": "R1(config-dhcpv6)# domain-name campus.local", "customize": "Domein-naam.", "prereqs": ["enable", "configure terminal", "ipv6 dhcp pool <name>"]},
+      {"name": "ipv6 dhcp server (interface)", "mode": "Interface Config", "syntax": "ipv6 dhcp server <pool-name>", "description": "Bind een DHCPv6 pool aan een interface.", "example": "R1(config-if)# ipv6 dhcp server IPV6_POOL", "customize": "Pool-naam.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ipv6 nd other-config-flag", "mode": "Interface Config", "syntax": "ipv6 nd other-config-flag", "description": "Vertel hosts dat ze DHCPv6 moeten gebruiken voor 'andere' info (DNS) bovenop SLAAC.", "example": "R1(config-if)# ipv6 nd other-config-flag", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "ipv6 nd managed-config-flag", "mode": "Interface Config", "syntax": "ipv6 nd managed-config-flag", "description": "Forceer stateful DHCPv6 voor adres en config (M-flag).", "example": "R1(config-if)# ipv6 nd managed-config-flag", "customize": "Geen parameters.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]}
+    ]
+  },
+  {
+    id: "file-mgmt",
+    title: "File & IOS Management",
+    blurb: "Configs/IOS verplaatsen tussen flash, NVRAM, TFTP, USB.",
+    commands: [
+      {"name": "copy running-config startup-config", "mode": "Privileged EXEC", "syntax": "copy running-config startup-config", "description": "Sla running-config op naar NVRAM (persist na reboot). Korte vorm: \`wr\`.", "example": "R1# copy running-config startup-config", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "copy startup-config running-config", "mode": "Privileged EXEC", "syntax": "copy startup-config running-config", "description": "Laad opgeslagen config in geheugen (merge, niet replace).", "example": "R1# copy startup-config running-config", "customize": "Geen parameters.", "prereqs": ["enable"]},
+      {"name": "copy running-config tftp:", "mode": "Privileged EXEC", "syntax": "copy running-config tftp:", "description": "Backup config naar TFTP-server.", "example": "R1# copy running-config tftp:", "customize": "Vraagt om server-IP en filename.", "prereqs": ["enable"]},
+      {"name": "copy tftp: flash:", "mode": "Privileged EXEC", "syntax": "copy tftp: flash:", "description": "Download een nieuw IOS-image vanaf TFTP naar flash.", "example": "R1# copy tftp: flash:", "customize": "Vraagt om server-IP, source filename, dest filename.", "prereqs": ["enable"]},
+      {"name": "erase startup-config", "mode": "Privileged EXEC", "syntax": "erase startup-config", "description": "Wis de opgeslagen config (na reload: default config).", "example": "R1# erase startup-config", "customize": "Geen parameters - bevestigen.", "prereqs": ["enable"]},
+      {"name": "reload", "mode": "Privileged EXEC", "syntax": "reload [in <minutes>|cancel]", "description": "Herstart het apparaat. Optioneel uitstellen.", "example": "R1# reload in 5", "customize": "Optioneel \`in <min>\` voor uitstel.", "prereqs": ["enable"]},
+      {"name": "boot system", "mode": "Global Config", "syntax": "boot system flash:<filename>", "description": "Welke IOS-image gebruikt het apparaat bij volgende boot.", "example": "R1(config)# boot system flash:c2900-universalk9-mz.SPA.157-3.M.bin", "customize": "Filename op flash.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "show boot", "mode": "Privileged EXEC", "syntax": "show boot", "description": "Welke boot-system config staat ingesteld.", "example": "R1# show boot", "customize": "Geen parameters.", "prereqs": ["enable"]}
+    ]
+  },
+  {
+    id: "etherchannel-deep",
+    title: "EtherChannel Deep (LACP/PAgP modes)",
+    blurb: "Per-mode opties voor LACP/PAgP, load-balancing en min-links.",
+    commands: [
+      {"name": "channel-group active (LACP)", "mode": "Interface Config", "syntax": "channel-group <num> mode active", "description": "LACP active - stuurt LACP packets om te negotieren.", "example": "SW1(config-if)# channel-group 1 mode active", "customize": "Vervang \`1\` \u2192 group-id.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "channel-group passive (LACP)", "mode": "Interface Config", "syntax": "channel-group <num> mode passive", "description": "LACP passive - wacht op LACP van peer.", "example": "SW1(config-if)# channel-group 1 mode passive", "customize": "Group-id.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "channel-group desirable (PAgP)", "mode": "Interface Config", "syntax": "channel-group <num> mode desirable", "description": "PAgP active - stuurt PAgP packets.", "example": "SW1(config-if)# channel-group 1 mode desirable", "customize": "Group-id.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "channel-group auto (PAgP)", "mode": "Interface Config", "syntax": "channel-group <num> mode auto", "description": "PAgP passive.", "example": "SW1(config-if)# channel-group 1 mode auto", "customize": "Group-id.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "channel-group on", "mode": "Interface Config", "syntax": "channel-group <num> mode on", "description": "Static / forced - geen onderhandeling. Beide kanten moeten ON zijn.", "example": "SW1(config-if)# channel-group 1 mode on", "customize": "Group-id.", "prereqs": ["enable", "configure terminal", "interface <type><number>"]},
+      {"name": "port-channel load-balance", "mode": "Global Config", "syntax": "port-channel load-balance <method>", "description": "Hoe verkeer over bundle-members verdelen (src-mac, dst-ip, src-dst-ip, etc.).", "example": "SW1(config)# port-channel load-balance src-dst-ip", "customize": "Kies methode.", "prereqs": ["enable", "configure terminal"]},
+      {"name": "interface Port-channel", "mode": "Global Config", "syntax": "interface Port-channel <num>", "description": "Configureer parameters die voor alle members gelden (mode, allowed VLAN).", "example": "SW1(config)# interface Port-channel 1", "customize": "Vervang \u2192 group-id.", "prereqs": ["enable", "configure terminal"]}
+    ]
+  }
+
 ];
