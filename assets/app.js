@@ -113,18 +113,25 @@
       if (cmd.syntax) card.appendChild(el("code", { class: "cmd-syntax" }, cmd.syntax));
       if (cmd.description) card.appendChild(el("p", { class: "cmd-desc" }, cmd.description));
 
-      // ----- Prereqs: commands to type first to reach this mode -----
+      // ----- Prereqs: CLI-style path to reach this command -----
       if (cmd.prereqs && cmd.prereqs.length) {
         const prereqWrap = el("div", { class: "cmd-prereqs" });
         prereqWrap.appendChild(el("span", { class: "cmd-prereqs-label" }, "Get there with:"));
-        const chain = el("span", { class: "cmd-prereqs-chain" });
-        cmd.prereqs.forEach((step, i) => {
-          if (i > 0) chain.appendChild(el("span", { class: "arrow" }, " \u2192 "));
-          chain.appendChild(el("code", null, step));
+        const cliLines = buildCliPath(cat, cmd);
+        const cliBlock = el("pre", { class: "snippet cli-path" });
+        const cliCopyValue = cliLines.map(L => L.cmd).join("\n");
+        const cliCopyBtn = el("button", {
+          class: "copy-btn", type: "button", "aria-label": "Copy to clipboard",
+          title: "Copy: " + (cliCopyValue.length > 60 ? cliCopyValue.slice(0, 60) + "\u2026" : cliCopyValue),
+          onclick: e => copyText(cliCopyValue, e.target)
+        }, "Copy");
+        cliBlock.appendChild(cliCopyBtn);
+        cliLines.forEach((L, i) => {
+          if (i > 0) cliBlock.appendChild(document.createTextNode("\n"));
+          cliBlock.appendChild(el("span", { class: "cli-prompt" }, L.prompt + " "));
+          cliBlock.appendChild(document.createTextNode(L.cmd));
         });
-        if (cmd.prereqs.length) chain.appendChild(el("span", { class: "arrow final" }, " \u2192 "));
-        chain.appendChild(el("code", { class: "this-cmd" }, cmd.name));
-        prereqWrap.appendChild(chain);
+        prereqWrap.appendChild(cliBlock);
         card.appendChild(prereqWrap);
       }
 
@@ -169,7 +176,55 @@
   cmdCountEl.textContent = totalCommands;
   catCountEl.textContent = CATEGORIES.length;
 
-  function copyText(text, btn) {
+  function buildCliPath(cat, cmd) {
+  const SWITCH_CATS = new Set(["vlans","trunking","stp","etherchannel","port-security"]);
+  const ROUTER_CATS = new Set(["static-routing","rip","ospf","eigrp","router-on-stick","nat","dhcp","acl-standard","acl-extended"]);
+  function deviceFor() {
+    if (SWITCH_CATS.has(cat.id)) return "Switch";
+    if (ROUTER_CATS.has(cat.id)) return "Router";
+    if (cmd.example) {
+      const m = cmd.example.match(/^([A-Za-z][\w-]*?)(?:\([^)]+\))?[#>]/m);
+      if (m) {
+        const n = m[1];
+        if (/^R/i.test(n)) return "Router";
+        if (/^S/i.test(n)) return "Switch";
+      }
+    }
+    return "Switch";
+  }
+  function modePrompt(mode) {
+    const m = (mode || "").toLowerCase();
+    if (m.includes("user exec")) return ">";
+    if (m.includes("privileged exec")) return "#";
+    if (m.includes("interface config / range")) return "(config-if-range)#";
+    if (m.includes("interface config")) return "(config-if)#";
+    if (m.includes("sub-interface")) return "(config-subif)#";
+    if (m.includes("vlan config")) return "(config-vlan)#";
+    if (m.includes("line config")) return "(config-line)#";
+    if (m.includes("router config")) return "(config-router)#";
+    if (m.includes("dhcp config")) return "(dhcp-config)#";
+    if (m.includes("std-nacl")) return "(config-std-nacl)#";
+    if (m.includes("ext-nacl")) return "(config-ext-nacl)#";
+    if (m.includes("std/ext")) return "(config-ext-nacl)#";
+    if (m.includes("any config sub-mode")) return "(config-*)#";
+    if (m.includes("global config")) return "(config)#";
+    return "#";
+  }
+  const dev = deviceFor();
+  const lines = [];
+  let curr = ">";
+  for (const step of (cmd.prereqs || [])) {
+    const s = step.toLowerCase().trim();
+    lines.push({ prompt: dev + curr, cmd: step });
+    if (s === "enable") curr = "#";
+    else if (s === "configure terminal" || s === "conf t") curr = "(config)#";
+    else curr = modePrompt(cmd.mode);
+  }
+  lines.push({ prompt: dev + curr, cmd: cmd.syntax || cmd.name });
+  return lines;
+}
+
+function copyText(text, btn) {
     const fallback = () => {
       const ta = document.createElement("textarea");
       ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
@@ -258,9 +313,9 @@
   const css = `
     .cmd-prereqs { font-size: 13px; margin: 8px 0; padding: 8px 12px; background: var(--surface-2); border-left: 3px solid var(--primary); border-radius: 0 6px 6px 0; }
     .cmd-prereqs-label { font-weight: 600; color: var(--text); margin-right: 6px; }
-    .cmd-prereqs-chain code { font-family: ui-monospace, Consolas, monospace; background: var(--surface); padding: 1px 6px; border-radius: 4px; border: 1px solid var(--border); margin: 0 1px; font-size: 12px; }
-    .cmd-prereqs-chain code.this-cmd { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
-    .cmd-prereqs-chain .arrow { color: var(--text-muted); }
+    .cli-path { margin: 4px 0 0; padding: 10px 12px; white-space: pre; font-family: ui-monospace, Consolas, monospace; font-size: 13px; line-height: 1.55; }
+    .cli-path .cli-prompt { color: #7ec7ff; user-select: none; font-weight: 600; opacity: 0.95; }
+    [data-theme="light"] .cli-path .cli-prompt { color: #7ec7ff; }
     .cmd-customize { font-size: 14px; margin: 8px 0; padding: 8px 12px; background: var(--surface-2); border-left: 3px solid #16a34a; border-radius: 0 6px 6px 0; }
     [data-theme="dark"] .cmd-customize { border-left-color: #4ade80; }
     .cmd-customize-label { font-weight: 600; color: var(--text); }
