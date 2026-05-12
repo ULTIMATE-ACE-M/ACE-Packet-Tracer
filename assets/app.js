@@ -119,13 +119,6 @@
         prereqWrap.appendChild(el("span", { class: "cmd-prereqs-label" }, "Get there with:"));
         const cliLines = buildCliPath(cat, cmd);
         const cliBlock = el("pre", { class: "snippet cli-path" });
-        const cliCopyValue = cliLines.map(L => L.cmd).join("\n");
-        const cliCopyBtn = el("button", {
-          class: "copy-btn", type: "button", "aria-label": "Copy to clipboard",
-          title: "Copy: " + (cliCopyValue.length > 60 ? cliCopyValue.slice(0, 60) + "\u2026" : cliCopyValue),
-          onclick: e => copyText(cliCopyValue, e.target)
-        }, "Copy");
-        cliBlock.appendChild(cliCopyBtn);
         cliLines.forEach((L, i) => {
           if (i > 0) cliBlock.appendChild(document.createTextNode("\n"));
           cliBlock.appendChild(el("span", { class: "cli-prompt" }, L.prompt + " "));
@@ -172,6 +165,10 @@
 
     categoriesEl.appendChild(section);
   });
+
+  // Extra sidebar link: troubleshooting page (separate file, not a category)
+  const tsLi = el("li", { class: "nav-extra" }, el("a", { href: "troubleshooting.html" }, "Troubleshooting"));
+  navList.appendChild(tsLi);
 
   cmdCountEl.textContent = totalCommands;
   catCountEl.textContent = CATEGORIES.length;
