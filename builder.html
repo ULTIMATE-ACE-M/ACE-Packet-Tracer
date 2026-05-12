@@ -640,10 +640,10 @@
 
   let drag = null;
   deviceLayer.addEventListener("mousedown", e => {
-    if (state.linking) return;
     const tgt = e.target.closest(".device");
     if (!tgt) return;
     if (e.target.dataset.del) return;
+    if (state.linking) { e.preventDefault(); return; }
     const id = tgt.dataset.id;
     const d = state.devices[id];
     drag = { id, ox: e.clientX, oy: e.clientY, sx: d.x, sy: d.y, moved: false };
@@ -671,7 +671,11 @@
   });
 
   deviceLayer.addEventListener("click", e => {
-    if (e.target.dataset.del) { deleteDevice(e.target.dataset.del); e.stopPropagation(); }
+    if (e.target.dataset.del) { deleteDevice(e.target.dataset.del); e.stopPropagation(); return; }
+    if (state.linking) {
+      const tgt = e.target.closest(".device");
+      if (tgt) { handleLinkClick(tgt.dataset.id); e.stopPropagation(); }
+    }
   });
 
   document.getElementById("btn-link").addEventListener("click", () => {
