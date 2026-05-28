@@ -277,6 +277,7 @@ const CATEGORIES = [
     diagram: {"type": "svg", "src": "assets/diagrams/dhcp.svg", "alt": "DHCP DORA process between client and server"},
     mermaid: "sequenceDiagram\n      participant C as Client\n      participant S as Server\n      C->>S: DHCPDISCOVER (broadcast)\n      S-->>C: DHCPOFFER\n      C->>S: DHCPREQUEST\n      S-->>C: DHCPACK",
     commands: [
+      {"name": "service dhcp", "mode": "Global Config", "syntax": "service dhcp", "description": "Enables the DHCP server/relay service on the router. Default: ON. Use `no service dhcp` to disable. Verify it's on by checking that `no service dhcp` does NOT appear in `show running-config`.", "example": "R1(config)# service dhcp", "customize": "No parameters. Use `no service dhcp` to disable.", "prereqs": ["enable", "configure terminal"], "related": ["enable dhcp", "turn on dhcp", "is dhcp enabled", "verify dhcp service"]},
       {"name": "ip dhcp pool", "mode": "Global Config", "syntax": "ip dhcp pool <name>", "description": "Creates a DHCP scope and enters DHCP-config mode.", "example": "R1(config)# ip dhcp pool LAN1\nR1(dhcp-config)#", "customize": "Replace `LAN1` \u2192 a name you choose for this DHCP scope.", "prereqs": ["enable", "configure terminal"]},
       {"name": "network (dhcp)", "mode": "DHCP Config", "syntax": "network <addr> <mask>", "description": "Defines the subnet from which addresses are leased.", "example": "R1(dhcp-config)# network 192.168.1.0 255.255.255.0", "customize": "Replace `192.168.1.0` \u2192 the subnet to lease from; `255.255.255.0` \u2192 its mask.", "prereqs": ["enable", "configure terminal", "ip dhcp pool <name>"]},
       {"name": "default-router", "mode": "DHCP Config", "syntax": "default-router <addr>", "description": "Gateway given to clients (Option 3).", "example": "R1(dhcp-config)# default-router 192.168.1.1", "customize": "Replace `192.168.1.1` \u2192 the gateway IP that clients should use.", "prereqs": ["enable", "configure terminal", "ip dhcp pool <name>"]},
@@ -698,3 +699,385 @@ const CATEGORIES = [
     ]
   }
 ];
+
+// ============================================================
+// Rules & Gotchas — common constraints / mismatches per category.
+// Looked up by category id in app.js, rendered above the commands.
+// Each rule: { title, body, symptom? }
+// ============================================================
+const RULES = {
+  "vlans": [
+    {"title": "Default VLAN is VLAN 1 — every switchport starts there.", "body": "Leaving a port unconfigured doesn't isolate it — it still passes traffic, just in VLAN 1. For production, don't use VLAN 1 for user traffic; use a named VLAN.", "symptom": "An unconfigured port is reachable when you expected it not to be."},
+    {"title": "A VLAN must exist in the VLAN database before a port can be assigned.", "body": "Run `vlan <id>` first (which enters config-vlan mode), then `switchport access vlan <id>` on the port. Some IOS versions auto-create the VLAN on assignment; many don't.", "symptom": "Port assignment is accepted but the port stays inactive / doesn't forward."},
+    {"title": "`no vlan <id>` strands every port that was in it.", "body": "Deleted-VLAN ports don't fall back to VLAN 1 — they go inactive and stop forwarding until you reassign them. Move ports off first.", "symptom": "Hosts go offline after a VLAN cleanup."},
+    {"title": "VLAN names are local to the switch.", "body": "Names don't synchronize across switches unless you've set up VTP. Switch A's VLAN 10 = Sales doesn't tell Switch B anything.", "symptom": "Same VLAN id has different names on different switches."},
+    {"title": "Voice VLAN requires the port to be `switchport mode access` first.", "body": "`switchport voice vlan <id>` can't be applied on a trunk via this command — set the port to access mode first.", "symptom": "The voice VLAN command is rejected."}
+  ],
+
+  "trunking": [
+    {"title": "Both ends must be in the same VTP domain.", "body": "DTP-negotiated trunks (auto/desirable) only form when both switches share a VTP domain name. Hardcode both ends with `switchport mode trunk` to bypass DTP entirely.", "symptom": "Trunk won't come up between two switches even though both ports look configured."},
+    {"title": "Two ports in `dynamic auto` will never trunk.", "body": "Two passive ports wait for each other forever. At least one side must be `dynamic desirable` or `switchport mode trunk`.", "symptom": "Link is up but `show interfaces trunk` lists nothing."},
+    {"title": "Native VLAN must match on both ends.", "body": "Mismatch generates `%CDP-4-NATIVE_VLAN_MISMATCH` and untagged traffic leaks between VLANs.", "symptom": "Hosts in the native VLAN can't reach the other side."},
+    {"title": "Same encapsulation on both ends.", "body": "ISL on one side + dot1Q on the other = silent fail. On modern Cisco switches it's almost always dot1Q on both.", "symptom": "`switchport mode trunk` is accepted but only one VLAN crosses."},
+    {"title": "Allowed-VLAN list must include the VLAN you care about.", "body": "A previous `switchport trunk allowed vlan remove X` quietly drops X. Verify with `show interfaces trunk`.", "symptom": "One VLAN can't pass while others work fine."},
+    {"title": "VLAN must exist AND be allowed on the trunk — both are required.", "body": "Creating the VLAN isn't enough if it's not in the trunk's allowed list, and vice versa.", "symptom": "VLAN exists, trunk is up, but traffic still doesn't cross."},
+    {"title": "VTP: only servers can create or modify VLANs — clients only sync.", "body": "Every domain needs at least one VTP server. Clients reject `vlan <id>` commands. Transparent switches keep their own local VLAN database and don't sync at all.", "symptom": "`vlan 10` is rejected on a switch with `% VTP VLAN configuration not allowed when device is in CLIENT mode`."},
+    {"title": "VTP: all switches must share the exact same domain name.", "body": "Domain name is case-sensitive. A blank domain name on one switch + a real domain on another = no sync. Set with `vtp domain <name>`.", "symptom": "VLAN created on the server doesn't appear on other switches."},
+    {"title": "VTP: highest revision number wins — even if it's wrong.", "body": "When you connect a switch with a higher VTP revision than the rest of the domain, its VLAN database REPLACES everyone else's. A used lab switch plugged into production can wipe out every VLAN. Reset with `vtp mode transparent` then back to whatever you need, or change the domain name to a junk value first to zero the revision.", "symptom": "Production VLANs vanish after plugging in a new switch."},
+    {"title": "VTP password must match on every switch in the domain.", "body": "Case-sensitive. Empty on one side and set on another counts as a mismatch and breaks sync silently. Set with `vtp password <pwd>`.", "symptom": "Domain name matches, revision number matches, but VLANs still don't sync."},
+    {"title": "VTP version 3 is required for extended VLANs (1006-4094).", "body": "VTPv1 and v2 only sync VLANs 1-1005. For extended-range VLANs in the database, the whole domain must run v3. Mixing versions is messy — pick one and run it everywhere.", "symptom": "Extended VLAN 2000 exists on one switch but never propagates to others."}
+  ],
+
+  "router-on-stick": [
+    {"title": "Sub-interface VLAN must match the trunk's tag exactly.", "body": "`encapsulation dot1Q <vlan>` on the sub-interface has to match the VLAN id used on the switch-side trunk. Off-by-one = no inter-VLAN routing.", "symptom": "Hosts in the VLAN can't reach their gateway."},
+    {"title": "The physical interface must be `no shutdown`.", "body": "Sub-interfaces inherit the admin state of the parent. A shut parent = every sub-interface down.", "symptom": "Every sub-interface stays down for no obvious reason."},
+    {"title": "Switch side of the trunk needs `switchport mode trunk`.", "body": "If the switch port is still access, frames arrive at the router untagged and router-on-a-stick can't tell them apart.", "symptom": "Only one VLAN works through the router."},
+    {"title": "Native VLAN sub-interface needs the `native` keyword.", "body": "On the sub-interface for the native VLAN: `encapsulation dot1Q X native`. Without `native`, untagged frames don't hit that sub-interface.", "symptom": "Native VLAN reaches its gateway but not other VLANs."},
+    {"title": "On a Layer-3 switch you must enable `ip routing` globally.", "body": "Without `ip routing` in global config, SVIs are just management interfaces — they won't route between VLANs.", "symptom": "Hosts can ping their own SVI but not the other VLAN's hosts."}
+  ],
+
+  "stp": [
+    {"title": "Lowest bridge priority wins root election; tie breaks on lowest MAC.", "body": "Default priority is 32768 on every switch. If you leave it default, the oldest switch (lowest MAC) becomes root — usually not what you want.", "symptom": "A random / old switch ends up as root and traffic takes suboptimal paths."},
+    {"title": "Hardcode your root with `spanning-tree vlan X root primary`.", "body": "Without explicitly setting root and secondary-root, the topology shifts every time you add or remove a switch.", "symptom": "Root keeps moving and STP reconverges unexpectedly."},
+    {"title": "PortFast is for end-host ports only.", "body": "Putting PortFast on a switch-to-switch link bypasses listening/learning and opens a brief loop window. Use only on access ports going to PCs / phones / servers.", "symptom": "Brief loop or broadcast storm when you patch in another switch."},
+    {"title": "Always pair PortFast with BPDU Guard.", "body": "If anyone plugs a switch into a PortFast access port, BPDU Guard err-disables the port the moment a BPDU arrives — protecting the network.", "symptom": "A rogue switch in a meeting room takes over as root."},
+    {"title": "PVST+ runs one STP instance per VLAN.", "body": "Root election is per VLAN — don't assume the root is the same for every VLAN. Check with `show spanning-tree vlan X`.", "symptom": "Traffic for VLAN A and VLAN B takes different paths and you didn't expect it."}
+  ],
+
+  "etherchannel": [
+    {"title": "All member ports must match: speed, duplex, native VLAN, allowed VLANs, access/trunk mode.", "body": "Any mismatch and the port is rejected from the bundle and shows as suspended.", "symptom": "A member shows `s` (suspended) in `show etherchannel summary`."},
+    {"title": "LACP: active+active or active+passive form. Passive+passive doesn't.", "body": "At least one side must actively send LACPDUs. Two passive sides wait forever.", "symptom": "Both ports stay individual — no bundle."},
+    {"title": "PAgP: desirable+desirable or desirable+auto form. Auto+auto doesn't.", "body": "Same logic as LACP, different keyword.", "symptom": "No PAgP bundle forms."},
+    {"title": "LACP and PAgP cannot mix on the same bundle.", "body": "Both ends must use the same protocol. Mixing them = no channel.", "symptom": "One side configured LACP, the other PAgP — the bundle never comes up."},
+    {"title": "Mode `on` skips negotiation — both sides must be `on`.", "body": "If one end is `on` and the other is LACP or PAgP, no channel forms. Use `on` only when you control both ends and want zero negotiation.", "symptom": "Bundle works for a moment then breaks after a link flap."}
+  ],
+
+  "ospf": [
+    {"title": "All non-zero areas must touch area 0.", "body": "Either directly or via a virtual link. An OSPF area that's not connected to the backbone is unreachable from the rest of the OSPF domain.", "symptom": "Routes from a far area never appear in the backbone's routing table."},
+    {"title": "MTU must match on both ends of an adjacency.", "body": "Mismatched MTU leaves the neighbor stuck in EXSTART or EXCHANGE state and the adjacency never reaches FULL.", "symptom": "Neighbor never reaches FULL — stuck in EXSTART or EXCHANGE."},
+    {"title": "Hello and Dead timers must match.", "body": "Defaults are 10/40 on broadcast, 30/120 on NBMA. Changing one side without the other breaks the adjacency.", "symptom": "Neighbor flaps or never forms."},
+    {"title": "Network type must match (broadcast vs point-to-point vs NBMA).", "body": "If you change network type on one side only, the adjacency may form briefly then drop.", "symptom": "Adjacency forms then drops repeatedly."},
+    {"title": "Router IDs must be unique.", "body": "Set them explicitly with `router-id X.X.X.X` — don't rely on auto-selection from highest interface IP. Duplicate router-ids break OSPF on both routers.", "symptom": "Two routers fight over OSPF — both lose."},
+    {"title": "Use passive-interface on user-facing interfaces.", "body": "A passive interface still advertises its prefix but won't send hellos or form neighbors on that segment. Without it, OSPF leaks hellos to user LANs.", "symptom": "OSPF hellos appear on a user-facing LAN where they shouldn't."}
+  ],
+
+  "nat": [
+    {"title": "Tag inside and outside interfaces with `ip nat inside` / `ip nat outside`.", "body": "Without these tags on the right interfaces, no translation happens — even if every other NAT line is correct.", "symptom": "NAT config looks right but `show ip nat translations` is empty."},
+    {"title": "The ACL referenced by `ip nat inside source list X` decides WHICH traffic gets NAT'd.", "body": "If a subnet isn't permitted by that ACL, it doesn't get translated. Forgetting one LAN is a common cause.", "symptom": "One LAN reaches the internet, another LAN doesn't."},
+    {"title": "PAT (overload) is what lets many hosts share one public IP.", "body": "Without the `overload` keyword you get one-to-one static NAT only — first inside host claims the outside IP and nobody else can translate.", "symptom": "Only one inside host can be online at a time."},
+    {"title": "Translations persist until they time out.", "body": "Old translation entries can hide config changes. Run `clear ip nat translation *` after you change anything NAT-related.", "symptom": "You fix a NAT rule but nothing changes — old translations are still cached."}
+  ],
+
+  "dhcp": [
+    {"title": "`ip helper-address` goes on the CLIENT-facing interface.", "body": "It must be on the interface where DHCP broadcasts arrive — the client side — not the interface facing the DHCP server. This is the #1 DHCP relay mistake.", "symptom": "Clients across the router can't get an IP from a remote DHCP server."},
+    {"title": "Always `ip dhcp excluded-address` BEFORE creating the pool.", "body": "Exclude the router's own gateway IP and any static-IP servers first, otherwise DHCP will lease them out and you'll see address conflicts.", "symptom": "IP conflicts (duplicate IP warnings) right after DHCP starts handing out leases."},
+    {"title": "The `network` statement uses the network address, not a host IP.", "body": "For a /24, that means the `.0` address. `network 192.168.1.0 255.255.255.0` — not `192.168.1.1`.", "symptom": "Pool is created but no addresses are handed out."},
+    {"title": "`service dhcp` must be enabled (it's the default).", "body": "If somebody ran `no service dhcp` during a hardening pass, the router stops responding to DHCP entirely — the pool config still looks fine.", "symptom": "DHCP just stops working after a 'security' config change."},
+    {"title": "The router needs an interface IP in the pool's subnet (or a relay pointing at it).", "body": "Without one of these, the router has no way to associate an incoming DHCP request with the right pool.", "symptom": "Pool exists, clients are on the right subnet, but no offers go out."}
+  ],
+
+  "interfaces": [
+    {"title": "Router interfaces start `shutdown` — you must `no shutdown` after configuring.", "body": "Every Cisco router interface ships disabled by default. Even with a correct IP, the interface stays down until `no shutdown` is run. Switch access ports default to `no shutdown` — different behavior.", "symptom": "Interface configured perfectly but stays administratively down."},
+    {"title": "Speed/duplex must match on both ends.", "body": "Auto + auto = generally fine. Auto on one side + manual on the other = duplex mismatch and late collisions. Either both auto or both hardcoded to the same value.", "symptom": "Link is up but throughput is awful and `show interface` shows runts and CRC errors."},
+    {"title": "Back-to-back serial DCE needs `clock rate <bps>`.", "body": "In Packet Tracer's serial labs, the DCE end of a back-to-back link must provide clocking. Without `clock rate`, the line protocol stays down regardless of cable and config.", "symptom": "Serial link with valid IPs on both sides won't come up."},
+    {"title": "`no ip address` drops connectivity instantly.", "body": "There's no confirmation prompt — the moment you press enter, the interface loses its IP. If you're SSH'd in via that interface, you've just kicked yourself out.", "symptom": "You disconnect from a router while reconfiguring an interface."},
+    {"title": "Every active interface should have a `description`.", "body": "Future-you reading `show interface` six months from now will thank present-you. Especially for inter-router links and uplinks.", "symptom": "You can't tell which port goes where without tracing cables."}
+  ],
+
+  "static-routing": [
+    {"title": "Static route needs next-hop IP, exit interface, or both.", "body": "On a multi-access link (Ethernet), use next-hop IP — exit-interface alone causes ARP problems because the router treats every destination as on the local segment. Point-to-point links (Serial) can use exit-interface safely.", "symptom": "Static route shows in `show ip route` but pings don't reach the destination."},
+    {"title": "The next-hop IP must be reachable via the routing table.", "body": "Static routes are recursive — the router has to look up how to reach the next-hop first. If the next-hop isn't reachable, the static route stays inactive.", "symptom": "Static route configured but doesn't appear in `show ip route`."},
+    {"title": "Higher administrative distance = floating static (backup).", "body": "`ip route 0.0.0.0 0.0.0.0 1.1.1.1 200` only kicks in when the better route (lower AD) goes away. Useful for backup paths via a slower link.", "symptom": "Backup route never installs — its AD is lower than the primary, so it's always preferred."},
+    {"title": "Default route: `ip route 0.0.0.0 0.0.0.0 <next-hop>`.", "body": "Matches anything not in the routing table. Almost always pointing at the ISP / upstream router.", "symptom": "Hosts can reach internal networks but not the internet."},
+    {"title": "Static routes don't auto-remove when the link dies.", "body": "Unless you use `track` or IP SLA, the static route stays in the table even if the next-hop becomes unreachable. The router happily forwards into a black hole.", "symptom": "Failover doesn't happen when a link drops."}
+  ],
+
+  "rip": [
+    {"title": "Always use `version 2` — RIPv1 is classful.", "body": "RIPv1 doesn't carry subnet masks in updates, which breaks any subnetting you've done. `version 2` is the default in modern IOS but worth setting explicitly.", "symptom": "Routes appear but with wrong masks (the classful boundary)."},
+    {"title": "`no auto-summary` is mandatory for discontiguous subnets.", "body": "RIPv2 auto-summarizes by default in older IOS. Two non-contiguous subnets of the same classful network behind different routers will fight over the summary.", "symptom": "One half of a discontiguous network is unreachable from the other half."},
+    {"title": "Max metric is 15 hops — 16 means unreachable.", "body": "RIP doesn't scale beyond small networks. If you have more than 15 router hops between two endpoints, RIP can't carry the route.", "symptom": "Routes from a far corner of the network never appear."},
+    {"title": "`network` uses a CLASSFUL network address.", "body": "`network 10.0.0.0` activates RIP on every interface in 10.0.0.0/8, even ones you didn't want. Use `passive-interface` to stop hellos on the unwanted ones.", "symptom": "RIP starts running on user-facing interfaces you didn't intend."}
+  ],
+
+  "eigrp": [
+    {"title": "AS numbers must match on neighbors.", "body": "The number after `router eigrp` is the autonomous system. Two routers with different AS numbers will never form a neighborship — even on the same wire.", "symptom": "Two directly connected EIGRP routers never become neighbors."},
+    {"title": "K-values (metric weights) must match.", "body": "EIGRP default is K1=K3=1, K2=K4=K5=0. Changing them on one router breaks every neighbor relationship that router has.", "symptom": "EIGRP works between most routers but one specific router can't peer."},
+    {"title": "`network` uses a wildcard mask (modern IOS).", "body": "Like OSPF: `network 10.1.0.0 0.0.0.255` activates EIGRP on interfaces matching that prefix. Older IOS used classful, newer requires wildcard.", "symptom": "EIGRP activates on more interfaces than you wanted."},
+    {"title": "Auto-summary OFF by default in modern IOS (15.0+).", "body": "Older IOS had it on. If you're on Packet Tracer's older device images, run `no auto-summary` explicitly to avoid summarization headaches.", "symptom": "Discontiguous subnets behave the same way as the RIP problem."},
+    {"title": "Passive interfaces don't send Hellos.", "body": "A passive EIGRP interface still advertises its own prefix but won't form neighbors there. Use on user LANs.", "symptom": "EIGRP hellos appear on user-facing LANs."}
+  ],
+
+  "port-security": [
+    {"title": "Port must be access or trunk mode FIRST.", "body": "`switchport port-security` is rejected on dynamic ports. Run `switchport mode access` (or `trunk`) before any port-security command.", "symptom": "`% Command rejected: ... requires the port to be statically configured access/trunk` error."},
+    {"title": "Default violation is `shutdown` — port goes err-disable.", "body": "Once err-disabled, the port stays down until you bounce it (`shutdown` then `no shutdown`) or set `errdisable recovery cause psecure-violation` for auto-recovery.", "symptom": "Port goes down on first violation and won't come back without manual intervention."},
+    {"title": "Sticky MACs go in running-config — `copy run start` to persist.", "body": "`switchport port-security mac-address sticky` writes learned MACs to running-config but doesn't auto-save them. Without `copy run start` they disappear on reload.", "symptom": "All sticky MACs are forgotten after a power cycle."},
+    {"title": "Default max MAC is 1.", "body": "Change with `switchport port-security maximum <n>`. For ports with a PC behind an IP phone, you usually want 2 or 3.", "symptom": "Port-security shuts down a perfectly fine PC-behind-phone setup."},
+    {"title": "`restrict` and `protect` drop traffic without shutting the port.", "body": "`restrict` logs and counts violations; `protect` drops silently. Both leave the port up. Use these instead of `shutdown` when you don't want a tripwire.", "symptom": "You wanted a soft block but got a hard shutdown."}
+  ],
+
+  "passwords": [
+    {"title": "`enable secret` wins over `enable password`.", "body": "If both are configured, `enable secret` (hashed) is used and `enable password` (plaintext) is ignored. Always use `enable secret`.", "symptom": "You set `enable password` and it didn't change anything because `enable secret` was already configured."},
+    {"title": "`service password-encryption` is weak (Type-7).", "body": "Type-7 is trivially reversible — any online decoder will crack it in milliseconds. Prefer commands that use `secret` (Type-5/8/9 hash) wherever possible.", "symptom": "A `show run` reveals seemingly encrypted passwords that anyone can decode."},
+    {"title": "Console password without `login` doesn't prompt.", "body": "Setting `password X` on a line is half the config. The `login` (or `login local`) command is what actually enables the prompt.", "symptom": "You configured a console password but no one is ever asked for it."},
+    {"title": "Plaintext passwords show up in `show running-config`.", "body": "Anyone with view access to the running-config sees them. Use `secret` keyword and avoid leaving plaintext in the config.", "symptom": "A junior tech reads the config and writes down everyone's password."}
+  ],
+
+  "ssh": [
+    {"title": "SSH needs hostname AND domain-name set BEFORE key generation.", "body": "Default hostname `Router` won't work. Set a real hostname, then `ip domain-name <name>`, then `crypto key generate rsa`.", "symptom": "`% Please define a domain-name first` when running `crypto key generate rsa`."},
+    {"title": "Use modulus 1024 or larger — 2048 is the safe default.", "body": "Anything smaller is breakable. `crypto key generate rsa modulus 2048` is the standard recommendation.", "symptom": "Security audit flags weak RSA key size."},
+    {"title": "VTY lines need `transport input ssh` explicitly.", "body": "Modern IOS defaults to `transport input none` — meaning no remote access works until you set this. Use `transport input ssh` (or `ssh telnet` if telnet is still required).", "symptom": "SSH client connects then immediately disconnects, or `% Connection refused`."},
+    {"title": "Disable SSHv1 — `ip ssh version 2`.", "body": "SSHv1 is broken. Force v2 explicitly with `ip ssh version 2`.", "symptom": "Vulnerability scanner flags SSHv1 supported."},
+    {"title": "Need at least one local user + `login local` on the line.", "body": "Without a local username (or AAA), there's nobody for SSH to authenticate. `username admin secret X` + `login local` on the VTY line is the minimum.", "symptom": "SSH connects but immediately rejects every credential."}
+  ],
+
+  "acl-standard": [
+    {"title": "Match on SOURCE IP only — no destination, no ports.", "body": "If you need to filter by destination, protocol, or port, use an extended ACL instead. Standard ACLs are intentionally minimal.", "symptom": "You can't selectively block traffic to one server without breaking others."},
+    {"title": "Place close to the DESTINATION.", "body": "Filtering source-only ACLs at the source can block traffic the source still needs to send to other places. Apply standard ACLs at the destination router instead.", "symptom": "An ACL meant to block HR from one server also blocks HR from everything else."},
+    {"title": "Implicit `deny all` at the end of every ACL.", "body": "If nothing matches your permit/deny rules, the packet is dropped. Add `permit any` at the end if you only want to selectively block.", "symptom": "All traffic is dropped after applying an ACL that only contains `deny` lines."},
+    {"title": "Top-down, first-match wins.", "body": "ACL processing stops at the first matching line. Put specific entries (e.g., `permit host 10.0.0.5`) BEFORE broad ones (e.g., `deny 10.0.0.0 0.0.0.255`).", "symptom": "A specific permit you added isn't taking effect because a broader deny above it matches first."},
+    {"title": "Numbered ACL edits delete and re-create the whole ACL.", "body": "In older IOS, modifying a numbered ACL line means deleting all of them and re-entering. Use named ACLs (`ip access-list standard X`) to edit individual lines by sequence number.", "symptom": "You lose half your ACL trying to change one line."}
+  ],
+
+  "acl-extended": [
+    {"title": "Order: `permit/deny <proto> <src> <src-wild> [op port] <dst> <dst-wild> [op port]`.", "body": "Source comes before destination. The ports (if any) come right after each address. Getting the order wrong is the most common ACL syntax error.", "symptom": "ACL command is rejected with cryptic syntax errors."},
+    {"title": "Place close to the SOURCE.", "body": "Drop unwanted traffic before it crosses the network — saves bandwidth on intermediate links and is more efficient.", "symptom": "Traffic that should be blocked still traverses several hops before being dropped at the destination."},
+    {"title": "Implicit `deny all` still applies.", "body": "Same as standard ACLs. Add `permit ip any any` at the end if you only want to selectively block.", "symptom": "All traffic dropped after applying an extended ACL with only `deny` lines."},
+    {"title": "Port matching needs `eq`, `gt`, `lt`, `neq`, or `range`.", "body": "Just writing the port number is a syntax error — IOS needs the operator. `eq 80` = equal to port 80; `range 1024 65535` = a range.", "symptom": "ACL line is rejected when you try to specify a port."},
+    {"title": "VTY ACLs use `access-class`, NOT `ip access-group`.", "body": "For filtering remote management access (SSH/Telnet into the device), apply the ACL with `access-class X in` on the line, not `ip access-group`. Different keyword for the same idea.", "symptom": "ACL applied to VTY does nothing because you used the wrong command."}
+  ],
+
+  "ipv6": [
+    {"title": "`ipv6 unicast-routing` must be ON to forward IPv6.", "body": "By default, routers don't forward IPv6 even with IPv6 addresses configured. Run `ipv6 unicast-routing` in global config first.", "symptom": "Router has IPv6 addresses but won't route v6 packets between interfaces."},
+    {"title": "Every IPv6 interface gets a link-local automatically.", "body": "Once you set any IPv6 address (or run `ipv6 enable`), the interface generates an fe80::/64 link-local. Override with `ipv6 address fe80::1 link-local` if you want a memorable value.", "symptom": "Two routers' link-locals collide because they're auto-derived from the same MAC pattern."},
+    {"title": "SLAAC requires /64 prefix + RAs on the segment.", "body": "SLAAC won't work with anything other than a /64 prefix. RAs (Router Advertisements) are sent by default on router interfaces; suppress with `ipv6 nd ra suppress` if needed.", "symptom": "Hosts don't auto-configure an IPv6 address."},
+    {"title": "EUI-64 flips the 7th bit of the MAC.", "body": "Quirk of the EUI-64 algorithm. A MAC of `aabb.cc00.0100` becomes interface ID `a8bb:ccff:fe00:0100` in the address. Not a bug, just confusing the first time.", "symptom": "You can't reconcile the interface ID with the MAC and think something's wrong."},
+    {"title": "Static IPv6 route with link-local next-hop needs an exit interface.", "body": "Link-local addresses are only meaningful on a specific link, so the router needs to know which one. `ipv6 route 2001:db8::/64 fe80::1 GigabitEthernet0/0`.", "symptom": "Static route accepted but doesn't work — fe80:: is ambiguous without the interface."}
+  ],
+
+  "loopback": [
+    {"title": "Loopbacks are always up unless you shut them.", "body": "Perfect for OSPF/EIGRP router-id and management addresses — they don't go down when a physical link flaps.", "symptom": "Router-id keeps changing every time a physical interface bounces."},
+    {"title": "Loopback IPs are routable like any other interface IP.", "body": "You can ping a loopback from elsewhere if its prefix is advertised by your routing protocol. Often used as the SSH management target.", "symptom": "You expected the loopback to be magic — it's not, you still have to advertise its subnet."},
+    {"title": "OSPF prefers highest loopback IP for router-id.", "body": "Auto-selected over physical interface IPs. To avoid surprises, set router-id explicitly with `router-id X.X.X.X` under `router ospf`.", "symptom": "OSPF router-id changes when you add a new loopback with a higher number."}
+  ],
+
+  "ntp": [
+    {"title": "`ntp server` = client of that server. `ntp peer` = mutual sync.", "body": "Most labs and small networks use `ntp server`. `ntp peer` is for routers that should sync each other when they're at the same stratum.", "symptom": "Time keeps drifting because the relationship type is wrong."},
+    {"title": "Stratum 1 = atomic clock; each hop adds 1; 16 = unsynced.", "body": "Lower stratum = closer to the reference clock = more trusted. Anything over 15 is treated as unreliable.", "symptom": "`show ntp status` shows stratum 16 and time isn't syncing."},
+    {"title": "DNS or `no ip domain-lookup` matters for NTP hostnames.", "body": "If you use `ntp server pool.ntp.org` without DNS, the router can't resolve the name. Either configure DNS or use an IP address.", "symptom": "NTP server config accepted but never syncs to a hostname-based server."},
+    {"title": "NTP authentication needs matching keys on both sides.", "body": "Without auth, anyone on-path can spoof an NTP server and shift your clock. Auth needs the same `ntp authentication-key X md5 <secret>` on both client and server.", "symptom": "Time syncs but the system is vulnerable to NTP spoofing."}
+  ],
+
+  "snmp": [
+    {"title": "SNMPv1/v2c communities are cleartext — never use over untrusted networks.", "body": "Anyone sniffing the wire reads the community string in plain text. For real security use SNMPv3 with auth + encryption.", "symptom": "Community string captured in a packet trace."},
+    {"title": "Community strings are case-sensitive.", "body": "`public` and `Public` are different communities. A common headache in cross-team setups.", "symptom": "Monitoring tool can't poll the device even though the community looks right."},
+    {"title": "`rw` (read-write) is dangerous — restrict tightly.", "body": "Read-only (`ro`) is for monitoring. Read-write (`rw`) lets the manager change config — never expose `rw` outside trusted management networks.", "symptom": "Someone with the rw community can reconfigure devices remotely."},
+    {"title": "`snmp-server host` defines WHERE traps go.", "body": "Without an `snmp-server host` line, traps are generated but go nowhere. The host command names the receiver and which trap categories to send.", "symptom": "Trap conditions occur but the monitoring server never sees them."}
+  ],
+
+  "hsrp": [
+    {"title": "Virtual IP must be in the interface's subnet AND not match either router's IP.", "body": "If the virtual IP equals the router's own IP, HSRP refuses. If it's in a different subnet, hosts can't reach it.", "symptom": "HSRP rejected on the interface, or clients can't ping the virtual IP."},
+    {"title": "Higher priority wins. Without `preempt`, the original Active keeps its role.", "body": "Default priority is 100. Set higher (e.g., 110) to make a router the preferred Active. Add `standby 10 preempt` so a returning higher-priority router takes back its role.", "symptom": "Your preferred Active comes back online but stays Standby."},
+    {"title": "Both routers must share group number AND virtual IP.", "body": "Mismatched group numbers mean both routers think they're the only one. Mismatched virtual IPs split the group.", "symptom": "Both routers show as Active simultaneously — a classic split-brain symptom."},
+    {"title": "HSRPv1: groups 0–255. HSRPv2: 0–4095 + IPv6.", "body": "Pick a version and stick with it across the group. Mixing v1 and v2 in the same group doesn't work.", "symptom": "HSRP neighbors don't see each other because of version mismatch."},
+    {"title": "Track an interface to fail over on upstream link loss.", "body": "`standby 10 track <if> decrement 20` lowers the priority when the tracked interface goes down. Without tracking, HSRP only fails over when the router itself dies.", "symptom": "Upstream link drops but HSRP doesn't fail over — traffic black-holes."}
+  ],
+
+  "aaa-local": [
+    {"title": "`aaa new-model` changes default login — set a method list FIRST.", "body": "The moment you run `aaa new-model`, the default login behavior changes. If you don't have a working method list (and a working local user), you lock yourself out of the console.", "symptom": "You can't get back in after enabling AAA."},
+    {"title": "Method lists are tried in order — left to right.", "body": "`aaa authentication login default local enable` means: try local user db first, fall back to enable password. The fallback only triggers if the previous method is unreachable, not if it rejects credentials.", "symptom": "Local user with a wrong password gets denied — enable password is never tried."},
+    {"title": "The `default` method list applies to every line unless overridden.", "body": "If a line has no specific method list, it uses `default`. Be intentional about what `default` does, especially before applying it.", "symptom": "Console line suddenly requires credentials you didn't expect."},
+    {"title": "Authentication and accounting are separate.", "body": "Turning on `aaa authentication` doesn't log anything by itself — you also need `aaa accounting` for the audit trail.", "symptom": "No record of who logged in or what they ran, even though AAA is on."}
+  ],
+
+  "cdp-lldp": [
+    {"title": "CDP is ON by default on every Cisco port.", "body": "Including ISP-facing and customer-facing ports. Disable with `no cdp enable` on external interfaces — you don't want to leak model numbers and IOS versions.", "symptom": "Your ISP knows what model and IOS version every router runs."},
+    {"title": "LLDP is OFF by default on Cisco.", "body": "If you need cross-vendor neighbor info (e.g., Cisco talking to Juniper), enable LLDP globally with `lldp run`.", "symptom": "Non-Cisco neighbor invisible to Cisco's discovery."},
+    {"title": "CDP advertises every 60s, holdtime 180s.", "body": "Default. A removed neighbor can linger in `show cdp neighbors` for up to 3 minutes. Don't trust the table during fast-changing topologies.", "symptom": "A device you unplugged still appears as a neighbor for a while."},
+    {"title": "L2 only — directly connected neighbors only.", "body": "Both CDP and LLDP are link-local. They don't see anything beyond the next hop, no matter the routing config.", "symptom": "You expected to find a device two hops away in `show cdp neighbors`."}
+  ],
+
+  "storm-control": [
+    {"title": "Thresholds are percentages of bandwidth, not packet counts.", "body": "`storm-control broadcast level 5.00` = drop broadcasts when they exceed 5% of the link capacity. On a 1 Gbps link, that's 50 Mbps of broadcast.", "symptom": "You set what you thought was a tight threshold but it's actually huge."},
+    {"title": "Default action is drop silently.", "body": "Storm-control drops over-threshold traffic but doesn't alert. Add `storm-control action {shutdown|trap}` to be notified or to err-disable on violations.", "symptom": "You only notice a broadcast storm by chance — no alert was generated."},
+    {"title": "`shutdown` action = err-disable.", "body": "Same recovery process as other err-disable causes: bounce the port or configure `errdisable recovery`.", "symptom": "Port stays down after a storm and won't come back without manual intervention."}
+  ],
+
+  "named-acls": [
+    {"title": "Named ACLs let you insert/delete individual lines by sequence number.", "body": "Numbered ACLs in older IOS require deleting the whole ACL to edit. Named ACLs (`ip access-list extended NAME`) accept line-by-line edits.", "symptom": "You can't surgically edit a numbered ACL — you have to rebuild it."},
+    {"title": "All the standard/extended rules still apply.", "body": "Naming changes only how you reference the ACL — placement, implicit deny, top-down processing, source-only vs source+dest all behave the same.", "symptom": "You expected a named ACL to behave differently — it doesn't."},
+    {"title": "Apply with `ip access-group <name> {in|out}`.", "body": "Same syntax as numbered ACLs but with the name instead of the number.", "symptom": "ACL applied but seems to do nothing — check direction (in vs out)."}
+  ],
+
+  "qos-basics": [
+    {"title": "Set the trust boundary first.", "body": "Where does the network start trusting incoming markings (DSCP/CoS)? Usually at the access switch facing IP phones or trusted servers — never trust markings from a user PC port.", "symptom": "A user PC sets EF (voice) on its own traffic and gets priority over actual phones."},
+    {"title": "`auto qos voip` is a sane default for IP phone ports.", "body": "Sets trust DSCP, configures queueing, and marks voice traffic appropriately. Good starting point in Packet Tracer; tune from there.", "symptom": "You're configuring QoS line-by-line and missing pieces."},
+    {"title": "Classify, then mark, then queue/police.", "body": "QoS pipeline: identify WHICH traffic (classify), set its marking (DSCP/CoS), then make decisions based on that marking (queue, drop, shape). Order matters.", "symptom": "Marking happens after the queueing decision so QoS uses stale values."}
+  ],
+
+  "dhcp-relay": [
+    {"title": "`ip helper-address` op de CLIENT-kant van de router.", "body": "Het commando hoort op de interface waar DHCP-broadcasts binnenkomen (de kant van de client), niet op de interface naar de server. Dit is de meest gemaakte fout bij DHCP relay.", "symptom": "Clients in een ander subnet krijgen geen IP van de centrale DHCP-server."},
+    {"title": "DHCP-broadcasts gaan niet automatisch door routers.", "body": "Zonder helper-address bereikt een DHCPDISCOVER nooit een server in een ander subnet — routers droppen broadcasts standaard.", "symptom": "DHCP werkt prima binnen één subnet maar nooit cross-subnet."},
+    {"title": "NTP zit NIET in de default helper-address forwarding-lijst.", "body": "Standaard worden o.a. DHCP (67/68), TFTP (69), DNS (53), Time (37), NetBIOS (137/138) en TACACS (49) door helper-address gerelayed. NTP (UDP 123) niet — daar gebruik je `ntp server` direct.", "symptom": "NTP-pakketten lijken via helper-address te moeten gaan maar bereiken de server niet."}
+  ],
+
+  "dtp-vtp": [
+    {"title": "Zelfde VTP-domein op alle switches — anders geen sync.", "body": "VTP domein-naam is case-sensitive. Blank op één switch + een echte naam op een ander = geen sync. Zet met `vtp domain <name>`.", "symptom": "VLAN aangemaakt op de server verschijnt niet op andere switches."},
+    {"title": "Hoogste revisienummer wint — ook als het verkeerd is.", "body": "Een switch met een hoger VTP-revisienummer overschrijft de VLAN-database van iedereen anders in het domein. Een gebruikte lab-switch in productie kan zo alle VLANs wissen. Reset met `vtp mode transparent` en terug, of pas de domein-naam eerst aan naar iets onzinnigs om de revisie naar 0 te zetten.", "symptom": "Productie-VLANs verdwijnen na het aansluiten van een 'nieuwe' switch."},
+    {"title": "VTP-wachtwoord moet overal exact gelijk zijn (of overal afwezig).", "body": "Case-sensitive. Leeg op één kant, ingesteld op een ander = mismatch en de sync breekt stilletjes.", "symptom": "Domein-naam klopt, revisie klopt, maar VLANs syncen niet."},
+    {"title": "Twee `dynamic auto` poorten worden nooit een trunk.", "body": "DTP: minstens één kant moet `dynamic desirable` of `switchport mode trunk` zijn. Twee passieve kanten wachten eeuwig op elkaar.", "symptom": "Link is up, beide poorten lijken trunk-config te hebben, maar `show interfaces trunk` is leeg."}
+  ],
+
+  "stp-tuning": [
+    {"title": "PortFast alleen op end-host poorten.", "body": "Switch-naar-switch links met PortFast openen een loop-window van enkele seconden. Gebruik PortFast alleen op access poorten naar PC's / IP-telefoons / servers.", "symptom": "Kortstondige loop / broadcast storm na het patchen van een nieuwe switch."},
+    {"title": "PortFast + BPDU Guard = veilig.", "body": "Als er een BPDU op een PortFast-poort binnenkomt, zet BPDU Guard de poort meteen op err-disable. Beschermt tegen het per ongeluk inpluggen van een switch op een gebruikerspoort.", "symptom": "Rogue switch in een vergaderzaal neemt root over."},
+    {"title": "Rapid-PVST+ convergeert veel sneller dan PVST+.", "body": "`spanning-tree mode rapid-pvst` zet RSTP aan per VLAN. Convergentie gaat van ~30s naar enkele seconden.", "symptom": "Topologie-wijzigingen veroorzaken 30+ seconden uitval."}
+  ],
+
+  "ipv6-extra": [
+    {"title": "SLAAC heeft een /64 prefix nodig op het segment.", "body": "SLAAC werkt niet met een andere prefix-lengte dan /64. Het hele auto-configure mechanisme rekent op die 64-bit grens.", "symptom": "Hosts auto-configureren geen IPv6-adres ondanks RAs."},
+    {"title": "DHCPv6 stateless: M=0, O=1 (other-config-flag).", "body": "Hosts halen hun adres via SLAAC en alleen DNS/info uit DHCPv6. Zet met `ipv6 nd other-config-flag`.", "symptom": "Hosts hebben een IPv6 maar geen DNS."},
+    {"title": "DHCPv6 stateful: M=1 (managed-config-flag).", "body": "Volledig adres + config via DHCPv6, geen SLAAC. Zet met `ipv6 nd managed-config-flag`. Hosts negeren de SLAAC-prefix en gebruiken DHCP.", "symptom": "Je wilde stateful DHCPv6 maar hosts blijven SLAAC doen."}
+  ]
+};
+
+// ============================================================
+// REQUIRES — cross-category prerequisites: 'to make X work you need...'
+// Looked up alongside RULES in app.js; rendered as a separate section
+// inside the category's dropdown.
+// Each entry: { feature: "...", steps: [{title, body, see?}] }
+// 'see' is an optional category id to cross-reference.
+// ============================================================
+const REQUIRES = {
+  "router-on-stick": {
+    "feature": "Inter-VLAN routing to work",
+    "steps": [
+    {"title": "VLANs must exist on the switch.", "body": "Create each VLAN with `vlan <id>` in the switch's VLAN database.", "see": "vlans"},
+    {"title": "Switch port to the router must be a trunk.", "body": "`switchport mode trunk` on the switch side. Allowed-VLAN list must include the VLANs you want to route.", "see": "trunking"},
+    {"title": "One sub-interface per VLAN on the router.", "body": "`interface gig0/0.<vlan>` for each VLAN you're routing.", "see": null},
+    {"title": "Sub-interface VLAN tag must match the trunk.", "body": "`encapsulation dot1Q <vlan>` on each sub-interface — the VLAN number must match what's on the trunk.", "see": null},
+    {"title": "Each sub-interface needs an IP in the VLAN's subnet.", "body": "This IP becomes the default gateway for hosts in that VLAN. Hosts must point at it.", "see": null},
+    {"title": "Parent physical interface must be `no shutdown`.", "body": "Sub-interfaces inherit the admin state of the parent.", "see": "interfaces"}
+    ]
+  },
+
+  "dhcp": {
+    "feature": "DHCP to hand out IPs (local subnet)",
+    "steps": [
+    {"title": "Exclude the gateway and any static-IP servers FIRST.", "body": "`ip dhcp excluded-address <start> <end>` BEFORE creating the pool, otherwise DHCP will lease those IPs out.", "see": null},
+    {"title": "Create the DHCP pool.", "body": "`ip dhcp pool <name>` enters DHCP-config mode.", "see": null},
+    {"title": "Configure pool network, gateway, DNS.", "body": "`network <addr> <mask>`, `default-router <gw>`, `dns-server <ip>` inside the pool.", "see": null},
+    {"title": "Router must have an interface IP in the pool's subnet.", "body": "Without an IP on that subnet, the router doesn't know which pool to match incoming requests against.", "see": "interfaces"},
+    {"title": "`service dhcp` must be enabled.", "body": "Default ON — check it wasn't disabled by a hardening pass.", "see": null, "cmd": "service dhcp"}
+    ]
+  },
+
+  "dhcp-relay": {
+    "feature": "DHCP across subnets to work",
+    "steps": [
+    {"title": "DHCP server exists somewhere (router or dedicated server).", "body": "Pool configured with `ip dhcp pool` on a router, OR a Windows/Linux DHCP server reachable by IP.", "see": "dhcp"},
+    {"title": "`ip helper-address <server-ip>` on the CLIENT-facing interface.", "body": "On the router interface where clients send broadcasts — NOT the server-facing one. This is the #1 mistake.", "see": null},
+    {"title": "Routing exists between client-router and DHCP server.", "body": "The relay sends unicast — there must be a route from the client router back to the server's IP.", "see": "static-routing"},
+    {"title": "Pool's `network` matches the client subnet.", "body": "When the relay forwards a request, the server picks the pool whose `network` matches the source subnet. Pool must exist for that subnet.", "see": "dhcp"}
+    ]
+  },
+
+  "trunking": {
+    "feature": "A trunk to form between two switches",
+    "steps": [
+    {"title": "Both switches must have the VLANs in their database.", "body": "Create with `vlan <id>` on each switch (or use VTP to sync them).", "see": "vlans"},
+    {"title": "Either matching VTP domain (for DTP) OR hardcoded trunk both sides.", "body": "DTP-negotiated trunks only form when VTP domains match. Easiest path: `switchport mode trunk` on both sides — bypasses DTP entirely.", "see": "dtp-vtp"},
+    {"title": "Same encapsulation on both ends.", "body": "Modern Cisco switches: dot1Q on both. Older switches with ISL+dot1Q support need `switchport trunk encapsulation dot1q` explicitly.", "see": null},
+    {"title": "Same native VLAN on both ends.", "body": "`switchport trunk native vlan X` matches on both. Mismatches generate CDP errors and leak traffic.", "see": null},
+    {"title": "Allowed-VLAN list includes the VLANs you need.", "body": "`switchport trunk allowed vlan X,Y,Z` or `add` to extend it. By default all VLANs are allowed.", "see": null}
+    ]
+  },
+
+  "ssh": {
+    "feature": "SSH access to a device",
+    "steps": [
+    {"title": "Set a real hostname (not `Router`/`Switch`).", "body": "`hostname <name>` — SSH key generation refuses the default hostname.", "see": "basics"},
+    {"title": "Set a domain name.", "body": "`ip domain-name <name>` — required before RSA key generation.", "see": "basics"},
+    {"title": "Generate RSA keys with modulus ≥ 1024.", "body": "`crypto key generate rsa modulus 2048` (2048 recommended). Without keys, SSH can't run.", "see": null},
+    {"title": "Force SSHv2.", "body": "`ip ssh version 2` — SSHv1 is broken, disable it explicitly.", "see": null},
+    {"title": "Create at least one local user.", "body": "`username <name> secret <pwd>` — there must be an account for SSH to authenticate against.", "see": "passwords"},
+    {"title": "VTY lines: enable login + restrict transport.", "body": "On `line vty 0 4`: `login local` (use local user db) and `transport input ssh` (deny telnet).", "see": null},
+    {"title": "Management IP reachable from your client.", "body": "On a switch: usually `interface vlan <mgmt>` with `ip address` + `no shutdown`, plus `ip default-gateway` for off-subnet reachability.", "see": "router-on-stick"}
+    ]
+  },
+
+  "ospf": {
+    "feature": "OSPF neighbors to reach FULL state",
+    "steps": [
+    {"title": "OSPF process started on both routers.", "body": "`router ospf <pid>` — process IDs don't need to match between routers (they're locally significant).", "see": null},
+    {"title": "Networks / interfaces advertised into OSPF.", "body": "Either `network <addr> <wildcard> area <id>` in router config, or `ip ospf <pid> area <id>` on each interface.", "see": null},
+    {"title": "Same area on the interface on both sides.", "body": "If R1's Gi0/0 is in area 0, R2's Gi0/0 on the same wire must also be in area 0.", "see": null},
+    {"title": "Hello/Dead timers must match.", "body": "Defaults: 10/40 on broadcast, 30/120 on NBMA. If you change them on one side, change both.", "see": null},
+    {"title": "MTU must match.", "body": "Otherwise the adjacency hangs in EXSTART/EXCHANGE forever.", "see": "interfaces"},
+    {"title": "Unique router-IDs.", "body": "Set explicitly with `router-id X.X.X.X` to avoid auto-selection surprises.", "see": "loopback"}
+    ]
+  },
+
+  "hsrp": {
+    "feature": "HSRP failover to work",
+    "steps": [
+    {"title": "Both routers have IPs in the SAME subnet.", "body": "Each router gets its own real IP on the LAN-facing interface; HSRP rides on top.", "see": "interfaces"},
+    {"title": "Same HSRP group number on both routers.", "body": "`standby <group> ...` — different group numbers = two separate HSRP groups thinking they're each alone.", "see": null},
+    {"title": "Same virtual IP on both, NOT equal to either router's real IP.", "body": "The virtual IP is what clients use as their gateway. It must be a third IP in the subnet.", "see": null},
+    {"title": "Decide priority + preempt.", "body": "Higher priority = preferred Active. Without `standby <grp> preempt`, the returning higher-priority router stays Standby.", "see": null},
+    {"title": "Track the upstream interface for real failover.", "body": "`standby <grp> track <if> decrement <n>` — without tracking, HSRP only fails over when the router itself dies, not when its uplink fails.", "see": null}
+    ]
+  },
+
+  "nat": {
+    "feature": "Inside hosts to reach the internet via PAT",
+    "steps": [
+    {"title": "Inside interface tagged `ip nat inside`.", "body": "On every LAN-facing interface.", "see": "interfaces"},
+    {"title": "Outside interface tagged `ip nat outside`.", "body": "On the ISP-facing interface.", "see": "interfaces"},
+    {"title": "ACL identifying which inside traffic to NAT.", "body": "`access-list 1 permit 192.168.0.0 0.0.255.255` — list of subnets allowed to translate.", "see": "acl-standard"},
+    {"title": "NAT mapping with `overload` for PAT.", "body": "`ip nat inside source list 1 interface <outside> overload`. Without `overload` you get static one-to-one NAT and only the first host translates.", "see": null},
+    {"title": "Default route to ISP.", "body": "`ip route 0.0.0.0 0.0.0.0 <isp-ip>` so the translated traffic actually leaves.", "see": "static-routing"}
+    ]
+  },
+
+  "port-security": {
+    "feature": "Port-security to enforce",
+    "steps": [
+    {"title": "Set the port to access (or trunk) mode FIRST.", "body": "`switchport mode access` — dynamic ports reject port-security commands.", "see": "trunking"},
+    {"title": "Enable port-security.", "body": "`switchport port-security` — that one command turns the feature on with defaults.", "see": null},
+    {"title": "Decide max MACs.", "body": "Default is 1. Change with `switchport port-security maximum <n>`. For PC-behind-phone, often 2 or 3.", "see": null},
+    {"title": "Decide violation action.", "body": "Default `shutdown` (err-disable). Other options: `restrict` (drop+log) or `protect` (drop silently).", "see": null},
+    {"title": "Optional: sticky MAC learning.", "body": "`switchport port-security mac-address sticky` writes learned MACs to running-config — still need `copy run start` to persist them.", "see": null}
+    ]
+  },
+
+  "etherchannel": {
+    "feature": "An EtherChannel bundle to form",
+    "steps": [
+    {"title": "Both sides use the SAME protocol.", "body": "LACP (active/passive), PAgP (desirable/auto), or static (on). Can't mix protocols.", "see": null},
+    {"title": "Compatible modes on each side.", "body": "LACP: active+active or active+passive. PAgP: desirable+desirable or desirable+auto. Static: on+on. Two passive sides never form.", "see": null},
+    {"title": "All member ports match: speed, duplex, mode.", "body": "Any mismatch and the member is rejected and shows as suspended.", "see": "interfaces"},
+    {"title": "All member ports match: native VLAN, allowed VLANs.", "body": "For trunk bundles. Mismatched native VLANs break the channel.", "see": "trunking"},
+    {"title": "`channel-group <num> mode <mode>` on every member.", "body": "Each member port needs the channel-group command with matching group number.", "see": null}
+    ]
+  },
+
+  "static-routing": {
+    "feature": "End-to-end routing without a routing protocol",
+    "steps": [
+    {"title": "Static route on each router pointing to the OTHER side's subnet.", "body": "Routes are one-way — R1 needs a route to R2's LAN, and R2 needs a route back to R1's LAN.", "see": null},
+    {"title": "Next-hop IP must be reachable.", "body": "The router needs a route to the next-hop already (recursive lookup). Usually that's a directly-connected subnet.", "see": "interfaces"},
+    {"title": "Use next-hop IP on multi-access links (Ethernet).", "body": "Exit-interface alone causes ARP issues. Point-to-point links (Serial) can use exit-interface.", "see": null},
+    {"title": "Default route to upstream (if internet-bound).", "body": "`ip route 0.0.0.0 0.0.0.0 <next-hop>` catches everything not in the routing table.", "see": null}
+    ]
+  },
+
+  "stp": {
+    "feature": "Predictable spanning-tree topology",
+    "steps": [
+    {"title": "Decide which switch is root for each VLAN.", "body": "Pick the most central / capable switch. Default priority is 32768 on every switch — left default, lowest MAC wins, usually the oldest switch.", "see": null},
+    {"title": "Hardcode the root.", "body": "On the chosen root: `spanning-tree vlan X root primary`. On the backup: `root secondary`.", "see": null},
+    {"title": "PortFast on end-host ports only.", "body": "`spanning-tree portfast` on access ports to PCs/phones/servers. Never on switch-to-switch links.", "see": null},
+    {"title": "BPDU Guard on PortFast ports.", "body": "`spanning-tree bpduguard enable` on each PortFast port (or `spanning-tree portfast bpduguard default` globally). Err-disables the port if a BPDU arrives.", "see": null}
+    ]
+  }
+};
