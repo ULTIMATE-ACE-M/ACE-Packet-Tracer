@@ -287,12 +287,15 @@
     if (cat.blurb) section.appendChild(el("p", { class: "blurb" }, cat.blurb));
 
     const catReq = (typeof REQUIRES !== "undefined" && REQUIRES[cat.id]) ? REQUIRES[cat.id] : null;
-    if ((catRules && catRules.length) || catReq) {
+    const catModesCheck = (typeof MODES !== "undefined" && MODES[cat.id]) ? MODES[cat.id] : null;
+    if ((catRules && catRules.length) || catReq || catModesCheck) {
       const panel = el("div", { class: "rules-panel" });
       const headerBtn = el("button", { class: "rules-panel-header", type: "button", "aria-expanded": "false" });
       headerBtn.appendChild(el("span", { class: "rules-panel-icon", "aria-hidden": "true" }, "!"));
       const countParts = [];
+      const catModesForCount = (typeof MODES !== "undefined" && MODES[cat.id]) ? MODES[cat.id] : null;
       if (catReq) countParts.push(catReq.steps.length + " step" + (catReq.steps.length === 1 ? "" : "s"));
+      if (catModesForCount && catModesForCount.options) countParts.push(catModesForCount.options.length + " mode" + (catModesForCount.options.length === 1 ? "" : "s"));
       if (catRules && catRules.length) countParts.push(catRules.length + " gotcha" + (catRules.length === 1 ? "" : "s"));
       headerBtn.appendChild(el("span", { class: "rules-panel-title" }, "Rules (" + countParts.join(" + ") + ")"));
       headerBtn.appendChild(el("span", { class: "rules-panel-chev", "aria-hidden": "true" }, ">"));
@@ -331,6 +334,44 @@
           reqList.appendChild(li);
         });
         body.appendChild(reqList);
+      }
+
+      const catModes = (typeof MODES !== "undefined" && MODES[cat.id]) ? MODES[cat.id] : null;
+      if (catModes && catModes.options && catModes.options.length) {
+        const modesHead = el("div", { class: "rules-section-header rules-section-modes" });
+        modesHead.appendChild(el("span", { class: "rules-section-badge modes-badge" }, "?"));
+        modesHead.appendChild(el("span", { class: "rules-section-title" }, catModes.title || "Modes — wanneer welke?"));
+        body.appendChild(modesHead);
+        if (catModes.subtitle) {
+          body.appendChild(el("p", { class: "modes-subtitle" }, catModes.subtitle));
+        }
+        const grid = el("div", { class: "modes-grid" });
+        catModes.options.forEach(opt => {
+          const card = el("div", { class: "mode-card mode-" + (opt.color || "gray") });
+          const cardHead = el("div", { class: "mode-head" });
+          cardHead.appendChild(el("span", { class: "mode-icon", "aria-hidden": "true" }, opt.icon || "?"));
+          cardHead.appendChild(el("span", { class: "mode-name" }, opt.name));
+          card.appendChild(cardHead);
+          if (opt.command) {
+            const cmdEl = el("code", { class: "mode-cmd" }, opt.command);
+            card.appendChild(cmdEl);
+          }
+          if (opt.use) {
+            const useEl = el("p", { class: "mode-use" });
+            renderInlineMarkdown(useEl, opt.use);
+            card.appendChild(useEl);
+          }
+          if (opt.tip) {
+            const tipEl = el("div", { class: "mode-tip" });
+            tipEl.appendChild(el("span", { class: "mode-tip-label" }, "Tip: "));
+            const t = el("span", null);
+            renderInlineMarkdown(t, opt.tip);
+            tipEl.appendChild(t);
+            card.appendChild(tipEl);
+          }
+          grid.appendChild(card);
+        });
+        body.appendChild(grid);
       }
 
       if (catRules && catRules.length) {
@@ -466,6 +507,120 @@
 
     categoriesEl.appendChild(section);
   });
+
+
+  // ============================================================
+  // WALKTHROUGHS — render after CATEGORIES, before troubleshooting link
+  // ============================================================
+  if (typeof WALKTHROUGHS !== "undefined" && WALKTHROUGHS.length) {
+    const wtNavHead = el("li", { class: "nav-header" }, "Setup Guides");
+    navList.appendChild(wtNavHead);
+
+    WALKTHROUGHS.forEach(wt => {
+      // Sidebar entry
+      const wtNavLi = el("li", null, el("a", { href: "#" + wt.id, "data-cat": wt.id }, wt.title));
+      navList.appendChild(wtNavLi);
+
+      // Main content section
+      const wtText = wt.title + " " + wt.blurb + " " +
+        wt.steps.map(s => s.title + " " + s.body + " " + s.lines.map(l => l.cmd).join(" ")).join(" ") + " " +
+        (wt.gotchas || []).map(g => g.title + " " + g.body + " " + (g.bad || "") + " " + (g.good || "")).join(" ");
+      const section = el("section", { class: "category walkthrough", id: wt.id, "data-search": wtText.toLowerCase() });
+      const h3 = el("h3", null);
+      h3.appendChild(el("span", { class: "wt-icon", "aria-hidden": "true" }, wt.device === "Switch" ? "S" : "R"));
+      h3.appendChild(document.createTextNode(" " + wt.title));
+      section.appendChild(h3);
+      section.appendChild(el("p", { class: "blurb" }, wt.blurb));
+
+      // Steps
+      wt.steps.forEach((step, idx) => {
+        const stepBox = el("div", { class: "wt-step" });
+        const head = el("div", { class: "wt-step-head" });
+        head.appendChild(el("span", { class: "wt-step-num", "aria-hidden": "true" }, String(idx + 1)));
+        head.appendChild(el("span", { class: "wt-step-title" }, step.title));
+        stepBox.appendChild(head);
+        if (step.body) {
+          stepBox.appendChild(el("div", { class: "wt-step-body" }, step.body));
+        }
+        // Code snippet (with copy button)
+        const snip = el("pre", { class: "snippet wt-snippet" });
+        // Copy text = just the commands, no prompts
+        const copyText = step.lines.map(l => l.cmd.trim()).filter(Boolean).join("\n");
+        const copyBtn = el("button", {
+          class: "copy-btn", type: "button",
+          "aria-label": "Copy commands to clipboard",
+          title: "Copy: " + (copyText.length > 60 ? copyText.slice(0, 60) + "..." : copyText),
+          onclick: e => copyText && copyTextToClipboard(copyText, e.target)
+        }, "Copy");
+        snip.appendChild(copyBtn);
+        step.lines.forEach((line, i) => {
+          if (i > 0) snip.appendChild(document.createTextNode("\n"));
+          snip.appendChild(el("span", { class: "cli-prompt" }, line.prompt + " "));
+          snip.appendChild(document.createTextNode(line.cmd));
+        });
+        stepBox.appendChild(snip);
+
+        // Make the whole step clickable to the most relevant command card
+        const stepHaystack = step.title + " " + step.body + " " + step.lines.map(l => l.cmd).join(" ");
+        const target = deriveTarget({title: step.title, body: stepHaystack}, wt.id);
+        if (target && target !== wt.id) {
+          stepBox.classList.add("wt-step-link");
+          attachClickToTarget(stepBox, target);
+        }
+        section.appendChild(stepBox);
+      });
+
+      // Gotchas as collapsible dropdown
+      if (wt.gotchas && wt.gotchas.length) {
+        const panel = el("div", { class: "rules-panel" });
+        const hbtn = el("button", { class: "rules-panel-header", type: "button", "aria-expanded": "false" });
+        hbtn.appendChild(el("span", { class: "rules-panel-icon", "aria-hidden": "true" }, "!"));
+        hbtn.appendChild(el("span", { class: "rules-panel-title" }, "Veelgemaakte fouten (" + wt.gotchas.length + ")"));
+        hbtn.appendChild(el("span", { class: "rules-panel-chev", "aria-hidden": "true" }, ">"));
+        panel.appendChild(hbtn);
+        const body = el("div", { class: "rules-panel-body" });
+        wt.gotchas.forEach(g => {
+          const item = el("div", { class: "rule wt-gotcha" });
+          item.appendChild(el("span", { class: "rule-dot", "aria-hidden": "true" }, "*"));
+          const content = el("div", { class: "rule-content" });
+          const tEl = el("div", { class: "rule-title" });
+          renderInlineMarkdown(tEl, g.title);
+          content.appendChild(tEl);
+          if (g.body) {
+            const bEl = el("p", { class: "rule-body" });
+            renderInlineMarkdown(bEl, g.body);
+            content.appendChild(bEl);
+          }
+          if (g.bad || g.good) {
+            const diff = el("div", { class: "wt-gotcha-diff" });
+            if (g.bad) {
+              const badRow = el("div", { class: "wt-gotcha-row wt-bad" });
+              badRow.appendChild(el("span", { class: "wt-gotcha-label" }, "Fout"));
+              badRow.appendChild(el("code", { class: "wt-gotcha-code" }, g.bad));
+              diff.appendChild(badRow);
+            }
+            if (g.good) {
+              const goodRow = el("div", { class: "wt-gotcha-row wt-good" });
+              goodRow.appendChild(el("span", { class: "wt-gotcha-label" }, "Goed"));
+              goodRow.appendChild(el("code", { class: "wt-gotcha-code" }, g.good));
+              diff.appendChild(goodRow);
+            }
+            content.appendChild(diff);
+          }
+          item.appendChild(content);
+          body.appendChild(item);
+        });
+        panel.appendChild(body);
+        hbtn.addEventListener("click", () => {
+          const open = panel.classList.toggle("open");
+          hbtn.setAttribute("aria-expanded", open ? "true" : "false");
+        });
+        section.appendChild(panel);
+      }
+
+      categoriesEl.appendChild(section);
+    });
+  }
 
   // Extra sidebar link: troubleshooting page (separate file, not a category)
   const tsLi = el("li", { class: "nav-extra" }, el("a", { href: "troubleshooting.html" }, "Troubleshooting"));
@@ -780,6 +935,52 @@ function copyText(text, btn) {
     .rule-symptom-label { font-weight: 600; color: var(--accent); margin-right: 4px; }
     .rule.rule-matched .rule-title, .req-step.rule-matched .req-title { color: var(--accent); }
     .rule.hidden, .rules-panel.hidden, .req-step.hidden { display: none; }
+    .nav-header { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); padding: 12px 12px 4px 12px; margin-top: 8px; border-top: 1px solid var(--border); font-weight: 600; }
+    .walkthrough h3 { display: flex; align-items: center; gap: 10px; }
+    .wt-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #22c55e; color: #0b1120; font-size: 13px; font-weight: 700; }
+    [data-theme="dark"] .wt-icon { background: #4ade80; color: #052e16; }
+    .wt-step { background: var(--surface-2); border: 1px solid var(--border); border-left: 4px solid #22c55e; border-radius: 0 8px 8px 0; padding: 12px 14px; margin: 10px 0; }
+    [data-theme="dark"] .wt-step { border-left-color: #4ade80; }
+    .wt-step-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .wt-step-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: #22c55e; color: #0b1120; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    [data-theme="dark"] .wt-step-num { background: #4ade80; color: #052e16; }
+    .wt-step-title { font-weight: 600; font-size: 15px; color: var(--text); }
+    .wt-step-body { color: var(--text-muted); font-size: 13.5px; margin: 4px 0 8px 36px; }
+    .wt-snippet { margin-left: 36px; line-height: 1.55; }
+    .wt-step-link { cursor: pointer; transition: border-color 0.12s; }
+    .wt-step-link:hover { border-color: var(--accent); border-left-color: var(--accent); }
+    .wt-gotcha-diff { display: grid; grid-template-columns: 1fr; gap: 6px; margin-top: 8px; padding-top: 6px; }
+    .wt-gotcha-row { display: grid; grid-template-columns: 48px 1fr; gap: 8px; align-items: start; padding: 6px 10px; border-radius: 4px; font-size: 12.5px; }
+    .wt-gotcha-row.wt-bad { background: rgba(220,38,38,0.10); border: 1px solid rgba(220,38,38,0.30); }
+    [data-theme="dark"] .wt-gotcha-row.wt-bad { background: rgba(220,38,38,0.12); }
+    .wt-gotcha-row.wt-good { background: rgba(34,197,94,0.10); border: 1px solid rgba(34,197,94,0.30); }
+    [data-theme="dark"] .wt-gotcha-row.wt-good { background: rgba(34,197,94,0.12); }
+    .wt-gotcha-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; padding: 2px 6px; border-radius: 3px; align-self: start; }
+    .wt-bad .wt-gotcha-label { background: #dc2626; color: #fff; }
+    .wt-good .wt-gotcha-label { background: #16a34a; color: #fff; }
+    .wt-gotcha-code { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; color: var(--text); word-break: break-all; }
+
+    .rules-section-modes .modes-badge { background: #3b82f6 !important; }
+    [data-theme="dark"] .rules-section-modes .modes-badge { background: #60a5fa !important; }
+    .modes-subtitle { color: var(--text-muted); font-size: 12.5px; margin: 0 0 10px 0; }
+    .modes-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 0 0 14px 0; }
+    .mode-card { background: var(--surface); border: 1px solid var(--border); border-top: 4px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+    .mode-card.mode-blue { border-top-color: #3b82f6; }
+    .mode-card.mode-green { border-top-color: #22c55e; }
+    .mode-card.mode-amber { border-top-color: #f59e0b; }
+    .mode-card.mode-gray { border-top-color: #6b7280; }
+    .mode-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .mode-icon { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .mode-card.mode-blue .mode-icon { background: #3b82f6; }
+    .mode-card.mode-green .mode-icon { background: #22c55e; }
+    .mode-card.mode-amber .mode-icon { background: #f59e0b; }
+    .mode-card.mode-gray .mode-icon { background: #6b7280; }
+    .mode-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .mode-cmd { display: block; font: 12px ui-monospace, Consolas, monospace; color: var(--accent); background: var(--surface-2); padding: 3px 7px; border-radius: 3px; border: 1px solid var(--border); margin: 4px 0 8px 0; }
+    .mode-use { font-size: 13px; color: var(--text); margin: 0 0 8px 0; line-height: 1.5; }
+    .mode-tip { font-size: 12px; color: var(--text-muted); padding: 6px 8px; background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 0 3px 3px 0; }
+    .mode-tip-label { font-weight: 600; color: var(--accent); margin-right: 3px; }
+
   `;
   const style = document.createElement('style');
   style.textContent = css;

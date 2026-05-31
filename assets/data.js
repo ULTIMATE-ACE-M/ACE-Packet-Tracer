@@ -1081,3 +1081,315 @@ const REQUIRES = {
     ]
   }
 };
+
+// ============================================================
+// WALKTHROUGHS — step-by-step setup guides (basis configuratie).
+// Rendered after all CATEGORIES, at the bottom of the sidebar.
+// ============================================================
+
+const WALKTHROUGHS = [
+  {
+    "id": "basic-switch-setup",
+    "title": "Basic switch setup",
+    "blurb": "Een nieuwe switch klaarmaken met twee VLANs, een trunk-poort en een access-poort. Begin nadat je via console of VTY bent ingelogd en een enable-password hebt geconfigureerd.",
+    "device": "Switch",
+    "steps": [
+      {
+        "title": "Initial setup",
+        "body": "Naar Privileged EXEC, dan naar Global Config, dan geef je de switch een naam.",
+        "lines": [
+          {
+            "prompt": "Switch>",
+            "cmd": "enable"
+          },
+          {
+            "prompt": "Switch#",
+            "cmd": "configure terminal"
+          },
+          {
+            "prompt": "Switch(config)#",
+            "cmd": "hostname Switch"
+          }
+        ]
+      },
+      {
+        "title": "VLAN database",
+        "body": "Maak VLAN 1 en VLAN 2 aan in de VLAN database en geef ze namen.",
+        "lines": [
+          {
+            "prompt": "Switch(config)#",
+            "cmd": "vlan 1"
+          },
+          {
+            "prompt": "Switch(config-vlan)#",
+            "cmd": " name VLAN_1"
+          },
+          {
+            "prompt": "Switch(config-vlan)#",
+            "cmd": " exit"
+          },
+          {
+            "prompt": "Switch(config)#",
+            "cmd": "vlan 2"
+          },
+          {
+            "prompt": "Switch(config-vlan)#",
+            "cmd": " name VLAN_2"
+          },
+          {
+            "prompt": "Switch(config-vlan)#",
+            "cmd": " exit"
+          }
+        ]
+      },
+      {
+        "title": "Interface-configuratie",
+        "body": "Fa0/1 wordt een trunk-poort (draagt beide VLANs). Fa0/2 wordt een access-poort in VLAN 2.",
+        "lines": [
+          {
+            "prompt": "Switch(config)#",
+            "cmd": "interface FastEthernet0/1"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " switchport trunk encapsulation dot1q"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " switchport mode trunk"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " switchport trunk allowed vlan 1,2"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " no shutdown"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " exit"
+          },
+          {
+            "prompt": "Switch(config)#",
+            "cmd": "interface FastEthernet0/2"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " switchport mode access"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " switchport access vlan 2"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " no shutdown"
+          },
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": " exit"
+          }
+        ]
+      },
+      {
+        "title": "Klaar — opslaan",
+        "body": "Verlaat config-modus en sla de running-config op naar NVRAM zodat 'ie na reboot bewaard blijft.",
+        "lines": [
+          {
+            "prompt": "Switch(config-if)#",
+            "cmd": "end"
+          },
+          {
+            "prompt": "Switch#",
+            "cmd": "write memory"
+          }
+        ]
+      }
+    ],
+    "gotchas": [
+      {
+        "title": "Access poort in meerdere VLANs.",
+        "body": "Een access-poort kan in maar één VLAN tegelijk zitten.",
+        "bad": "switchport access vlan 1,2",
+        "good": "switchport access vlan 2"
+      },
+      {
+        "title": "VLAN-naam met spatie.",
+        "body": "IOS leest spaties als scheidingstekens. Gebruik een underscore of streepje.",
+        "bad": "name VLAN 1",
+        "good": "name VLAN_1"
+      },
+      {
+        "title": "encapsulation dot1q niet altijd nodig.",
+        "body": "Op moderne 2960-switches die alleen dot1q ondersteunen geeft het commando een onbekend-fout. Gewoon meteen `switchport mode trunk`.",
+        "bad": "switchport trunk encapsulation dot1q  (op 2960)",
+        "good": "switchport mode trunk"
+      }
+    ]
+  },
+  {
+    "id": "basic-router-setup",
+    "title": "Basic router setup met DHCP server",
+    "blurb": "Een nieuwe router klaarmaken met een LAN-interface en een DHCP-pool die IPs uitdeelt aan clients in dat subnet.",
+    "device": "Router",
+    "steps": [
+      {
+        "title": "Initial setup",
+        "body": "Naar Privileged EXEC, naar Global Config, hostname zetten.",
+        "lines": [
+          {
+            "prompt": "Router>",
+            "cmd": "enable"
+          },
+          {
+            "prompt": "Router#",
+            "cmd": "configure terminal"
+          },
+          {
+            "prompt": "Router(config)#",
+            "cmd": "hostname Router"
+          }
+        ]
+      },
+      {
+        "title": "Interface-configuratie",
+        "body": "Geef de LAN-interface een IP en zet de interface aan.",
+        "lines": [
+          {
+            "prompt": "Router(config)#",
+            "cmd": "interface GigabitEthernet0/0"
+          },
+          {
+            "prompt": "Router(config-if)#",
+            "cmd": " ip address 192.168.0.1 255.255.255.0"
+          },
+          {
+            "prompt": "Router(config-if)#",
+            "cmd": " no shutdown"
+          },
+          {
+            "prompt": "Router(config-if)#",
+            "cmd": " exit"
+          }
+        ]
+      },
+      {
+        "title": "DHCP server",
+        "body": "Sluit eerst het gateway-IP uit zodat DHCP 'm niet uitdeelt, maak dan de pool aan en zet network, gateway en DNS.",
+        "lines": [
+          {
+            "prompt": "Router(config)#",
+            "cmd": "ip dhcp excluded-address 192.168.10.1 192.168.10.10"
+          },
+          {
+            "prompt": "Router(config)#",
+            "cmd": "ip dhcp pool POOL1"
+          },
+          {
+            "prompt": "Router(dhcp-config)#",
+            "cmd": " network 192.168.10.0 255.255.255.0"
+          },
+          {
+            "prompt": "Router(dhcp-config)#",
+            "cmd": " default-router 192.168.10.1"
+          },
+          {
+            "prompt": "Router(dhcp-config)#",
+            "cmd": " dns-server 8.8.8.8"
+          },
+          {
+            "prompt": "Router(dhcp-config)#",
+            "cmd": " exit"
+          }
+        ]
+      },
+      {
+        "title": "Klaar — opslaan",
+        "body": "Verlaat config-modus en sla de running-config op naar NVRAM.",
+        "lines": [
+          {
+            "prompt": "Router(config)#",
+            "cmd": "end"
+          },
+          {
+            "prompt": "Router#",
+            "cmd": "write memory"
+          }
+        ]
+      }
+    ],
+    "gotchas": [
+      {
+        "title": "Komma in excluded-address.",
+        "body": "Cisco IOS verwacht een spatie tussen begin- en eind-IP, geen komma.",
+        "bad": "ip dhcp excluded-address 192.168.10.1, 192.168.10.10",
+        "good": "ip dhcp excluded-address 192.168.10.1 192.168.10.10"
+      },
+      {
+        "title": "Network-statement met host-IP.",
+        "body": "Het network statement wil het netwerk-adres (eindigt op .0 voor een /24), niet een host IP.",
+        "bad": "network 192.168.10.1 255.255.255.0",
+        "good": "network 192.168.10.0 255.255.255.0"
+      },
+      {
+        "title": "Pool-naam met spatie.",
+        "body": "Pool-namen mogen geen spaties bevatten. Gebruik een underscore, hoofdletters, of geen scheidingsteken.",
+        "bad": "ip dhcp pool Pool 1",
+        "good": "ip dhcp pool POOL1"
+      },
+      {
+        "title": "Router-interface IP niet in pool-subnet.",
+        "body": "Router heeft hier IP 192.168.0.1 op Gi0/0, maar de pool deelt uit in 192.168.10.0/24. DHCP koppelt requests aan een pool via het interface-subnet, dus deze koppeling werkt niet. Of pas de interface IP aan, of voeg een sub-interface toe in de pool-range.",
+        "bad": "interface IP 192.168.0.1 + pool 192.168.10.0/24",
+        "good": "interface IP 192.168.10.254 + pool 192.168.10.0/24"
+      }
+    ]
+  }
+];
+
+// ============================================================
+// MODES — "when to use which X mode" reference blocks (e.g. VTP modes).
+// Rendered inside the Rules dropdown of the linked category.
+// ============================================================
+
+const MODES = {
+  "trunking": {
+    "title": "VTP modes — wanneer welke?",
+    "subtitle": "Vier modi, elk met een eigen rol in de VTP-domein. Kies bewust per switch.",
+    "options": [
+      {
+        "name": "Server",
+        "command": "vtp mode server",
+        "icon": "S",
+        "color": "blue",
+        "use": "Default. Gebruik op de switch(es) die VLANs mogen aanmaken, wijzigen en verwijderen. Wijzigingen worden gesynchroniseerd naar alle clients in het domein.",
+        "tip": "Meestal 1–2 servers per domein — een hoofdserver plus eentje voor redundantie. Te veel servers maakt het lastig te bepalen wie de waarheid is."
+      },
+      {
+        "name": "Client",
+        "command": "vtp mode client",
+        "icon": "C",
+        "color": "green",
+        "use": "Op alle andere switches in het domein. Ontvangt de VLAN-database van de server, kan zelf niks wijzigen. De veiligste keus voor het overgrote deel van je switches.",
+        "tip": "Een client wijst `vlan <id>` af met `% VTP VLAN configuration not allowed when device is in CLIENT mode`."
+      },
+      {
+        "name": "Transparent",
+        "command": "vtp mode transparent",
+        "icon": "T",
+        "color": "amber",
+        "use": "Switch doet niet mee aan VTP en heeft een eigen lokale VLAN-database. Forward wel VTP-advertisements naar buurswitches, maar past ze zelf niet toe. Gebruik wanneer een switch eigen VLANs nodig heeft die niet in het domein moeten, of voor extra veiligheid (een transparent switch kan het domein niet overschrijven).",
+        "tip": "VLANs die je hier aanmaakt staan alleen op deze switch — worden niet gesynchroniseerd."
+      },
+      {
+        "name": "Off (VTPv3)",
+        "command": "vtp mode off",
+        "icon": "O",
+        "color": "gray",
+        "use": "Alleen beschikbaar in VTPv3. De switch verstuurt en forward GEEN VTP-berichten meer. Volledige opt-out. Gebruik wanneer je VTP überhaupt niet wilt op deze switch, en ook niet wilt dat 'ie VTP-pakketten doorgeeft.",
+        "tip": "Op VTPv1/v2 bestaat deze modus niet — daar gebruik je transparent als je VTP wilt vermijden."
+      }
+    ]
+  }
+};
