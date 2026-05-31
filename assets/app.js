@@ -556,7 +556,16 @@
         step.lines.forEach((line, i) => {
           if (i > 0) snip.appendChild(document.createTextNode("\n"));
           snip.appendChild(el("span", { class: "cli-prompt" }, line.prompt + " "));
-          snip.appendChild(document.createTextNode(line.cmd));
+          // Split cmd on <...> segments to colorize the changeable parts
+          const parts = line.cmd.split(/(<[^<>]+>)/g);
+          parts.forEach(p => {
+            if (p.length === 0) return;
+            if (p.startsWith("<") && p.endsWith(">") && p.length > 2) {
+              snip.appendChild(el("span", { class: "cli-placeholder" }, p));
+            } else {
+              snip.appendChild(document.createTextNode(p));
+            }
+          });
         });
         stepBox.appendChild(snip);
 
@@ -980,6 +989,16 @@ function copyText(text, btn) {
     .mode-use { font-size: 13px; color: var(--text); margin: 0 0 8px 0; line-height: 1.5; }
     .mode-tip { font-size: 12px; color: var(--text-muted); padding: 6px 8px; background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 0 3px 3px 0; }
     .mode-tip-label { font-weight: 600; color: var(--accent); margin-right: 3px; }
+
+    .wt-snippet .cli-placeholder { color: var(--accent); font-weight: 600; }
+    [data-theme="dark"] .wt-snippet .cli-placeholder { color: #fb923c; }
+    .wt-snippet { color: var(--code-text); }
+    .wt-snippet .cli-prompt { color: #7ec7ff; font-weight: 600; user-select: none; opacity: 0.95; }
+    .wt-gotcha-code { color: var(--text); }
+    .wt-bad .wt-gotcha-code { color: #fca5a5; }
+    [data-theme="dark"] .wt-bad .wt-gotcha-code { color: #fca5a5; }
+    .wt-good .wt-gotcha-code { color: #86efac; }
+    [data-theme="dark"] .wt-good .wt-gotcha-code { color: #86efac; }
 
   `;
   const style = document.createElement('style');

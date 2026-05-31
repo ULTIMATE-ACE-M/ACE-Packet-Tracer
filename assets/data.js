@@ -1108,7 +1108,7 @@ const WALKTHROUGHS = [
           },
           {
             "prompt": "Switch(config)#",
-            "cmd": "hostname Switch"
+            "cmd": "hostname <Switch>"
           }
         ]
       },
@@ -1118,11 +1118,11 @@ const WALKTHROUGHS = [
         "lines": [
           {
             "prompt": "Switch(config)#",
-            "cmd": "vlan 1"
+            "cmd": "vlan <1>"
           },
           {
             "prompt": "Switch(config-vlan)#",
-            "cmd": " name VLAN_1"
+            "cmd": " name <VLAN_1>"
           },
           {
             "prompt": "Switch(config-vlan)#",
@@ -1130,11 +1130,11 @@ const WALKTHROUGHS = [
           },
           {
             "prompt": "Switch(config)#",
-            "cmd": "vlan 2"
+            "cmd": "vlan <2>"
           },
           {
             "prompt": "Switch(config-vlan)#",
-            "cmd": " name VLAN_2"
+            "cmd": " name <VLAN_2>"
           },
           {
             "prompt": "Switch(config-vlan)#",
@@ -1148,7 +1148,7 @@ const WALKTHROUGHS = [
         "lines": [
           {
             "prompt": "Switch(config)#",
-            "cmd": "interface FastEthernet0/1"
+            "cmd": "interface <FastEthernet0/1>"
           },
           {
             "prompt": "Switch(config-if)#",
@@ -1160,7 +1160,7 @@ const WALKTHROUGHS = [
           },
           {
             "prompt": "Switch(config-if)#",
-            "cmd": " switchport trunk allowed vlan 1,2"
+            "cmd": " switchport trunk allowed vlan <1,2>"
           },
           {
             "prompt": "Switch(config-if)#",
@@ -1172,7 +1172,7 @@ const WALKTHROUGHS = [
           },
           {
             "prompt": "Switch(config)#",
-            "cmd": "interface FastEthernet0/2"
+            "cmd": "interface <FastEthernet0/2>"
           },
           {
             "prompt": "Switch(config-if)#",
@@ -1180,7 +1180,7 @@ const WALKTHROUGHS = [
           },
           {
             "prompt": "Switch(config-if)#",
-            "cmd": " switchport access vlan 2"
+            "cmd": " switchport access vlan <2>"
           },
           {
             "prompt": "Switch(config-if)#",
@@ -1248,7 +1248,7 @@ const WALKTHROUGHS = [
           },
           {
             "prompt": "Router(config)#",
-            "cmd": "hostname Router"
+            "cmd": "hostname <Router>"
           }
         ]
       },
@@ -1258,11 +1258,11 @@ const WALKTHROUGHS = [
         "lines": [
           {
             "prompt": "Router(config)#",
-            "cmd": "interface GigabitEthernet0/0"
+            "cmd": "interface <GigabitEthernet0/0>"
           },
           {
             "prompt": "Router(config-if)#",
-            "cmd": " ip address 192.168.0.1 255.255.255.0"
+            "cmd": " ip address <192.168.0.1> <255.255.255.0>"
           },
           {
             "prompt": "Router(config-if)#",
@@ -1280,23 +1280,23 @@ const WALKTHROUGHS = [
         "lines": [
           {
             "prompt": "Router(config)#",
-            "cmd": "ip dhcp excluded-address 192.168.10.1 192.168.10.10"
+            "cmd": "ip dhcp excluded-address <192.168.10.1> <192.168.10.10>"
           },
           {
             "prompt": "Router(config)#",
-            "cmd": "ip dhcp pool POOL1"
+            "cmd": "ip dhcp pool <POOL1>"
           },
           {
             "prompt": "Router(dhcp-config)#",
-            "cmd": " network 192.168.10.0 255.255.255.0"
+            "cmd": " network <192.168.10.0> <255.255.255.0>"
           },
           {
             "prompt": "Router(dhcp-config)#",
-            "cmd": " default-router 192.168.10.1"
+            "cmd": " default-router <192.168.10.1>"
           },
           {
             "prompt": "Router(dhcp-config)#",
-            "cmd": " dns-server 8.8.8.8"
+            "cmd": " dns-server <8.8.8.8>"
           },
           {
             "prompt": "Router(dhcp-config)#",
