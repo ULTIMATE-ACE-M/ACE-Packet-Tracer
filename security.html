@@ -62,6 +62,74 @@
     .reset-btn { margin-top: 12px; background: transparent; color: var(--text-muted); border: 1px solid var(--border); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
     .reset-btn:hover { color: var(--text); border-color: var(--primary); }
     @media (max-width: 700px) { .security-main { padding: 18px 16px 60px; } }
+
+    .grade-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; margin: 0 0 16px 0; }
+    .grade-row { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; font-size: 14px; }
+    .grade-lbl { color: var(--text-muted); font-size: 13px; font-weight: 600; }
+    .grade-row span:not(.grade-lbl):not(.grade-max) { color: var(--text); font-weight: 700; }
+    .grade-max { color: var(--text-muted); font-size: 13px; }
+    .grade-cijfer { font-size: 18px !important; color: var(--primary) !important; font-weight: 800 !important; }
+    .cijfer-table-wrap { margin-top: 10px; font-size: 12.5px; }
+    .cijfer-table-wrap summary { cursor: pointer; color: var(--primary); font-weight: 600; padding: 4px 0; }
+    .cijfer-table-wrap summary:hover { color: var(--primary-hover, var(--primary)); }
+    .cijfer-table { width: 100%; max-width: 480px; border-collapse: collapse; margin-top: 6px; }
+    .cijfer-table th, .cijfer-table td { padding: 4px 8px; text-align: center; border: 1px solid var(--border); font-size: 12.5px; }
+    .cijfer-table th { background: var(--surface); color: var(--text-muted); font-weight: 700; }
+    .cijfer-table td { background: var(--surface); }
+
+    .score-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); }
+    .score-btn { width: 32px; height: 32px; border-radius: 6px; border: 2px solid var(--border); background: var(--surface); color: var(--text); font-weight: 700; font-size: 14px; cursor: pointer; transition: transform .12s, background .12s, border-color .12s; }
+    .score-btn:hover { transform: scale(1.05); }
+    .score-btn.score-0 { border-color: rgba(185,28,28,0.4); }
+    .score-btn.score-1 { border-color: rgba(194,65,12,0.4); }
+    .score-btn.score-2 { border-color: rgba(180,83,9,0.4); }
+    .score-btn.score-3 { border-color: rgba(21,128,61,0.4); }
+    .score-btn.score-0.selected { background: #b91c1c; color: white; border-color: #b91c1c; }
+    .score-btn.score-1.selected { background: #c2410c; color: white; border-color: #c2410c; }
+    .score-btn.score-2.selected { background: #b45309; color: white; border-color: #b45309; }
+    .score-btn.score-3.selected { background: #15803d; color: white; border-color: #15803d; }
+    .score-current { font-size: 13px; color: var(--text-muted); margin-left: 8px; font-style: italic; }
+    .score-current.has-score { color: var(--text); font-style: normal; font-weight: 600; }
+    .score-current[data-level="0"] { color: #b91c1c; }
+    .score-current[data-level="1"] { color: #c2410c; }
+    .score-current[data-level="2"] { color: #b45309; }
+    .score-current[data-level="3"] { color: #15803d; }
+    [data-theme="dark"] .score-current[data-level="0"] { color: #fca5a5; }
+    [data-theme="dark"] .score-current[data-level="1"] { color: #fdba74; }
+    [data-theme="dark"] .score-current[data-level="2"] { color: #fcd34d; }
+    [data-theme="dark"] .score-current[data-level="3"] { color: #86efac; }
+    .ref-meta { color: var(--text-muted); font-size: 12.5px; margin-top: 4px; }
+    .ref-meta code { background: var(--surface-2); padding: 1px 5px; border-radius: 3px; font-size: 11.5px; }
+
+    .plan-list { list-style: none; counter-reset: plan; margin: 0; padding: 0; }
+    .plan-step { display: flex; gap: 14px; padding: 14px 16px; margin: 8px 0; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 0 8px 8px 0; transition: border-color .15s; }
+    .plan-step:hover { border-left-color: var(--accent); }
+    .plan-num { flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 50%; background: var(--primary); color: #fff; font-size: 15px; font-weight: 800; }
+    .plan-content { flex: 1; min-width: 0; }
+    .plan-title { font-size: 15px; font-weight: 700; color: var(--text); margin: 4px 0 6px 0; }
+    .plan-content p { margin: 0; font-size: 13.5px; line-height: 1.6; color: var(--text-muted); }
+    [data-theme="dark"] .plan-content p { color: var(--text); }
+
+    #naslag-section { margin-top: 28px; }
+    .naslag-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; overflow: hidden; transition: border-color .15s; }
+    .naslag-card[open] { border-color: var(--primary); }
+    .naslag-card summary { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; list-style: none; user-select: none; transition: background .12s; }
+    .naslag-card summary::-webkit-details-marker { display: none; }
+    .naslag-card summary:hover { background: var(--surface-2); }
+    .naslag-card[open] summary { background: var(--surface-2); border-bottom: 1px solid var(--border); }
+    .naslag-icon { display: inline-block; color: var(--primary); font-size: 14px; transition: transform .18s; flex-shrink: 0; font-family: ui-monospace, Consolas, monospace; }
+    .naslag-card[open] .naslag-icon { transform: rotate(90deg); }
+    .naslag-title { flex: 1; font-size: 15px; font-weight: 700; color: var(--text); }
+    .naslag-meta { font-size: 12px; color: var(--text-muted); font-weight: 500; padding: 2px 8px; background: var(--surface); border-radius: 10px; border: 1px solid var(--border); }
+    [data-theme="dark"] .naslag-meta { background: var(--surface-2); }
+    .naslag-body { padding: 14px 18px 18px 18px; font-size: 13.5px; line-height: 1.6; color: var(--text); }
+    .naslag-body > p { margin: 0 0 10px 0; }
+    .naslag-body code { font: 12.5px ui-monospace, Consolas, monospace; background: var(--surface-2); color: var(--accent); padding: 1px 5px; border-radius: 3px; }
+    .naslag-h4 { font-size: 13.5px; font-weight: 700; color: var(--text); margin: 14px 0 6px 0; padding-bottom: 4px; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.04em; }
+    .naslag-steps, .naslag-list { margin: 6px 0 12px 0; padding-left: 24px; }
+    .naslag-steps li, .naslag-list li { margin: 4px 0; line-height: 1.6; }
+    .naslag-steps ul { margin: 4px 0; padding-left: 20px; }
+    .naslag-code { background: var(--code-bg); color: var(--code-text); padding: 10px 12px; border-radius: 6px; margin: 8px 0 12px 0; font: 12px ui-monospace, Consolas, monospace; line-height: 1.5; overflow-x: auto; white-space: pre; }
   </style>
 </head>
 <body>
@@ -79,25 +147,233 @@
   <main class="security-main">
     <section class="hero">
       <h2>Checklist — P2-K2: Controleert de security</h2>
-      <p>Klik op een onderdeel om af te vinken. Klik op <strong>Details</strong> voor de scoring-rubric (Niet/nauwelijks &rarr; Volledig). Per tool vind je <em>Wat</em>, <em>Hoe</em> en de <em>Verwachte uitkomst</em>.</p>
+      <p>Per criterium kies je een score van <strong>0 (niet/nauwelijks)</strong> tot <strong>3 (volledig)</strong>. Het cijfer per werkproces wordt automatisch berekend volgens de officiele cijfertabel. Klik op <strong>Details</strong> voor de scoring-rubric per criterium. Per tool vind je <em>Wat</em>, <em>Hoe</em> en de <em>Verwachte uitkomst</em>.</p>
+      <p class="ref-meta">Beoordelingsformulier <code>BF_EX_IT20_P2-K2_2</code> &middot; Profiel 25606 Expert IT systems and devices &middot; Kerntaak P2-K2 Controleert de security</p>
       <div class="progress-card">
-        Voortgang: <strong><span id="checked-count">0</span> / <span id="total-count">0</span></strong> onderdelen afgevinkt
+        Stappen afgevinkt (los van scoring): <strong><span id="checked-count">0</span> / <span id="total-count">0</span></strong>
       </div>
     </section>
 
     <section class="category" id="w1-section">
       <h3>(P2-K2-W1) Geeft security advies en verbetert de security</h3>
-      <p class="blurb">Opdracht 1 &middot; Bijlage 1.3 Auditrapport voorbeelduitwerking &middot; 4 criteria</p>
+      <p class="blurb">Opdracht 1 &middot; Bijlage 1.3 Auditrapport voorbeelduitwerking &middot; 4 criteria &middot; max 12 punten</p>
+      <div class="grade-card">
+        <div class="grade-row">
+          <span class="grade-lbl">Ingevuld:</span><span id="w1-scored">0 / 4</span>
+          <span class="grade-lbl">Punten:</span><span id="w1-total">0</span> <span class="grade-max">/ 12</span>
+          <span class="grade-lbl">Cijfer:</span><span id="w1-cijfer" class="grade-cijfer">—</span>
+        </div>
+        <details class="cijfer-table-wrap"><summary>Cijfertabel W1 (12 punten = max)</summary>
+          <table class="cijfer-table">
+            <tr><th>Pnt</th><th>Cijfer</th><th>Pnt</th><th>Cijfer</th><th>Pnt</th><th>Cijfer</th><th>Pnt</th><th>Cijfer</th></tr>
+            <tr><td>0</td><td>1.0</td><td>4</td><td>4.0</td><td>8</td><td>7.0</td><td>12</td><td>10.0</td></tr>
+            <tr><td>1</td><td>1.8</td><td>5</td><td>4.8</td><td>9</td><td>7.8</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+            <tr><td>2</td><td>2.5</td><td>6</td><td>5.5</td><td>10</td><td>8.5</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+            <tr><td>3</td><td>3.3</td><td>7</td><td>6.3</td><td>11</td><td>9.3</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+          </table>
+        </details>
+      </div>
       <div id="w1-criteria"></div>
       <button class="reset-btn" data-reset="w1">Reset W1</button>
     </section>
 
     <section class="category" id="w2-section">
       <h3>(P2-K2-W2) Reageert op security incidenten</h3>
-      <p class="blurb">Opdracht 2 &middot; Bijlage 2.5 Onderzoeksverslag voorbeelduitwerking &middot; 5 criteria</p>
+      <p class="blurb">Opdracht 2 &middot; Bijlage 2.5 Onderzoeksverslag voorbeelduitwerking &middot; 5 criteria &middot; max 15 punten</p>
+      <div class="grade-card">
+        <div class="grade-row">
+          <span class="grade-lbl">Ingevuld:</span><span id="w2-scored">0 / 5</span>
+          <span class="grade-lbl">Punten:</span><span id="w2-total">0</span> <span class="grade-max">/ 15</span>
+          <span class="grade-lbl">Cijfer:</span><span id="w2-cijfer" class="grade-cijfer">—</span>
+        </div>
+        <details class="cijfer-table-wrap"><summary>Cijfertabel W2 (15 punten = max)</summary>
+          <table class="cijfer-table">
+            <tr><th>Pnt</th><th>Cijfer</th><th>Pnt</th><th>Cijfer</th><th>Pnt</th><th>Cijfer</th><th>Pnt</th><th>Cijfer</th></tr>
+            <tr><td>0</td><td>1.0</td><td>4</td><td>3.4</td><td>8</td><td>5.8</td><td>12</td><td>8.2</td></tr>
+            <tr><td>1</td><td>1.6</td><td>5</td><td>4.0</td><td>9</td><td>6.4</td><td>13</td><td>8.8</td></tr>
+            <tr><td>2</td><td>2.2</td><td>6</td><td>4.6</td><td>10</td><td>7.0</td><td>14</td><td>9.4</td></tr>
+            <tr><td>3</td><td>2.8</td><td>7</td><td>5.2</td><td>11</td><td>7.6</td><td>15</td><td>10.0</td></tr>
+          </table>
+        </details>
+      </div>
       <div id="w2-criteria"></div>
       <button class="reset-btn" data-reset="w2">Reset W2</button>
     </section>
+
+    <section class="category" id="naslag-section">
+      <h3>Naslag &amp; Documentatie</h3>
+      <p class="blurb">Achtergrond, plan van aanpak en tooling-uitleg. Klik op een onderwerp om uit te klappen.</p>
+
+      <details class="naslag-card">
+        <summary><span class="naslag-icon">&#9656;</span><span class="naslag-title">Plan van Aanpak</span><span class="naslag-meta">7 stappen</span></summary>
+        <div class="naslag-body">
+          <p>Een mogelijke aanpak om tot een gestructureerd security-advies te komen.</p>
+          <ol class="plan-list">
+            <li class="plan-step">
+              <div class="plan-num">1</div>
+              <div class="plan-content">
+                <h4 class="plan-title">Identificeer de doelen</h4>
+                <p>Wat zijn de belangrijkste risico's en beveiligingsuitdagingen in de Windows Server-omgeving die je wilt analyseren? Wat zijn de belangrijkste beveiligingsdoelen die je wilt bereiken met het advies?</p>
+              </div>
+            </li>
+            <li class="plan-step">
+              <div class="plan-num">2</div>
+              <div class="plan-content">
+                <h4 class="plan-title">Analyseer de huidige beveiligingsmaatregelen</h4>
+                <p>Onderzoek de huidige beveiligingsmaatregelen die zijn ge&iuml;mplementeerd in de Windows Server-omgeving. Beoordeel de effectiviteit van deze maatregelen en identificeer eventuele zwakke plekken.</p>
+              </div>
+            </li>
+            <li class="plan-step">
+              <div class="plan-num">3</div>
+              <div class="plan-content">
+                <h4 class="plan-title">Voer een risicoanalyse uit</h4>
+                <p>Voer een risicoanalyse uit van de Windows Server-omgeving om de belangrijkste risico's te identificeren. Dit kan onder meer het identificeren van potenti&euml;le bedreigingen, kwetsbaarheden en de impact van een beveiligingsinbreuk omvatten.</p>
+              </div>
+            </li>
+            <li class="plan-step">
+              <div class="plan-num">4</div>
+              <div class="plan-content">
+                <h4 class="plan-title">Adviseer passende beveiligingsmaatregelen</h4>
+                <p>Ontwikkel een reeks passende beveiligingsmaatregelen op basis van de risicoanalyse en de huidige beveiligingsmaatregelen. Dit kan onder meer het implementeren van nieuwe beveiligingsmaatregelen, zoals antivirus- en firewallsoftware, het bijwerken van bestaande software en systemen, en het afdwingen van sterke wachtwoordbeleid omvatten.</p>
+              </div>
+            </li>
+            <li class="plan-step">
+              <div class="plan-num">5</div>
+              <div class="plan-content">
+                <h4 class="plan-title">Implementeer de aanbevelingen</h4>
+                <p>Implementeer de aanbevolen beveiligingsmaatregelen om de beveiliging van de Windows Server-omgeving te verbeteren.</p>
+              </div>
+            </li>
+            <li class="plan-step">
+              <div class="plan-num">6</div>
+              <div class="plan-content">
+                <h4 class="plan-title">Test de nieuwe beveiligingsmaatregelen</h4>
+                <p>Test de nieuwe beveiligingsmaatregelen om te verifi&euml;ren dat ze werken zoals bedoeld en om eventuele fouten of problemen te identificeren. Maak een rapport met alle bevindingen en geef eventuele aanbevelingen voor verdere verbeteringen.</p>
+              </div>
+            </li>
+            <li class="plan-step">
+              <div class="plan-num">7</div>
+              <div class="plan-content">
+                <h4 class="plan-title">Documenteer het proces</h4>
+                <p>Documenteer het proces van het ontwikkelen van de beveiligingsadviezen en het implementeren van de aanbevolen beveiligingsmaatregelen. Dit kan helpen bij het onderhouden en updaten van de beveiligingsmaatregelen en kan nuttig zijn voor andere beveiligingsprofessionals binnen de organisatie.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="naslag-card">
+        <summary><span class="naslag-icon">&#9656;</span><span class="naslag-title">Event Viewer</span><span class="naslag-meta">Windows Server 2019</span></summary>
+        <div class="naslag-body">
+          <p>Het gebruik van de Event Viewer op een Windows Server 2019:</p>
+          <ol class="naslag-steps">
+            <li><strong>Open de Event Viewer:</strong> druk op <code>Win + R</code>, typ <code>eventvwr.msc</code>, druk op Enter.</li>
+            <li><strong>Navigeer door de logboeken:</strong> in de linkerkolom zie je verschillende logboeken &mdash; Toepassingslogboek, Beveiligingslogboek, Systeemlogboek. Klik er een aan om de gebeurtenissen te bekijken.</li>
+            <li><strong>Bekijk de details van een gebeurtenis:</strong> klik op een gebeurtenis in het rechterdeelvenster. Je ziet datum/tijd, bronprogramma, gebeurtenis-ID en beschrijving.</li>
+            <li><strong>Filteren van gebeurtenissen:</strong> klik op <em>Filter Current Log</em> en geef criteria op zoals bron, gebeurtenisniveau of trefwoorden.</li>
+            <li><strong>Exporteer gebeurtenissen:</strong> klik met rechtermuisknop op een gebeurtenis of logboek &rarr; <em>Export Custom View</em>. Kies locatie en bestandsnaam.</li>
+            <li><strong>Maak aangepaste weergaven:</strong> klik met rechtermuisknop op <em>Aangepaste weergaven</em> in de linkerkolom &rarr; <em>Aangepaste weergave maken</em>. Stel je filtercriteria in.</li>
+          </ol>
+          <p>De Event Viewer is een krachtige tool om gebeurtenissen en logs op een Windows Server 2019 te bekijken en te analyseren &mdash; problemen opsporen, fouten identificeren en systeemprestaties controleren.</p>
+        </div>
+      </details>
+
+      <details class="naslag-card">
+        <summary><span class="naslag-icon">&#9656;</span><span class="naslag-title">Firewall log</span><span class="naslag-meta">CSV-formaat configureren</span></summary>
+        <div class="naslag-body">
+          <p>Om de Windows Server firewall log te configureren en beheren:</p>
+          <ol class="naslag-steps">
+            <li><strong>Identificeer de doelstellingen:</strong> bepaal wat je wilt bereiken &mdash; monitoring van toegang tot applicaties, identificeren van potenti&euml;le aanvallen, etc.</li>
+            <li><strong>Bepaal welke gebeurtenissen gelogd moeten worden:</strong> hangt af van de doelstellingen van het project.</li>
+            <li><strong>Configureer de firewall log:</strong> stel de log in met de juiste settings. Zorg dat de log roteert en regelmatig wordt opgeslagen om gegevensverlies te voorkomen.</li>
+            <li><strong>Analyseer de loggegevens:</strong> identificeer potenti&euml;le aanvallen en afwijkingen. Gebruik tools zoals Microsoft Log Parser om de gegevens te filteren.</li>
+            <li><strong>Rapporteer de bevindingen</strong> aan de relevante belanghebbenden en onderneem actie waar nodig.</li>
+            <li><strong>Onderhoud en update de firewall log</strong> regelmatig.</li>
+          </ol>
+
+          <h4 class="naslag-h4">Firewall-log in CSV genereren (Windows Server 2019)</h4>
+          <ol class="naslag-steps">
+            <li>Open <em>Windows Firewall met geavanceerde beveiliging</em>: <code>Win + R</code> &rarr; <code>wf.msc</code> &rarr; Enter.</li>
+            <li>Klik in het linker deelvenster op <em>Windows Firewall met geavanceerde beveiliging</em>.</li>
+            <li>Klik rechts op <em>Eigenschappen</em>.</li>
+            <li>Tabblad <em>Domeinprofiel</em>.</li>
+            <li>Onder <em>Logboekregistratie</em> &rarr; <em>Aanpassen</em>.</li>
+            <li>Selecteer:
+              <ul>
+                <li><em>Geregistreerde pakketten die zijn verworpen</em></li>
+                <li><em>Geregistreerde geslaagde verbindingen</em></li>
+              </ul>
+            </li>
+            <li>Onder <em>Bestandsnaam</em>: geef locatie + naam van het CSV-bestand op.</li>
+            <li>Onder <em>Maximale bestandsgrootte (KB)</em>: max grootte in KB.</li>
+            <li>Onder <em>Wanneer maximale bestandsgrootte is bereikt</em>: kies <em>Gebeurtenissen overschrijven indien nodig</em>.</li>
+            <li>Onder <em>Naamnotatie</em>: kies <em>Bestandsnaam</em> en geef notatie op.</li>
+            <li>Klik <em>OK</em> om de instellingen op te slaan.</li>
+            <li>Herstart de Windows Firewall-service via <code>services.msc</code>.</li>
+          </ol>
+
+          <h4 class="naslag-h4">Voorbeeld output (CSV)</h4>
+          <pre class="naslag-code">Date,Time,Action,Protocol,Source IP,Destination IP,Source Port,Destination Port
+2023-05-15,10:15:23,Allow,TCP,192.168.1.100,8.8.8.8,53217,443
+2023-05-15,10:17:42,Block,UDP,192.168.1.101,10.0.0.2,123,123
+2023-05-15,10:20:19,Allow,TCP,192.168.1.102,74.125.24.100,55555,80
+2023-05-15,10:22:05,Allow,TCP,192.168.1.103,192.168.1.104,3389,3389
+2023-05-15,10:24:36,Block,ICMP,192.168.1.105,192.168.1.106,,</pre>
+          <p>Kolommen: datum, tijd, actie (ALLOW/BLOCK), protocol, bron-IP, bestemmings-IP, bronpoort en bestemmingspoort. Werkelijke kolommen en inhoud zijn afhankelijk van je firewall-configuratie.</p>
+        </div>
+      </details>
+
+      <details class="naslag-card">
+        <summary><span class="naslag-icon">&#9656;</span><span class="naslag-title">Logging</span><span class="naslag-meta">Windows Server</span></summary>
+        <div class="naslag-body">
+          <p>Logging is een belangrijk onderdeel van de beveiliging en het beheer van een Windows-server. Het stelt de beheerder in staat om belangrijke informatie te verzamelen over gebeurtenissen op de server: inlogpogingen, fouten en waarschuwingen.</p>
+
+          <h4 class="naslag-h4">Belangrijkste aspecten</h4>
+          <ul class="naslag-list">
+            <li><strong>Gebeurtenislogboeken</strong> &mdash; logboeken voor beveiliging, systeem en toepassingen. Bevatten gebeurtenissen zoals inlogpogingen, systeemfouten en waarschuwingen.</li>
+            <li><strong>Logboekbeheer</strong> &mdash; tools om logboeken te bekijken, zoeken en filteren op datum, tijd, bron, categorie. Beleidsregels voor maximale grootte en bewaarbeleid.</li>
+            <li><strong>Loggingniveaus</strong> &mdash; geen / minimaal / normaal / uitgebreid. Hoger niveau = meer data maar potentieel mindere serverprestaties.</li>
+            <li><strong>Logboekanalyse</strong> &mdash; analyseer logboeken regelmatig met tools als Splunk, Graylog, ELK-stack.</li>
+            <li><strong>Automatisering</strong> &mdash; stuur logboeken automatisch naar een externe locatie zodat ze veilig zijn, ook als de server wordt aangevallen of offline gaat.</li>
+          </ul>
+
+          <h4 class="naslag-h4">Stappenplan voor logging op je Windows-server</h4>
+          <ol class="naslag-steps">
+            <li><strong>Analyse van de huidige logging:</strong> welke gebeurtenissen worden vastgelegd, welke niet? Is het loggingniveau adequaat?</li>
+            <li><strong>Bepalen van de vereisten:</strong> welke gebeurtenissen moeten worden vastgelegd en welke logboeken te gebruiken?</li>
+            <li><strong>Configuratie van logging:</strong> stel loggingniveaus in, selecteer de juiste logboeken, stel beleidsregels in.</li>
+            <li><strong>Testen van logging:</strong> controleer of alle vereiste gebeurtenissen worden vastgelegd en of niveaus en beleidsregels werken zoals bedoeld.</li>
+            <li><strong>Logboekanalyse:</strong> identificeer potenti&euml;le beveiligingsproblemen en fouten met tools als Splunk / Graylog / ELK-stack.</li>
+            <li><strong>Implementatie van verbeteringen:</strong> pas loggingniveaus en beleidsregels aan op basis van de analyse.</li>
+            <li><strong>Training en documentatie:</strong> train andere systeembeheerders en documenteer de logginginstellingen en -procedures.</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="naslag-card">
+        <summary><span class="naslag-icon">&#9656;</span><span class="naslag-title">Auditing</span><span class="naslag-meta">Projectopdracht — security audit</span></summary>
+        <div class="naslag-body">
+          <p><strong>Doel:</strong> een security audit uitvoeren op een Windows-server. Vereist kennis van Windows-systeembeheer, netwerkbeveiliging en beveiligingsmaatregelen.</p>
+
+          <h4 class="naslag-h4">Stappen</h4>
+          <ol class="naslag-steps">
+            <li>Verzamel informatie over de serverconfiguratie en -omgeving.</li>
+            <li>Controleer de toegangscontrolelijsten (ACL's) van bestanden, mappen en andere resources om te zorgen dat ze overeenkomen met de juiste beveiligingsniveaus.</li>
+            <li>Controleer de toegangsrechten van gebruikers en groepen op de server, inclusief accounts voor beheerders.</li>
+            <li>Controleer de configuratie van beveiligingsfuncties zoals de firewall, antivirus, anti-malware en andere beveiligingssoftware.</li>
+            <li>Controleer de authenticatie- en autorisatie-instellingen, zoals wachtwoordbeleid en gebruikersrechten.</li>
+            <li>Controleer de logboeken van het systeem en beveiligingssoftware voor ongebruikelijke activiteiten of inbraakpogingen.</li>
+            <li>Voer penetratietests uit op de server om zwakke punten te identificeren en te verhelpen.</li>
+            <li>Maak een beveiligingsrapport met aanbevelingen voor verbetering van de beveiliging.</li>
+            <li>Implementeer de aanbevolen beveiligingsmaatregelen en voer opnieuw tests uit om te controleren of ze effectief zijn.</li>
+            <li>Documenteer het project en geef een presentatie over de opgedane kennis en ervaring.</li>
+          </ol>
+          <p>Vereiste vaardigheden: Windows-systeembeheer, netwerkbeveiliging, beveiligingsmaatregelen, werken met beveiligingssoftware. Kennis van penetratietesttechnieken en basisprincipes van ethisch hacken zijn een plus. Uitbreidingen: beoordelen van security van andere servers in de omgeving, implementeren van geavanceerde maatregelen zoals MFA en encryptie.</p>
+        </div>
+      </details>
+
+    </section>
+
   </main>
 
   <script>
@@ -225,7 +501,62 @@
       { group: "Aanvullend", name: "Hashing tools", file: "CertUtil / Get-FileHash",
         use: "Hashes berekenen voor bestand-integriteit (verdachte downloads, bewijsstuk).",
         howHtml: '<ul><li>PowerShell: <code>Get-FileHash -Algorithm SHA256 bestand.exe</code></li><li>cmd: <code>certutil -hashfile bestand.exe SHA256</code></li></ul>',
-        expectHtml: 'SHA256 hash (64 hex chars). Vergelijken met VirusTotal of bekende good/bad-list. Identieke hash = identiek bestand; verschillende hash = bestand gewijzigd.' }
+        expectHtml: 'SHA256 hash (64 hex chars). Vergelijken met VirusTotal of bekende good/bad-list. Identieke hash = identiek bestand; verschillende hash = bestand gewijzigd.' },
+
+      { group: "MySQL — security audit", name: "Inloggen op MySQL", file: "mysql -u root -p",
+        use: "Eerste stap: krijg shell-toegang tot de MySQL-instantie als root. Daarna kun je gebruikers, databases en permissies inspecteren.",
+        howHtml: '<code>mysql -u root -p</code><br>Typt om het wachtwoord. Op een geauditeerde server: noteer welke accounts kunnen inloggen — extra accounts met root-rechten = bevinding.',
+        expectHtml: 'Prompt verandert in <code>mysql&gt;</code>. Vanaf hier kun je SQL-statements uitvoeren. Als root niet kan inloggen, of het wachtwoord is leeg, is dat al een bevinding op zich.' },
+
+      { group: "MySQL — security audit", name: "Welke users bestaan", file: "SELECT user FROM mysql.user;",
+        use: "Snelle lijst van alle MySQL-accounts. Eerste check tijdens een audit — zijn er onbekende of overbodige accounts?",
+        howHtml: '<code>SELECT user FROM mysql.user;</code><br>Geeft alleen de usernames terug (één kolom).',
+        expectHtml: 'Standaard accounts: <code>root</code>, <code>mysql.session</code>, <code>mysql.sys</code>, <code>mysql.infoschema</code>, eventueel een <code>debian-sys-maint</code> op Debian/Ubuntu. Alles daarbuiten checken — onbekende accounts = mogelijke bevinding.' },
+
+      { group: "MySQL — security audit", name: "Users + waar ze vandaan mogen verbinden", file: "SELECT user,host FROM mysql.user;",
+        use: "Per account zien vanaf welke host het mag inloggen. <code>%</code> betekent &quot;vanaf overal&quot; — vaak een bevinding.",
+        howHtml: '<code>SELECT user,host FROM mysql.user;</code><br>Twee kolommen: gebruikersnaam + host-pattern.',
+        expectHtml: 'Verwacht: meeste accounts op <code>localhost</code> of een specifiek IP. Verdacht: <code>root@%</code> (root mag overal vandaan inloggen) of een applicatie-account met host <code>%</code> in plaats van het web-server IP.' },
+
+      { group: "MySQL — security audit", name: "Volledige user-tabel", file: "SELECT * FROM mysql.user;",
+        use: "Toon ALLES wat MySQL over elke gebruiker weet — privileges, password-hash, account-status, etc. Grote output.",
+        howHtml: '<code>SELECT * FROM mysql.user;</code><br>Tip: gebruik <code>\G</code> aan het eind in plaats van <code>;</code> voor een leesbare verticale weergave.',
+        expectHtml: 'Per gebruiker tientallen kolommen: alle <em>_priv</em>-kolommen (Y/N), <code>authentication_string</code> (de password-hash), <code>account_locked</code>, <code>password_expired</code>. Verdacht: accounts met alle privileges op Y of met een lege authentication_string.' },
+
+      { group: "MySQL — security audit", name: "Databases zien", file: "show databases;",
+        use: "Welke databases staan op deze server. Onbekende DB-namen of test/dev-DBs op productie = bevinding.",
+        howHtml: '<code>show databases;</code>',
+        expectHtml: 'Standaard: <code>information_schema</code>, <code>mysql</code>, <code>performance_schema</code>, <code>sys</code>. Plus de productie-DBs van de applicatie. Verdacht: <code>test</code>, <code>tmp</code>, <code>backup_2019</code> of DBs die niemand kent.' },
+
+      { group: "MySQL — security audit", name: "Een database selecteren", file: "use database;",
+        use: "Schakel naar een specifieke database om zijn tabellen te bekijken. Vervang <code>database</code> met de echte naam uit <code>show databases</code>.",
+        howHtml: '<code>use &lt;naam&gt;;</code>, bv. <code>use apotheek;</code>',
+        expectHtml: '<code>Database changed</code>. Daarna doet <code>show tables;</code> de tabellen van die DB tonen.' },
+
+      { group: "MySQL — security audit", name: "Tabellen in geselecteerde DB", file: "show tables;",
+        use: "Lijst van alle tabellen binnen de actieve database. Vooral relevant voor de AVG-check: bevatten ze persoonsgegevens?",
+        howHtml: '<code>show tables;</code>',
+        expectHtml: 'Tabellen relevant voor je analyse: <code>klanten</code>, <code>users</code>, <code>orders</code>, <code>medewerkers</code>. AVG-aandachtspunt: tabellen met persoonsgegevens hoor je niet zomaar door te neuzen — beperk je tot wat noodzakelijk is.' },
+
+      { group: "MySQL — security audit", name: "Tabel-structuur opvragen", file: "DESC mysql.user;",
+        use: "Toon de kolomdefinities van een tabel zonder de data zelf op te halen. Veiliger en sneller dan SELECT *.",
+        howHtml: '<code>DESC mysql.user;</code> (alias voor <code>DESCRIBE</code>). Werkt op elke tabel: <code>DESC apotheek.klanten;</code>',
+        expectHtml: 'Per kolom: naam, type, NULL-allowed, key, default. Voor <code>mysql.user</code>: ~50 kolommen, vooral <em>_priv</em>-velden, plus <code>authentication_string</code>, <code>account_locked</code>, <code>password_expired</code>.' },
+
+      { group: "MySQL — security audit", name: "Unieke users (zonder duplicaten)", file: "SELECT DISTINCT user FROM mysql.user;",
+        use: "Als een gebruiker meerdere host-rijen heeft (bv. <code>root@localhost</code> en <code>root@127.0.0.1</code>), toont DISTINCT 'm maar één keer. Schoner overzicht.",
+        howHtml: '<code>SELECT DISTINCT user FROM mysql.user;</code>',
+        expectHtml: 'Een korte lijst met enkel unieke gebruikersnamen. Handig als eerste oriëntatie voordat je dieper kijkt naar host-restricties.' },
+
+      { group: "MySQL — security audit", name: "Account-status: locked en expired", file: "SELECT user, account_locked, password_expired FROM mysql.user;",
+        use: "Welke accounts zijn vergrendeld (<code>account_locked = Y</code>) en bij welke is het wachtwoord verlopen (<code>password_expired = Y</code>)? Belangrijke audit-info.",
+        howHtml: '<code>SELECT user, account_locked, password_expired FROM mysql.user;</code>',
+        expectHtml: 'Drie kolommen. Verwacht: alle <em>mysql.</em>-systeem-accounts zijn <code>locked = Y</code>. Verdacht: een normaal account dat <code>locked = N</code> EN <code>password_expired = N</code> én al jaren ongebruikt is.' },
+
+      { group: "MySQL — security audit", name: "Wie ben ik nu?", file: "SELECT current_user();",
+        use: "Verifieer met welke MySQL-identiteit je momenteel verbonden bent. Handig bij <em>SU/SUDO</em>-achtige situaties of bij audit-bewijs.",
+        howHtml: '<code>SELECT current_user();</code>',
+        expectHtml: 'Output bv. <code>root@localhost</code> of <code>auditor@10.0.0.5</code>. Bevestigt onder welk account je je queries uitvoert — leg vast in je logboek.' }
     ];
 
     const W1 = [
@@ -340,6 +671,19 @@
     function saveState(s) { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); } catch (e) {} }
     let state = loadState();
 
+    // Cijfertabel uit BF_EX_IT20_P2-K2_2 (officiele beoordelingsformulier)
+    const CIJFERTABEL = {
+      w1: [1.0, 1.8, 2.5, 3.3, 4.0, 4.8, 5.5, 6.3, 7.0, 7.8, 8.5, 9.3, 10.0],
+      w2: [1.0, 1.6, 2.2, 2.8, 3.4, 4.0, 4.6, 5.2, 5.8, 6.4, 7.0, 7.6, 8.2, 8.8, 9.4, 10.0]
+    };
+    const MAX_PTS = { w1: 12, w2: 15 };
+
+    // Score state: per criterion id, the chosen 0/1/2/3 (or undefined)
+    const SCORE_KEY = "pkt-security-scores-v1";
+    function loadScores() { try { return JSON.parse(localStorage.getItem(SCORE_KEY) || "{}"); } catch (e) { return {}; } }
+    function saveScores(s) { try { localStorage.setItem(SCORE_KEY, JSON.stringify(s)); } catch (e) {} }
+    let scores = loadScores();
+
     function escapeHtml(s) {
       return String(s).replace(/[&<>"']/g, function (c) {
         return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -399,6 +743,13 @@
         const hasTools = Array.isArray(c.tools) && c.tools.length > 0;
         const hasLink = c.link && c.link.href;
         const hasDetails = !!c.details;
+        const labels = ["Niet/nauwelijks", "Enigszins", "Grotendeels", "Volledig"];
+        let scoreBtns = '<div class="score-row" role="radiogroup" aria-label="Punten 0 t/m 3">';
+        for (let i = 0; i < 4; i++) {
+          scoreBtns += '<button type="button" class="score-btn score-' + i + '" data-score="' + i + '" data-cid="' + c.id + '" role="radio" aria-checked="false" title="' + escapeHtml(labels[i]) + '">' + i + '</button>';
+        }
+        scoreBtns += '<span class="score-current" aria-live="polite"></span></div>';
+
         let html =
           '<div class="check-row-main" data-toggle="check" role="checkbox" tabindex="0" aria-checked="false">' +
             '<span class="check-box" aria-hidden="true"></span>' +
@@ -408,6 +759,7 @@
                 '<span class="check-title">' + escapeHtml(c.title) + '</span>' +
               '</div>' +
               '<p class="check-desc">' + escapeHtml(c.desc) + '</p>' +
+              scoreBtns +
             '</div>' +
           '</div>';
         if (hasTools || hasLink || hasDetails) {
@@ -439,6 +791,52 @@
 
     function toggleItem(id) { if (state[id]) { delete state[id]; } else { state[id] = true; } saveState(state); applyState(); }
 
+    function setScore(cid, val) {
+      if (scores[cid] === val) { delete scores[cid]; } else { scores[cid] = val; }
+      saveScores(scores);
+      applyScores();
+    }
+
+    function applyScores() {
+      // Mark buttons + per-item label
+      document.querySelectorAll(".check-item").forEach(function (item) {
+        const cid = item.dataset.id;
+        const v = scores[cid];
+        item.querySelectorAll(".score-btn").forEach(function (b) {
+          const on = (v === parseInt(b.dataset.score, 10));
+          b.classList.toggle("selected", on);
+          b.setAttribute("aria-checked", on ? "true" : "false");
+        });
+        const cur = item.querySelector(".score-current");
+        if (cur) {
+          if (v == null) { cur.textContent = ""; cur.classList.remove("has-score"); }
+          else {
+            const labels = ["Niet/nauwelijks", "Enigszins", "Grotendeels", "Volledig"];
+            cur.textContent = labels[v];
+            cur.classList.add("has-score");
+            cur.dataset.level = v;
+          }
+        }
+      });
+      // Totals per werkproces
+      ["w1", "w2"].forEach(function (wp) {
+        const list = (wp === "w1") ? W1 : W2;
+        let total = 0, scored = 0;
+        list.forEach(function (c) {
+          if (scores[c.id] != null) { total += scores[c.id]; scored++; }
+        });
+        const max = MAX_PTS[wp];
+        const tab = CIJFERTABEL[wp];
+        const cijfer = (scored === list.length) ? tab[total].toFixed(1) : "—";
+        const elTot = document.getElementById(wp + "-total");
+        const elCijf = document.getElementById(wp + "-cijfer");
+        const elScored = document.getElementById(wp + "-scored");
+        if (elTot) elTot.textContent = total;
+        if (elCijf) elCijf.textContent = cijfer;
+        if (elScored) elScored.textContent = scored + " / " + list.length;
+      });
+    }
+
     function togglePanel(item, kind, btn) {
       const panel = item.querySelector('[data-panel="' + kind + '"]');
       if (!panel) return;
@@ -453,14 +851,16 @@
       if (det) { e.stopPropagation(); togglePanel(det.closest(".check-item"), "details", det); return; }
       const tools = e.target.closest && e.target.closest('[data-toggle="tools"]');
       if (tools) { e.stopPropagation(); togglePanel(tools.closest(".check-item"), "tools", tools); return; }
+      const sbtn = e.target.closest && e.target.closest(".score-btn");
+      if (sbtn) { e.stopPropagation(); setScore(sbtn.dataset.cid, parseInt(sbtn.dataset.score, 10)); return; }
       const main = e.target.closest && e.target.closest('[data-toggle="check"]');
       if (main) { toggleItem(main.closest(".check-item").dataset.id); return; }
       const reset = e.target.closest && e.target.closest(".reset-btn");
       if (reset) {
         const which = reset.dataset.reset;
         const list = which === "w1" ? W1 : W2;
-        list.forEach(function (c) { delete state[c.id]; });
-        saveState(state); applyState();
+        list.forEach(function (c) { delete state[c.id]; delete scores[c.id]; });
+        saveState(state); saveScores(scores); applyState(); applyScores();
       }
     });
 
@@ -473,6 +873,7 @@
     render("w1-criteria", W1);
     render("w2-criteria", W2);
     applyState();
+    applyScores();
 
     (function () {
       const saved = localStorage.getItem("theme");
