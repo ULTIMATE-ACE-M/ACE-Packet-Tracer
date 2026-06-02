@@ -130,6 +130,18 @@
     .naslag-steps li, .naslag-list li { margin: 4px 0; line-height: 1.6; }
     .naslag-steps ul { margin: 4px 0; padding-left: 20px; }
     .naslag-code { background: var(--code-bg); color: var(--code-text); padding: 10px 12px; border-radius: 6px; margin: 8px 0 12px 0; font: 12px ui-monospace, Consolas, monospace; line-height: 1.5; overflow-x: auto; white-space: pre; }
+
+    .mysql-cmd { background: var(--surface-2); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 0 6px 6px 0; padding: 10px 14px; margin: 10px 0; }
+    .mysql-cmd-h { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+    .mysql-cmd-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .mysql-cmd-code { font: 12.5px ui-monospace, Consolas, monospace; background: var(--code-bg); color: var(--code-text); padding: 2px 8px; border-radius: 4px; }
+    .mysql-cmd p { margin: 4px 0; font-size: 13px; line-height: 1.55; color: var(--text); }
+    .mysql-cmd p strong { color: var(--text); }
+    .mysql-cmd-expect { background: var(--surface); border-left: 3px solid #15803d; padding: 6px 10px; border-radius: 0 4px 4px 0; margin-top: 6px !important; }
+    [data-theme="dark"] .mysql-cmd-expect { border-left-color: #4ade80; }
+    .mysql-cmd-expect strong { color: #15803d; }
+    [data-theme="dark"] .mysql-cmd-expect strong { color: #4ade80; }
+    .mysql-cmd code { font: 12px ui-monospace, Consolas, monospace; background: var(--surface); color: var(--accent); padding: 1px 5px; border-radius: 3px; }
   </style>
 </head>
 <body>
@@ -203,6 +215,92 @@
     <section class="category" id="naslag-section">
       <h3>Naslag &amp; Documentatie</h3>
       <p class="blurb">Achtergrond, plan van aanpak en tooling-uitleg. Klik op een onderwerp om uit te klappen.</p>
+
+
+      <details class="naslag-card">
+        <summary><span class="naslag-icon">&#9656;</span><span class="naslag-title">MySQL &mdash; security audit</span><span class="naslag-meta">11 commands</span></summary>
+        <div class="naslag-body">
+          <p>Tijdens een security audit inspecteer je een MySQL-instantie via de CLI. Welke users hebben toegang, welke databases bestaan, welke accounts zijn locked of expired. Hieronder de meest gebruikte commands met hun output en wat je ervan moet vinden.</p>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Inloggen op MySQL</span><code class="mysql-cmd-code">mysql -u root -p</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Eerste stap &mdash; krijg shell-toegang tot de MySQL-instantie als root. Daarna kun je gebruikers, databases en permissies inspecteren.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>mysql -u root -p</code> &mdash; typt om het wachtwoord. Op een geauditeerde server: noteer welke accounts kunnen inloggen &mdash; extra accounts met root-rechten = bevinding.</p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Prompt verandert in <code>mysql&gt;</code>. Vanaf hier kun je SQL-statements uitvoeren. Als root niet kan inloggen, of het wachtwoord is leeg, is dat al een bevinding op zich.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Welke users bestaan</span><code class="mysql-cmd-code">SELECT user FROM mysql.user;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Snelle lijst van alle MySQL-accounts. Eerste check tijdens een audit &mdash; zijn er onbekende of overbodige accounts?</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>SELECT user FROM mysql.user;</code> &mdash; geeft alleen de usernames terug (&eacute;&eacute;n kolom).</p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Standaard accounts: <code>root</code>, <code>mysql.session</code>, <code>mysql.sys</code>, <code>mysql.infoschema</code>, eventueel een <code>debian-sys-maint</code> op Debian/Ubuntu. Alles daarbuiten checken &mdash; onbekende accounts = mogelijke bevinding.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Users + waar ze vandaan mogen verbinden</span><code class="mysql-cmd-code">SELECT user,host FROM mysql.user;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Per account zien vanaf welke host het mag inloggen. <code>%</code> betekent &quot;vanaf overal&quot; &mdash; vaak een bevinding.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>SELECT user,host FROM mysql.user;</code> &mdash; twee kolommen: gebruikersnaam + host-pattern.</p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Meeste accounts op <code>localhost</code> of een specifiek IP. Verdacht: <code>root@%</code> (root mag overal vandaan inloggen) of een applicatie-account met host <code>%</code> in plaats van het web-server IP.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Volledige user-tabel</span><code class="mysql-cmd-code">SELECT * FROM mysql.user;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Toon ALLES wat MySQL over elke gebruiker weet &mdash; privileges, password-hash, account-status, etc. Grote output.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>SELECT * FROM mysql.user;</code> &mdash; tip: gebruik <code>\G</code> aan het eind in plaats van <code>;</code> voor een leesbare verticale weergave.</p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Per gebruiker tientallen kolommen: alle <em>_priv</em>-kolommen (Y/N), <code>authentication_string</code> (de password-hash), <code>account_locked</code>, <code>password_expired</code>. Verdacht: accounts met alle privileges op Y of met een lege authentication_string.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Databases zien</span><code class="mysql-cmd-code">show databases;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Welke databases staan op deze server. Onbekende DB-namen of test/dev-DBs op productie = bevinding.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>show databases;</code></p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Standaard: <code>information_schema</code>, <code>mysql</code>, <code>performance_schema</code>, <code>sys</code>. Plus de productie-DBs van de applicatie. Verdacht: <code>test</code>, <code>tmp</code>, <code>backup_2019</code> of DBs die niemand kent.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Een database selecteren</span><code class="mysql-cmd-code">use database;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Schakel naar een specifieke database om zijn tabellen te bekijken. Vervang <code>database</code> met de echte naam uit <code>show databases</code>.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>use &lt;naam&gt;;</code>, bv. <code>use apotheek;</code></p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> <code>Database changed</code>. Daarna doet <code>show tables;</code> de tabellen van die DB tonen.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Tabellen in geselecteerde DB</span><code class="mysql-cmd-code">show tables;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Lijst van alle tabellen binnen de actieve database. Vooral relevant voor de AVG-check: bevatten ze persoonsgegevens?</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>show tables;</code></p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Tabellen relevant voor je analyse: <code>klanten</code>, <code>users</code>, <code>orders</code>, <code>medewerkers</code>. AVG-aandachtspunt: tabellen met persoonsgegevens hoor je niet zomaar door te neuzen &mdash; beperk je tot wat noodzakelijk is.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Tabel-structuur opvragen</span><code class="mysql-cmd-code">DESC mysql.user;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Toon de kolomdefinities van een tabel zonder de data zelf op te halen. Veiliger en sneller dan SELECT *.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>DESC mysql.user;</code> (alias voor <code>DESCRIBE</code>). Werkt op elke tabel: <code>DESC apotheek.klanten;</code></p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Per kolom: naam, type, NULL-allowed, key, default. Voor <code>mysql.user</code>: ~50 kolommen, vooral <em>_priv</em>-velden, plus <code>authentication_string</code>, <code>account_locked</code>, <code>password_expired</code>.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Unieke users (zonder duplicaten)</span><code class="mysql-cmd-code">SELECT DISTINCT user FROM mysql.user;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Als een gebruiker meerdere host-rijen heeft (bv. <code>root@localhost</code> en <code>root@127.0.0.1</code>), toont DISTINCT 'm maar &eacute;&eacute;n keer. Schoner overzicht.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>SELECT DISTINCT user FROM mysql.user;</code></p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Een korte lijst met enkel unieke gebruikersnamen. Handig als eerste ori&euml;ntatie voordat je dieper kijkt naar host-restricties.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Account-status: locked en expired</span><code class="mysql-cmd-code">SELECT user, account_locked, password_expired FROM mysql.user;</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Welke accounts zijn vergrendeld (<code>account_locked = Y</code>) en bij welke is het wachtwoord verlopen (<code>password_expired = Y</code>)? Belangrijke audit-info.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>SELECT user, account_locked, password_expired FROM mysql.user;</code></p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Drie kolommen. Verwacht: alle <em>mysql.</em>-systeem-accounts zijn <code>locked = Y</code>. Verdacht: een normaal account dat <code>locked = N</code> EN <code>password_expired = N</code> &eacute;n al jaren ongebruikt is.</p>
+          </div>
+
+          <div class="mysql-cmd">
+            <div class="mysql-cmd-h"><span class="mysql-cmd-name">Wie ben ik nu?</span><code class="mysql-cmd-code">SELECT current_user();</code></div>
+            <p class="mysql-cmd-use"><strong>Wat:</strong> Verifieer met welke MySQL-identiteit je momenteel verbonden bent. Handig bij <em>SU/SUDO</em>-achtige situaties of bij audit-bewijs.</p>
+            <p class="mysql-cmd-how"><strong>Hoe:</strong> <code>SELECT current_user();</code></p>
+            <p class="mysql-cmd-expect"><strong>Verwacht:</strong> Output bv. <code>root@localhost</code> of <code>auditor@10.0.0.5</code>. Bevestigt onder welk account je je queries uitvoert &mdash; leg vast in je logboek.</p>
+          </div>
+
+        </div>
+      </details>
 
       <details class="naslag-card">
         <summary><span class="naslag-icon">&#9656;</span><span class="naslag-title">Plan van Aanpak</span><span class="naslag-meta">7 stappen</span></summary>
@@ -501,62 +599,7 @@
       { group: "Aanvullend", name: "Hashing tools", file: "CertUtil / Get-FileHash",
         use: "Hashes berekenen voor bestand-integriteit (verdachte downloads, bewijsstuk).",
         howHtml: '<ul><li>PowerShell: <code>Get-FileHash -Algorithm SHA256 bestand.exe</code></li><li>cmd: <code>certutil -hashfile bestand.exe SHA256</code></li></ul>',
-        expectHtml: 'SHA256 hash (64 hex chars). Vergelijken met VirusTotal of bekende good/bad-list. Identieke hash = identiek bestand; verschillende hash = bestand gewijzigd.' },
-
-      { group: "MySQL — security audit", name: "Inloggen op MySQL", file: "mysql -u root -p",
-        use: "Eerste stap: krijg shell-toegang tot de MySQL-instantie als root. Daarna kun je gebruikers, databases en permissies inspecteren.",
-        howHtml: '<code>mysql -u root -p</code><br>Typt om het wachtwoord. Op een geauditeerde server: noteer welke accounts kunnen inloggen — extra accounts met root-rechten = bevinding.',
-        expectHtml: 'Prompt verandert in <code>mysql&gt;</code>. Vanaf hier kun je SQL-statements uitvoeren. Als root niet kan inloggen, of het wachtwoord is leeg, is dat al een bevinding op zich.' },
-
-      { group: "MySQL — security audit", name: "Welke users bestaan", file: "SELECT user FROM mysql.user;",
-        use: "Snelle lijst van alle MySQL-accounts. Eerste check tijdens een audit — zijn er onbekende of overbodige accounts?",
-        howHtml: '<code>SELECT user FROM mysql.user;</code><br>Geeft alleen de usernames terug (één kolom).',
-        expectHtml: 'Standaard accounts: <code>root</code>, <code>mysql.session</code>, <code>mysql.sys</code>, <code>mysql.infoschema</code>, eventueel een <code>debian-sys-maint</code> op Debian/Ubuntu. Alles daarbuiten checken — onbekende accounts = mogelijke bevinding.' },
-
-      { group: "MySQL — security audit", name: "Users + waar ze vandaan mogen verbinden", file: "SELECT user,host FROM mysql.user;",
-        use: "Per account zien vanaf welke host het mag inloggen. <code>%</code> betekent &quot;vanaf overal&quot; — vaak een bevinding.",
-        howHtml: '<code>SELECT user,host FROM mysql.user;</code><br>Twee kolommen: gebruikersnaam + host-pattern.',
-        expectHtml: 'Verwacht: meeste accounts op <code>localhost</code> of een specifiek IP. Verdacht: <code>root@%</code> (root mag overal vandaan inloggen) of een applicatie-account met host <code>%</code> in plaats van het web-server IP.' },
-
-      { group: "MySQL — security audit", name: "Volledige user-tabel", file: "SELECT * FROM mysql.user;",
-        use: "Toon ALLES wat MySQL over elke gebruiker weet — privileges, password-hash, account-status, etc. Grote output.",
-        howHtml: '<code>SELECT * FROM mysql.user;</code><br>Tip: gebruik <code>\G</code> aan het eind in plaats van <code>;</code> voor een leesbare verticale weergave.',
-        expectHtml: 'Per gebruiker tientallen kolommen: alle <em>_priv</em>-kolommen (Y/N), <code>authentication_string</code> (de password-hash), <code>account_locked</code>, <code>password_expired</code>. Verdacht: accounts met alle privileges op Y of met een lege authentication_string.' },
-
-      { group: "MySQL — security audit", name: "Databases zien", file: "show databases;",
-        use: "Welke databases staan op deze server. Onbekende DB-namen of test/dev-DBs op productie = bevinding.",
-        howHtml: '<code>show databases;</code>',
-        expectHtml: 'Standaard: <code>information_schema</code>, <code>mysql</code>, <code>performance_schema</code>, <code>sys</code>. Plus de productie-DBs van de applicatie. Verdacht: <code>test</code>, <code>tmp</code>, <code>backup_2019</code> of DBs die niemand kent.' },
-
-      { group: "MySQL — security audit", name: "Een database selecteren", file: "use database;",
-        use: "Schakel naar een specifieke database om zijn tabellen te bekijken. Vervang <code>database</code> met de echte naam uit <code>show databases</code>.",
-        howHtml: '<code>use &lt;naam&gt;;</code>, bv. <code>use apotheek;</code>',
-        expectHtml: '<code>Database changed</code>. Daarna doet <code>show tables;</code> de tabellen van die DB tonen.' },
-
-      { group: "MySQL — security audit", name: "Tabellen in geselecteerde DB", file: "show tables;",
-        use: "Lijst van alle tabellen binnen de actieve database. Vooral relevant voor de AVG-check: bevatten ze persoonsgegevens?",
-        howHtml: '<code>show tables;</code>',
-        expectHtml: 'Tabellen relevant voor je analyse: <code>klanten</code>, <code>users</code>, <code>orders</code>, <code>medewerkers</code>. AVG-aandachtspunt: tabellen met persoonsgegevens hoor je niet zomaar door te neuzen — beperk je tot wat noodzakelijk is.' },
-
-      { group: "MySQL — security audit", name: "Tabel-structuur opvragen", file: "DESC mysql.user;",
-        use: "Toon de kolomdefinities van een tabel zonder de data zelf op te halen. Veiliger en sneller dan SELECT *.",
-        howHtml: '<code>DESC mysql.user;</code> (alias voor <code>DESCRIBE</code>). Werkt op elke tabel: <code>DESC apotheek.klanten;</code>',
-        expectHtml: 'Per kolom: naam, type, NULL-allowed, key, default. Voor <code>mysql.user</code>: ~50 kolommen, vooral <em>_priv</em>-velden, plus <code>authentication_string</code>, <code>account_locked</code>, <code>password_expired</code>.' },
-
-      { group: "MySQL — security audit", name: "Unieke users (zonder duplicaten)", file: "SELECT DISTINCT user FROM mysql.user;",
-        use: "Als een gebruiker meerdere host-rijen heeft (bv. <code>root@localhost</code> en <code>root@127.0.0.1</code>), toont DISTINCT 'm maar één keer. Schoner overzicht.",
-        howHtml: '<code>SELECT DISTINCT user FROM mysql.user;</code>',
-        expectHtml: 'Een korte lijst met enkel unieke gebruikersnamen. Handig als eerste oriëntatie voordat je dieper kijkt naar host-restricties.' },
-
-      { group: "MySQL — security audit", name: "Account-status: locked en expired", file: "SELECT user, account_locked, password_expired FROM mysql.user;",
-        use: "Welke accounts zijn vergrendeld (<code>account_locked = Y</code>) en bij welke is het wachtwoord verlopen (<code>password_expired = Y</code>)? Belangrijke audit-info.",
-        howHtml: '<code>SELECT user, account_locked, password_expired FROM mysql.user;</code>',
-        expectHtml: 'Drie kolommen. Verwacht: alle <em>mysql.</em>-systeem-accounts zijn <code>locked = Y</code>. Verdacht: een normaal account dat <code>locked = N</code> EN <code>password_expired = N</code> én al jaren ongebruikt is.' },
-
-      { group: "MySQL — security audit", name: "Wie ben ik nu?", file: "SELECT current_user();",
-        use: "Verifieer met welke MySQL-identiteit je momenteel verbonden bent. Handig bij <em>SU/SUDO</em>-achtige situaties of bij audit-bewijs.",
-        howHtml: '<code>SELECT current_user();</code>',
-        expectHtml: 'Output bv. <code>root@localhost</code> of <code>auditor@10.0.0.5</code>. Bevestigt onder welk account je je queries uitvoert — leg vast in je logboek.' }
+        expectHtml: 'SHA256 hash (64 hex chars). Vergelijken met VirusTotal of bekende good/bad-list. Identieke hash = identiek bestand; verschillende hash = bestand gewijzigd.' }
     ];
 
     const W1 = [
